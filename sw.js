@@ -1,5 +1,5 @@
 // Сервис-воркер: приложение открывается без интернета. При обновлении файлов увеличьте номер версии V.
-const V = 'crm-v1';
+const V = 'crm-v3';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
