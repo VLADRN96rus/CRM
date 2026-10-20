@@ -232,13 +232,15 @@ details.glass>.in{margin-top:16px}
   <div class="glass" style="margin-bottom:14px">
     <div class="row end"><div><label class="f">Письмо</label><select id="mt"></select></div>
       <div><label class="f">Режим</label><select id="mm"><option value="1">Одно письмо</option><option value="2">Рассылка (файл с данными)</option></select></div>
-      <button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button></div>
+      <div><label class="f">Отправитель</label><select id="mfrom"><option value="me">Моя: paramuzov@skbkontur.ru</option><option value="shared">Общая: ornp@skbkontur.ru</option></select></div><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button></div>
     <div class="row end"><div><label class="f">Вложения (в рассылке — общие для всех писем)</label><input id="mfile" type="file" multiple></div></div>
     <div class="hint" id="mq">Откройте вкладку при подключении к интернету</div><div class="err" id="mmsg"></div>
   </div>
   <div class="glass" id="m1" style="margin-bottom:14px">
     <div class="row"><div><label class="f">Почта получателя</label><input id="me" type="email" placeholder="partner@example.ru" autocapitalize="off" autocorrect="off"><div class="hint" id="mfound"></div></div>
       <div><label class="f">Тема</label><input id="ms"></div></div>
+    <div class="row"><div><label class="f">Копия (CC), через запятую — необязательно</label><input id="mcopy" autocapitalize="off" autocorrect="off"></div></div>
+    <div id="mfree" hidden style="margin-bottom:10px"><label class="f">Текст письма</label><textarea id="mbody" rows="8"></textarea></div>
     <div class="row" id="mv"></div>
     <div class="row end" style="margin:0"><button class="btn" id="s1">В очередь на отправку</button></div>
   </div>
@@ -250,6 +252,7 @@ details.glass>.in{margin-top:16px}
     <div class="hint" id="mw" style="white-space:pre-wrap;margin-bottom:8px"></div><div id="mpl" class="scroll"></div>
   </div>
   <div class="glass" style="margin-bottom:14px"><label class="f">Предпросмотр (в рассылке — нажмите на получателя)</label><iframe id="pv" class="pv" sandbox></iframe></div>
+  <details class="glass" style="margin-bottom:14px" open><summary>История отправки</summary><div class="in" id="mlog"></div></details>
   <details class="glass" id="tex" style="margin-bottom:14px"><summary>Шаблон письма</summary><div class="in">
     <input type="hidden" id="te_id"><div class="row"><div><label class="f">Название</label><input id="te_n"></div><div><label class="f">Тема (можно с метками {{code}})</label><input id="te_s"></div></div>
     <label class="f">HTML письма (метки: {{code}}, {{login}}, {{grp}} или любая колонка файла)</label><textarea id="te_h" rows="8"></textarea>
@@ -538,46 +541,61 @@ const toText=h=>h.replace(/<(style|head|script)[\s\S]*?<\/\1>/gi,'').replace(/<\
 const msg=(t,bad)=>{$('mmsg').textContent=t||'';$('mmsg').style.color=bad?'var(--bad)':'var(--mu)'};
 const b64f=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok({name:f.name,type:f.type,b64:r.result.split(',')[1]});r.onerror=no;r.readAsDataURL(f)});
 const XL=()=>window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>no(new Error('Не загрузилась библиотека Excel (нужен интернет)'));document.head.appendChild(s)});
-const ERR={from_not_alias:'Адрес отправителя не добавлен в Gmail как «Отправлять как» (см. комментарий в Code.gs)',cap:'Достигнут дневной лимит писем',auth:'Неверный код доступа'};
+const ERR={auth:'Неверный код доступа'};
 async function mapi(act,d){
   if(!cfg.url||!cfg.key)throw new Error('Нет подключения к таблице (⚙)');
   const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({k:cfg.key,act},d||{})),redirect:'follow'});
   const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||j.error||'Ошибка сервера');return j;
 }
+function renderQ(j){
+  const q=j.q,live=j.hb&&Date.now()-j.hb<9e4;
+  $('mq').textContent='Очередь: ждут '+q.p+' · отправлено сегодня '+q.s+' · ошибок '+q.e+(q.c?' · в работе '+q.c:'')+' · '+(live?'● отправщик на Mac работает':'○ отправщик на Mac не отвечает'+(j.hb?' (был на связи '+new Date(j.hb).toLocaleString('ru')+')':'')+' — письма уйдут, когда он запустится');
+  $('mlog').innerHTML=(j.log||[]).map(x=>'<div class="li"><span class="n">'+esc(x.to)+'<small>'+esc(x.t+' · '+x.s+(x.from?' · '+x.from:'')+(x.ok?'':' · '+x.err))+'</small></span><span class="r" style="color:'+(x.ok?'inherit':'var(--bad)')+'">'+(x.ok?'✓':'ошибка')+'</span></div>').join('')||'<div class="hint">Пока пусто</div>';
+}
 async function loadMail(){
   if(!navigator.onLine)return msg('Письма работают только при подключении к интернету',1);
-  try{const j=await mapi('init');M.tpl=j.tpl||[];M.dir=j.dir||[];M.me=j.me;M.ok=true;
-    $('mq').textContent='Очередь: ждут '+j.q.p+' · отправлено сегодня '+j.q.s+' · ошибок '+j.q.e+(j.q.c?' · «в работе» '+j.q.c:'')+'. Отправляет скрипт на Mac: python3 outbox.py';$('dmeta').textContent=M.dir.length+' записей';fillTpl();msg('')}
+  try{const j=await mapi('init');M.tpl=j.tpl||[];M.dir=j.dir||[];M.ok=true;renderQ(j);$('dmeta').textContent=M.dir.length+' записей';fillTpl();msg('')}
   catch(e){msg(e.message,1)}
 }
-const curT=()=>M.tpl.find(t=>t.id===$('mt').value);
-function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=M.tpl.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')||'<option value="">— нет шаблонов, нажмите «＋ Шаблон» —</option>';if(v&&M.tpl.some(t=>t.id===v))$('mt').value=v;fillVars()}
+let wT=0;
+async function refreshQ(){try{renderQ(await mapi('status'))}catch(e){}}
+function watchQ(){clearInterval(wT);let n=0;wT=setInterval(async()=>{const j=await mapi('status').catch(()=>null);if(j)renderQ(j);
+  if(j&&j.q.p+j.q.c===0){clearInterval(wT);msg('Очередь обработана ✓ — результат в «Истории отправки»')}else if(++n>45)clearInterval(wT)},4000)}
+const FREE='__free',t2h=x=>'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+esc(x).replace(/\n/g,'<br>')+'</div>';
+const curT=()=>$('mt').value===FREE?{id:FREE,name:'',subject:'',html:t2h($('mbody').value)}:M.tpl.find(t=>t.id===$('mt').value);
+function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=M.tpl.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (без шаблона)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
 const dirVals=e=>{const r=M.dir.filter(x=>x.email===e);return{code:uniq(r.map(x=>x.code)).join(', '),grp:uniq(r.map(x=>x.grp)).join(', '),login:uniq(r.map(x=>x.login)).join(', '),email:e}};
 const gv=()=>{const v={};document.querySelectorAll('#mv [data-v]').forEach(i=>v[i.dataset.v]=i.value.trim());return v};
 function fillVars(){
   const t=curT(),e=$('me').value.trim().toLowerCase(),ok=EM.test(e),d=ok?dirVals(e):{};
   $('mfound').textContent=!ok?'':d.code?'Найден в справочнике: СЦ '+d.code:'В справочнике не найден — заполните поля ниже вручную';
-  $('mv').innerHTML=t?vnames(t.html+' '+t.subject).map(n=>'<div><label class="f">'+esc(n)+'</label><input data-v="'+esc(n)+'" value="'+esc(d[AL[nk(n)]]||'')+'"></div>').join(''):'';
+  $('mfree').hidden=!t||t.id!==FREE;
+  $('mv').innerHTML=t&&t.id!==FREE?vnames(t.html+' '+t.subject).map(n=>'<div><label class="f">'+esc(n)+'</label><input data-v="'+esc(n)+'" value="'+esc(d[AL[nk(n)]]||'')+'"></div>').join(''):'';
   $('ms')._man=0;preview();
 }
-function preview(){const t=curT();if(!t){$('pv').srcdoc='';return}const v=gv();if(!$('ms')._man)$('ms').value=fillT(t.subject,v);$('pv').srcdoc=fillT(clean(t.html),v,true)}
+function preview(){const t=curT();if(!t){$('pv').srcdoc='';return}const v=gv();if(t.id!==FREE&&!$('ms')._man)$('ms').value=fillT(t.subject,v);$('pv').srcdoc=fillT(clean(t.html),v,true)}
 $('mt').onchange=fillVars;$('me').oninput=fillVars;$('ms').oninput=()=>{$('ms')._man=1};
-$('mv').addEventListener('input',preview);
+$('mv').addEventListener('input',preview);$('mbody').oninput=preview;
+$('mfrom').value=LS.get('crm.from')==='shared'?'shared':'me';$('mfrom').onchange=()=>LS.set('crm.from',$('mfrom').value);
 $('mfile').onchange=e=>{M.files=[...e.target.files];if(M.files.reduce((s,f)=>s+f.size,0)>15e6){M.files=[];e.target.value='';msg('Вложения больше 15 МБ — уменьшите',1)}};
 $('mm').onchange=()=>{$('m1').hidden=$('mm').value!=='1';$('m2').hidden=$('mm').value!=='2'};
 function arm(b,txt,fn){if(!b.dataset.arm){b.dataset.arm=1;const o=b.textContent;b.textContent=txt;setTimeout(()=>{if(b.dataset.arm){b.dataset.arm='';b.textContent=o}},5000);return}b.dataset.arm='';fn()}
 
 /* одно письмо -> очередь */
 const Q=async jobs=>{for(let i=0;i<jobs.length;i+=3)await mapi('queue',{jobs:jobs.slice(i,i+3)})};
-const QMSG=n=>'В очереди: '+n+'. Теперь на Mac запустите: python3 outbox.py';
+const QMSG=n=>'В очереди: '+n+'. Отправка начнётся сама (обычно в течение 20–30 секунд) — статус ниже.';
 $('s1').onclick=()=>{
   const t=curT(),to=$('me').value.trim().toLowerCase(),v=gv(),b=$('s1'),miss=Object.keys(v).filter(k=>!v[k]);
   if(!t||!EM.test(to))return msg('Выберите шаблон и укажите корректную почту',1);
   if(miss.length)return msg('Не заполнено: '+miss.join(', '),1);
-  arm(b,'Точно поставить в очередь для '+to+'?',async()=>{
+  const cc=splitE($('mcopy').value),fr=$('mfrom').value;
+  if(cc.bad.length)return msg('Некорректная почта в копии: '+cc.bad.join(', '),1);
+  if(!$('ms').value.trim())return msg('Укажите тему',1);
+  if(t.id===FREE&&!$('mbody').value.trim())return msg('Напишите текст письма',1);
+  arm(b,'Отправить от '+(fr==='shared'?'ornp@':'paramuzov@')+' → '+to+'?',async()=>{
     b.disabled=true;
     try{const html=fillT(clean(t.html),v,true),files=await Promise.all(M.files.map(b64f));
-      await Q([{to,subject:$('ms').value,html,text:toText(html),files}]);msg(QMSG(1));loadMail()}
+      await Q([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}]);msg(QMSG(1));refreshQ();watchQ()}
     catch(e){msg(e.message,1)}finally{b.disabled=false}});
 };
 
@@ -597,6 +615,7 @@ function renderPL(){$('mpl').innerHTML=PL.map((p,i)=>'<div class="li" data-i="'+
 $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&&PL[+r.dataset.i].html)$('pv').srcdoc=PL[+r.dataset.i].html});
 $('b2').onclick=async()=>{
   const t=curT();if(!t||!D)return msg('Выберите шаблон и файл с данными',1);
+  if(t.id===FREE)return msg('Для рассылки выберите шаблон, а не «своё письмо»',1);
   try{await XL();
     const ci=+$('mcc').value,ei=+$('mce').value,drop=new Set([ei].concat([...$('mcd').selectedOptions].map(o=>+o.value))),keep=D.h.map((x,i)=>i).filter(i=>D.h[i]&&!drop.has(i));
     const G=new Map(),W=[];let orph=0,multi=0;
@@ -633,12 +652,12 @@ $('s2').onclick=()=>{
   if(!todo.length)return msg('Нечего ставить в очередь: сначала «Проверить» (уже поставленные сегодня пропускаются)',1);
   if(test&&!EM.test(tt))return msg('Для теста укажите свою рабочую почту',1);
   LS.set('crm.testto',tt);
-  arm(b,(test?'Тест: ':'Всем: ')+'поставить в очередь '+todo.length+'?',async()=>{
+  arm(b,(test?'Тест: ':'Всем: ')+'поставить в очередь '+todo.length+' от '+($('mfrom').value==='shared'?'общей':'моей')+' почты?',async()=>{
     b.disabled=true;
     try{const extra=await Promise.all(M.files.map(b64f));
-      await Q(todo.map(p=>({to:test?tt:p.a,subject:(test?'[ТЕСТ → '+p.a+'] ':'')+p.subject,html:p.html,text:toText(p.html),files:[p.file].concat(extra)})));
+      await Q(todo.map(p=>({from:$('mfrom').value,to:test?tt:p.a,subject:(test?'[ТЕСТ → '+p.a+'] ':'')+p.subject,html:p.html,text:toText(p.html),files:[p.file].concat(extra)})));
       todo.forEach(p=>{p.st='в очереди ✓';if(!test)sent[p.a]=1});if(!test)LS.set(sk,JSON.stringify(sent));
-      renderPL();msg(QMSG(todo.length));loadMail()}
+      renderPL();msg(QMSG(todo.length));refreshQ();watchQ()}
     catch(e){msg(e.message+' — проверьте очередь перед повтором, часть писем могла встать',1)}
     b.disabled=false;
   });
@@ -646,7 +665,7 @@ $('s2').onclick=()=>{
 
 /* шаблоны */
 $('mtNew').onclick=()=>{$('tex').open=true;['te_id','te_n','te_s','te_h'].forEach(i=>$(i).value='')};
-$('mtEdit').onclick=()=>{const t=curT();if(!t)return;$('tex').open=true;$('te_id').value=t.id;$('te_n').value=t.name;$('te_s').value=t.subject;$('te_h').value=t.html};
+$('mtEdit').onclick=()=>{const t=curT();if(!t||t.id===FREE)return;$('tex').open=true;$('te_id').value=t.id;$('te_n').value=t.name;$('te_s').value=t.subject;$('te_h').value=t.html};
 $('te_save').onclick=async()=>{
   const n=$('te_n').value.trim();let h=$('te_h').value,s=$('te_s').value.trim();
   const m=h.match(/<!--\s*subject:\s*(.*?)\s*-->\s*/);if(m){if(!s)s=m[1];h=h.replace(m[0],'')}
@@ -677,7 +696,7 @@ $('dirf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
   $('ss').innerHTML=o;
 })();
 function tab(n){[1,2,3].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''})}
-$('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail()};
+$('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
 derive();render();fillSettings();setStatus();
 if(!cfg.url)showCfg();else sync();
