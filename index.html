@@ -181,7 +181,11 @@ details.glass>.in{margin-top:16px}
 .ban{position:sticky;top:10px;z-index:30;margin-bottom:14px;padding:12px 16px;border-radius:14px;font-weight:600;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--gb);box-shadow:var(--sh)}
 .ban[hidden]{display:none}.ban.info{border-color:#7c5cff}
 .steps{display:flex;flex-wrap:wrap;align-items:center;row-gap:2px}.steps small{display:block;width:100%;font-weight:400;opacity:.8}
-.st{opacity:.5}.st.done{opacity:1}.st.cur{opacity:1;font-weight:700}.st.cur::after{content:"…"}.st.bad{opacity:1}.ar{opacity:.5;margin:0 8px}
+.st{opacity:.5}.st.done{opacity:1}.st.cur{opacity:1;font-weight:700}.st{white-space:nowrap;display:inline-flex;align-items:center;gap:6px}.st.bad{opacity:1}.ar{opacity:.5;margin:0 8px}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .7s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:10px;border:1px solid var(--line);background:var(--inp);font-size:13px;margin:8px 6px 0 0}.chip button{border:0;background:none;color:var(--bad);cursor:pointer;font-size:17px;line-height:1;padding:0}
+.acts{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}.acts .btn{min-width:130px}
+.btn.sec{background:var(--inp);color:var(--tx);border:1px solid var(--line);box-shadow:none;animation:none}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
@@ -249,7 +253,7 @@ details.glass>.in{margin-top:16px}
         <div class="fld"><label class="f">Письмо (шаблон)</label><select id="mt"></select>
           <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
         <div class="fld"><label class="f">Режим</label><select id="mm"><option value="1">Одно письмо</option><option value="2">Рассылка</option></select></div>
-        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple></div>
+        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple><div id="mfl"></div></div>
       </div>
       <div class="glass mb" id="m1"><h3>Получатель</h3>
         <div class="fld"><label class="f">Почта получателя</label><input id="me" type="email" placeholder="partner@example.ru" autocapitalize="off" autocorrect="off"></div>
@@ -261,6 +265,7 @@ details.glass>.in{margin-top:16px}
       </div>
       <div class="glass mb" id="m2" hidden><h3>Рассылка</h3>
         <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px"></div>
+        <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
         <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button></div>
       </div>
       <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div id="mlog"></div></div></details>
@@ -277,16 +282,24 @@ details.glass>.in{margin-top:16px}
   <div class="fld"><label class="f">Тема письма (обязательно; можно с полями {{…}})</label><input id="te_s"></div>
   <div class="fld"><label class="f">HTML письма. Поля {{…}} в тексте будут запрашиваться вручную</label><textarea id="te_h" rows="12"></textarea></div>
   <div class="err" id="te_err"></div>
-  <div class="row end" style="margin:10px 0 0"><button class="sm" id="te_cancel">Отмена</button><button class="btn" id="te_save">Сохранить</button></div>
+  <div class="acts"><button class="btn sec" id="te_cancel">Отмена</button><button class="btn" id="te_save">Сохранить</button></div>
 </div></div>
 <div class="modal" id="mmod" hidden><div class="glass wide">
   <h2>Рассылка</h2>
-  <div class="fld"><label class="f">Адреса получателей (через запятую, пробел или с новой строки) — каждому уйдёт отдельное письмо</label><textarea id="mlist" rows="6"></textarea></div>
+  <div class="fld"><label class="f">Получатели</label><select id="msrc"><option value="list">Список адресов</option><option value="file">Excel-файл: каждому — только его строки</option></select></div>
+  <div class="fld" id="msl"><label class="f">Адреса (через запятую, пробел или с новой строки) — каждому уйдёт отдельное письмо</label><textarea id="mlist" rows="6"></textarea></div>
+  <div id="msf" hidden>
+    <div class="fld"><label class="f">Excel-файл (.xlsx): код СЦ, почта, данные по СЦ</label><input id="mf" type="file" accept=".xlsx,.xls"></div>
+    <div class="row"><div><label class="f">Колонка с кодом СЦ</label><select id="mcc"></select></div><div><label class="f">Колонка с почтой</label><select id="mce"></select></div></div>
+    <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
+    <div class="fld"><label class="f">Не показывать получателям колонки (Cmd/Ctrl — несколько), необязательно. Колонка с почтой скрывается сама</label><select id="mcd" multiple size="4"></select></div>
+    <div class="hint" id="mfi" style="margin-bottom:10px"></div>
+  </div>
   <div id="mmv"></div>
   <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked> Сначала отправить тестовое письмо</label>
   <div class="fld" id="mtw"><label class="f">Куда отправить тест</label><select id="mtsel"><option value="me">paramuzov@skbkontur.ru</option><option value="shared">ornp@skbkontur.ru</option><option value="other">Другая почта…</option></select><input id="mtt" type="email" hidden style="margin-top:8px" placeholder="адрес для теста" autocapitalize="off"></div>
   <div class="err" id="mmsg2"></div>
-  <div class="row end" style="margin:12px 0 0"><button class="sm" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
+  <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
 
 <div class="modal" id="cfgm" hidden><div class="glass">
@@ -570,10 +583,10 @@ const msgm=mk('mmsg2'),ADDR={me:'paramuzov@skbkontur.ru',shared:'ornp@skbkontur.
 let bT=0;
 const msg=(t,bad)=>{if(t)ban(bad?'err':'ok',t)};   // все статусы показываем плашкой сверху
 function ban(k,t){const b=$('mban');clearTimeout(bT);if(!k){b.hidden=true;return}b.className='ban '+k;b.innerHTML='<span>'+esc(t)+'</span><button class="sm" id="mbx">×</button>';b.hidden=false;$('mbx').onclick=()=>{b.hidden=true};if(k==='ok')bT=setTimeout(()=>{b.hidden=true},9000)}
-function prog(i,fin,done,N,note){   // ход отправки: принято → отправляется → отправлено
+function prog(i,fin,done,N,note){   // 4 стадии: в очередь → принято → отправляется → отправлено (кружок — идёт, ✓ — готово, ✗ — ошибка)
   const b=$('mban');clearTimeout(bT);b.className='ban '+(fin||'info');
-  const L=['Принято к отправке','Отправляется'+(i===1&&N>1?' ('+done+' из '+N+')':''),'Отправлено'+(fin==='ok'&&N>1?' ('+N+')':'')];
-  b.innerHTML='<div class="steps">'+L.map((x,k)=>{if(fin==='err'&&k===2)return'<span class="st bad">Ошибка — см. «История отправки»</span>';const s=fin==='ok'||k<i?'done':k===i?'cur':'';return'<span class="st '+s+'">'+(s==='done'?'✓ ':'')+esc(x)+'</span>'}).join('<span class="ar">→</span>')+(note?'<small>'+esc(note)+'</small>':'')+'</div><button class="sm" id="mbx">×</button>';
+  const L=['Добавляется в очередь','Принято к отправке','Отправляется'+(i===2&&N>1?' ('+done+' из '+N+')':''),fin==='err'&&i===3?'Ошибка отправки — см. «История отправки»':'Отправлено'+(fin==='ok'&&N>1?' ('+N+')':'')];
+  b.innerHTML='<div class="steps">'+L.map((x,k)=>{let ic='',s='';if(k<i||(k===i&&fin==='ok')){ic='✓ ';s='done'}else if(k===i){if(fin==='err'){ic='✗ ';s='bad'}else{ic='<i class="spin"></i>';s='cur'}}return'<span class="st '+s+'">'+ic+esc(x)+'</span>'}).join('<span class="ar">→</span>')+(note?'<small>'+esc(note)+'</small>':'')+'</div><button class="sm" id="mbx">×</button>';
   b.hidden=false;$('mbx').onclick=()=>{b.hidden=true}}
 const b64f=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok({name:f.name,type:f.type,b64:r.result.split(',')[1]});r.onerror=no;r.readAsDataURL(f)});
 const XL=()=>window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>no(new Error('Не загрузилась библиотека Excel (нужен интернет)'));document.head.appendChild(s)});
@@ -598,11 +611,11 @@ async function refreshQ(){try{renderQ(await mapi('status'))}catch(e){}}
 function watchQ(N,cb){clearInterval(wT);let n=0;const q0=M.q0;
   wT=setInterval(async()=>{const j=await mapi('status').catch(()=>null);
     if(j){renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4;
-      if(left===0){clearInterval(wT);prog(2,de>0?'err':'ok',ds,N);if(cb)cb(de===0);return}
-      if(j.q.c>0||ds+de>0)prog(1,'',ds+de,N);else prog(0,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}
+      if(left===0){clearInterval(wT);prog(3,de>0?'err':'ok',ds,N);if(cb)cb(de===0);return}
+      if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}
     if(++n>90){clearInterval(wT);ban('info','Письмо пока в очереди: отправщик на Mac не успел. Проверьте, что Mac включён.')}},2000)}
 const Q=async jobs=>{for(let i=0;i<jobs.length;i+=3)await mapi('queue',{jobs:jobs.slice(i,i+3)})};
-async function Qsend(jobs,cb){ban('info','Ставлю в очередь…');const j=await mapi('status');M.q0=j.q;await Q(jobs);renderQ(j);prog(0,'',0,jobs.length);watchQ(jobs.length,cb)}
+async function Qsend(jobs,cb){const N=jobs.length;let j;prog(0,'',0,N);try{j=await mapi('status');M.q0=j.q;await Q(jobs)}catch(e){prog(0,'err',0,N,e.message);return false}renderQ(j);prog(1,'',0,N);watchQ(N,cb);return true}
 const FREE='__free',t2h=x=>'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+esc(x).replace(/\n/g,'<br>')+'</div>';
 const curT=()=>$('mt').value===FREE?{id:FREE,name:'',subject:'',html:t2h($('mbody').value)}:M.tpl.find(t=>t.id===$('mt').value);
 function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=M.tpl.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (без шаблона)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
@@ -617,7 +630,10 @@ function preview(){const t=curT();if(!t){$('pv').srcdoc='';return}const g=gv(),v
   if(t.id!==FREE&&!$('ms')._man)$('ms').value=fillT(t.subject,v);$('pv').srcdoc=fillT(clean(t.html),v,true)}
 $('mt').onchange=fillVars;$('ms').oninput=()=>{$('ms')._man=1};$('mv').addEventListener('input',preview);$('mbody').oninput=preview;
 $('mfrom').value=LS.get('crm.from')==='shared'?'shared':'me';$('mfrom').onchange=()=>LS.set('crm.from',$('mfrom').value);
-$('mfile').onchange=e=>{M.files=[...e.target.files];if(M.files.reduce((s,f)=>s+f.size,0)>15e6){M.files=[];e.target.value='';msg('Вложения больше 15 МБ — уменьшите',1)}};
+const fsz=n=>n>1e6?(n/1e6).toFixed(1)+' МБ':Math.ceil(n/1e3)+' КБ';
+function renderFiles(){$('mfl').innerHTML=M.files.map((f,i)=>'<span class="chip">'+esc(f.name)+' · '+fsz(f.size)+'<button data-x="'+i+'" title="Убрать вложение">×</button></span>').join('')}
+$('mfile').onchange=e=>{const add=[...e.target.files];e.target.value='';const all=M.files.concat(add);if(all.reduce((s,f)=>s+f.size,0)>15e6)return ban('err','Вложения больше 15 МБ — уменьшите');M.files=all;renderFiles()};
+$('mfl').onclick=e=>{const x=e.target.closest('[data-x]');if(x){M.files.splice(+x.dataset.x,1);renderFiles()}};
 $('mm').onchange=()=>{const m=$('mm').value==='2';$('m1').hidden=m;$('m2').hidden=!m};
 $('mClose').onclick=()=>{$('mmod').hidden=true};
 $('mccx').onchange=()=>{$('mcopyw').hidden=!$('mccx').checked;if(!$('mccx').checked)$('mcopy').value=''};
@@ -635,60 +651,109 @@ $('s1').onclick=()=>{
   arm(b,'Подтвердить: '+ADDR[fr]+' → '+to,async()=>{
     b.disabled=true;
     try{const html=fillT(clean(t.html),v,true),files=await Promise.all(M.files.map(b64f));
-      await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}]);$('me').value='';$('mccx').checked=false;$('mccx').onchange()}
+      if(await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}])){$('me').value='';$('mccx').checked=false;$('mccx').onchange();M.files=[];renderFiles()}}
     catch(e){ban('err','Не удалось поставить в очередь: '+e.message)}finally{b.disabled=false}});
 };
 
-/* рассылка: список адресов -> сохранить -> (тест) -> отправить всем */
-let PL=[],M2={test:true,tt:'',tested:false,warn:'',tid:''};
-$('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','other'].includes(LS.get('crm.mtsel'))?LS.get('crm.mtsel'):'me';$('mtt').value=LS.get('crm.testto')||'';
+/* рассылка: адреса списком или Excel (каждому — только его строки) -> сохранить -> (тест) -> отправить всем */
+let PL=[],D=null,M2={test:true,tt:'',tested:false,warn:'',tid:''};
+$('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','other'].includes(LS.get('crm.mtsel'))?LS.get('crm.mtsel'):'me';$('mtt').value=LS.get('crm.testto')||'';$('mfn').value=LS.get('crm.mfn')||'Партнер {код}';
 function toggleT(){const on=$('mtest').checked;$('mtw').hidden=!on;$('mtt').hidden=!(on&&$('mtsel').value==='other')}
-$('mtest').onchange=$('mtsel').onchange=toggleT;
-function fillMV(){   // поля {{…}} — ручной ввод, одно значение на все письма ({{email}}/{{почта}} подставляется адресом получателя)
+function toggleS(){const f=$('msrc').value==='file';$('msl').hidden=f;$('msf').hidden=!f}
+$('mtest').onchange=$('mtsel').onchange=toggleT;$('msrc').onchange=()=>{toggleS();fillMV()};$('mcc').onchange=fillMV;
+const cn=v=>v instanceof Date?'D'+Math.round(v.getTime()/36e5):v==null?'':String(v).trim();
+const nrm=a=>a.map(r=>{const x=r.map(cn);while(x.length&&x[x.length-1]==='')x.pop();return JSON.stringify(x)}).filter(s=>s!=='[]').join('|');
+async function readSheet(f){await XL();const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''})}
+$('mf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  try{const a=await readSheet(f);let hi=a.findIndex(r=>r.some(c=>/код|почт|mail/i.test(String(c))));if(hi<0)hi=0;
+    const h=a[hi].map(c=>String(c).trim());D={h,rows:a.slice(hi+1).filter(r=>r.some(c=>c!==''))};
+    const opt=s=>h.map((x,i)=>x?'<option value="'+i+'"'+(i===s?' selected':'')+'>'+esc(x)+'</option>':'').join('');
+    const ci=h.findIndex(x=>/код/i.test(x)),ei=h.findIndex(x=>/почт|mail/i.test(x));
+    $('mcc').innerHTML=opt(ci<0?0:ci);$('mce').innerHTML=opt(ei<0?1:ei);$('mcd').innerHTML=opt(-1);
+    $('mfi').textContent='Файл «'+f.name+'»: строк с данными '+D.rows.length+'. Проверьте колонки кода СЦ и почты.';msgm('');fillMV()}catch(err){D=null;msgm(err.message,1)}};
+function fillMV(){   // поля {{…}}, которых нет в данных, — ручной ввод (одно значение на все письма); {{email}}/{{почта}} — адрес получателя
   const old={};document.querySelectorAll('#mmv [data-m]').forEach(i=>old[i.dataset.m]=i.value);
-  const t=curT(),man=t&&t.id!==FREE?vnames(t.html+' '+t.subject).filter(n=>AL[nk(n)]!=='email'):[];
-  $('mmv').innerHTML=man.length?'<div class="hint" style="margin-bottom:8px">В письме есть поля {{…}} — заполните вручную (одно значение для всех писем):</div>'+man.map(n=>'<div class="fld"><label class="f">'+esc(n)+'</label><input data-m="'+esc(n)+'" value="'+esc(old[n]||'')+'"></div>').join(''):'';
+  const t=curT(),file=$('msrc').value==='file',H=new Set(file&&D?D.h.map(nk):[]),hasCode=file&&D&&$('mcc').value!=='';
+  const man=t&&t.id!==FREE?vnames(t.html+' '+t.subject).filter(n=>{const al=AL[nk(n)];return !(al==='email'||H.has(nk(n))||(al==='code'&&hasCode))}):[];
+  $('mmv').innerHTML=man.length?'<div class="hint" style="margin-bottom:8px">В письме есть поля {{…}}, которых нет в данных, — заполните вручную (одно значение для всех писем):</div>'+man.map(n=>'<div class="fld"><label class="f">'+esc(n)+'</label><input data-m="'+esc(n)+'" value="'+esc(old[n]||'')+'"></div>').join(''):'';
 }
 const gm=()=>{const v={};document.querySelectorAll('#mmv [data-m]').forEach(i=>v[i.dataset.m]=i.value.trim());return v};
+const okPL=()=>PL.filter(p=>!p.miss.length);
 function renderM2(){
-  const has=PL.length;
-  $('mlsum').textContent=!has?'Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.':'Получателей: '+PL.length+(M2.warn?'\n'+M2.warn:'')+(M2.test?(M2.tested?'\nТестовое письмо отправлено на '+M2.tt+'. Всё в порядке? Тогда можно отправлять всем.':'\nСначала отправьте тестовое письмо на '+M2.tt+'.'):'');
-  $('mtestbtn').hidden=!(has&&M2.test&&!M2.tested);$('mallbtn').hidden=!(has&&(!M2.test||M2.tested));
-  if(!$('mallbtn').dataset.arm)$('mallbtn').textContent='Отправить всем ('+PL.length+')';
+  const has=PL.length,n=okPL().length;
+  $('mlsum').textContent=!has?'Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.':'Получателей: '+n+(PL.length>n?' (пропущено: '+(PL.length-n)+')':'')+(M2.warn?'\n'+M2.warn:'')+(M2.test?(M2.tested?'\nТестовое письмо отправлено на '+M2.tt+'. Всё в порядке? Тогда можно отправлять всем.':'\nСначала отправьте тестовое письмо на '+M2.tt+'.'):'');
+  $('mpl').innerHTML=PL.map((p,i)=>'<div class="li" data-i="'+i+'" style="cursor:pointer"><span class="n">'+esc(p.a)+'<small>'+(p.codes.length?'СЦ '+esc(capC(p.codes,8))+' · ':'')+(p.file?esc(p.file.name)+' · ':'')+'строк '+p.rows+'</small></span><span class="r">'+(p.miss.length?'пропуск: нет '+esc(p.miss.join(', ')):'✓')+'</span></div>').join('');
+  $('mtestbtn').hidden=!(n&&M2.test&&!M2.tested);$('mallbtn').hidden=!(n&&(!M2.test||M2.tested));
+  if(!$('mallbtn').dataset.arm)$('mallbtn').textContent='Отправить всем ('+n+')';
 }
-$('mOpen').onclick=()=>{msgm('');fillMV();toggleT();$('mmod').hidden=false};
-$('mSave').onclick=()=>{
+$('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&&PL[+r.dataset.i].html)$('pv').srcdoc=PL[+r.dataset.i].html});
+$('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
+$('mSave').onclick=async()=>{
   const t=curT();if(!t||t.id===FREE)return msgm('Выберите шаблон (не «своё письмо»)',1);
-  const s=splitE($('mlist').value),W=[];if(s.bad.length)W.push('Пропущено, не похоже на адрес: '+s.bad.join(', '));
-  if(!s.good.length)return msgm('Добавьте хотя бы один адрес',1);
-  const man=gm(),ns=vnames(t.html+' '+t.subject),lack=ns.filter(n=>AL[nk(n)]!=='email'&&!man[n]);
+  const file=$('msrc').value==='file',W=[];let h,rows,ci=-1,ei=0,keep=[];
+  if(file){if(!D)return msgm('Загрузите Excel-файл',1);h=D.h;rows=D.rows;ci=+$('mcc').value;ei=+$('mce').value;
+    const drop=new Set([ei].concat([...$('mcd').selectedOptions].map(o=>+o.value)));keep=h.map((x,i)=>i).filter(i=>h[i]&&!drop.has(i))}
+  else{const s=splitE($('mlist').value);if(s.bad.length)W.push('Пропущено, не похоже на адрес: '+s.bad.join(', '));if(!s.good.length)return msgm('Добавьте хотя бы один адрес',1);h=['Почта'];rows=s.good.map(x=>[x])}
+  const man=gm(),ns=vnames(t.html+' '+t.subject),hk=new Set(h.map(nk));
+  const lack=ns.filter(n=>{const al=AL[nk(n)];return al!=='email'&&!man[n]&&!(file&&(hk.has(nk(n))||(al==='code'&&ci>=0)))});
   if(lack.length)return msgm('Заполните поля: '+lack.join(', '),1);
   const test=$('mtest').checked,k=$('mtsel').value;let tt='';
   if(test){tt=k==='other'?$('mtt').value.trim().toLowerCase():ADDR[k];if(!EM.test(tt))return msgm('Укажите корректную почту для теста',1)}
-  PL=s.good.map(a=>{const v={};ns.forEach(n=>{v[n]=AL[nk(n)]==='email'?a:man[n]});return{a,subject:fillT(t.subject,v),html:fillT(clean(t.html),v,true)}});
-  M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id};
-  LS.set('crm.mtest',test?'1':'0');LS.set('crm.mtsel',k);if(k==='other')LS.set('crm.testto',tt);
-  $('pv').srcdoc=PL[0].html;$('mmod').hidden=true;renderM2();
+  const sb=$('mSave');sb.disabled=true;msgm('Готовлю письма…');
+  try{if(file)await XL();
+    const G=new Map();let orph=0,multi=0;   // одна почта = один получатель = один файл со всеми её строками
+    rows.forEach((r,i)=>{const s=splitE(r[ei]);if(s.bad.length)W.push('Строка '+(i+1)+': некорректный адрес '+s.bad.join(', '));if(!s.good.length){orph++;return}if(s.good.length>1)multi++;s.good.forEach(a=>{if(!G.has(a))G.set(a,[]);G.get(a).push(r)})});
+    if(orph)W.push('Строк без корректной почты: '+orph+' — НЕ отправляются');
+    if(multi)W.push('Строк с несколькими адресами: '+multi+' — попадут в файл каждого из адресов');
+    const out=[],pat=$('mfn').value.trim()||'Партнер {код}';
+    for(const[a,rs]of G){
+      const src={};h.forEach((x,i)=>{if(x)src[nk(x)]=uniq(rs.map(r=>r[i]))});
+      const codes=ci>=0?uniq(rs.map(r=>r[ci])):[],v={},vs={},miss=[];
+      ns.forEach(n=>{const al=AL[nk(n)];let arr=src[nk(n)]||(al==='code'?codes:null);
+        if((!arr||!arr.length)&&al==='email')arr=[a];
+        if((!arr||!arr.length)&&man[n])arr=[man[n]];
+        if(!arr||!arr.length){miss.push(n);return}v[n]=arr.join(', ');vs[n]=al==='code'?capC(arr,8):v[n]});
+      let fl=null;
+      if(file&&!miss.length){
+        const aoa=[keep.map(i=>h[i])].concat(rs.map(r=>keep.map(i=>r[i])));
+        const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
+        ws['!cols']=keep.map(i=>({wch:Math.min(60,Math.max(String(h[i]).length,...rs.slice(0,200).map(r=>String(r[i]).length))+2)}));
+        const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Данные');
+        const b64=XLSX.write(wb,{bookType:'xlsx',type:'base64',cellDates:true});
+        const back=XLSX.utils.sheet_to_json(XLSX.read(b64,{type:'base64',cellDates:true}).Sheets['Данные'],{header:1,raw:true,defval:''});
+        if(nrm(back)!==nrm(aoa))throw new Error('Проверка файла для '+a+' не пройдена — рассылка остановлена');
+        const ct=codes.length<=3?codes.join(', '):codes.slice(0,3).join(', ')+' и ещё '+(codes.length-3);
+        const base=pat.replace(/\{\s*код\s*\}/gi,ct).replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,' ').trim()||'Данные';
+        fl={name:base.slice(0,100)+'.xlsx',type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64};
+      }
+      if(miss.length)W.push(a+': не отправится — нет значений для '+miss.join(', '));
+      out.push({a,codes,rows:rs.length,miss,subject:miss.length?'':fillT(t.subject,vs),html:miss.length?'':fillT(clean(t.html),v,true),file:fl});
+    }
+    if(!out.some(p=>!p.miss.length))throw new Error('Некому отправлять: '+(W.join('; ')||'нет получателей'));
+    PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id};
+    LS.set('crm.mtest',test?'1':'0');LS.set('crm.mtsel',k);if(k==='other')LS.set('crm.testto',tt);LS.set('crm.mfn',pat);
+    $('pv').srcdoc=okPL()[0].html;$('mmod').hidden=true;msgm('');renderM2();
+  }catch(err){msgm(err.message,1)}finally{sb.disabled=false}
 };
 $('mtestbtn').onclick=async()=>{
-  const p=PL[0],b=$('mtestbtn');if(!p)return;b.disabled=true;
+  const p=okPL()[0],b=$('mtestbtn');if(!p)return;b.disabled=true;
   try{const extra=await Promise.all(M.files.map(b64f));
-    await Qsend([{from:$('mfrom').value,to:M2.tt,subject:'[ТЕСТ → '+p.a+'] '+p.subject,html:p.html,text:toText(p.html),files:extra}],ok=>{if(ok){M2.tested=true;renderM2()}})}
+    await Qsend([{from:$('mfrom').value,to:M2.tt,subject:'[ТЕСТ → '+p.a+'] '+p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)}],ok=>{if(ok){M2.tested=true;renderM2()}})}
   catch(e){ban('err','Не удалось отправить тест: '+e.message)}finally{b.disabled=false}
 };
 $('mallbtn').onclick=()=>{
-  const b=$('mallbtn'),fr=$('mfrom').value,sk='crm.sent.'+today(),sent=parse(LS.get(sk),{}),key=p=>p.a+'|'+M2.tid,todo=PL.filter(p=>!sent[key(p)]);
+  const b=$('mallbtn'),fr=$('mfrom').value,sk='crm.sent.'+today(),sent=parse(LS.get(sk),{}),key=p=>p.a+'|'+M2.tid,todo=okPL().filter(p=>!sent[key(p)]);
   if(!todo.length)return ban('err','Все эти адреса уже получали это письмо сегодня — повторно не отправляю.');
   arm(b,'Подтвердить: отправить '+todo.length+' от '+ADDR[fr]+'?',async()=>{
     b.disabled=true;
     try{const extra=await Promise.all(M.files.map(b64f));
-      await Qsend(todo.map(p=>({from:fr,to:p.a,subject:p.subject,html:p.html,text:toText(p.html),files:extra})));
-      todo.forEach(p=>{sent[key(p)]=1});LS.set(sk,JSON.stringify(sent));PL=[];renderM2()}
+      if(await Qsend(todo.map(p=>({from:fr,to:p.a,subject:p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)})))){
+        todo.forEach(p=>{sent[key(p)]=1});LS.set(sk,JSON.stringify(sent));PL=[];M.files=[];renderFiles();renderM2()}}
     catch(e){ban('err',e.message+' — проверьте историю перед повтором, часть писем могла встать')}
     b.disabled=false;
   });
 };
-toggleT();renderM2();
+toggleT();toggleS();renderM2();renderFiles();
 
 /* шаблоны (модалка) */
 function openT(t){$('te_id').value=t?t.id:'';$('te_n').value=t?t.name:'';$('te_s').value=t?t.subject:'';$('te_h').value=t?t.html:'';$('te_err').textContent='';$('tmod').hidden=false}
