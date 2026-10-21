@@ -266,7 +266,7 @@ details.glass>.in{margin-top:16px}
       <div class="glass mb" id="m2" hidden><h3>Рассылка</h3>
         <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px"></div>
         <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
-        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button></div>
+        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button></div>
       </div>
       <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div id="mlog"></div></div></details>
     </div>
@@ -609,7 +609,7 @@ async function refreshQ(){try{renderQ(await mapi('status'))}catch(e){}}
 function watchQ(N,cb){clearInterval(wT);let n=0;const q0=M.q0;
   wT=setInterval(async()=>{const j=await mapi('status').catch(()=>null);
     if(j){renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4;
-      if(left===0){clearInterval(wT);prog(3,de>0?'err':'ok',ds,N);if(cb)cb(de===0);return}
+      if(left===0){clearInterval(wT);prog(3,de>0?'err':'ok',ds,N);if(cb){let lg=j.log||[];if(ds+de>lg.length)lg=((await mapi('status',{n:Math.min(300,ds+de)}).catch(()=>null))||j).log||lg;cb(de===0,lg.slice(0,ds+de))}return}
       if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}
     if(++n>90){clearInterval(wT);ban('info','Письмо пока в очереди: отправщик на Mac не успел. Проверьте, что Mac включён.')}},2000)}
 const Q=async jobs=>{for(let i=0;i<jobs.length;i+=3)await mapi('queue',{jobs:jobs.slice(i,i+3)})};
@@ -654,7 +654,11 @@ $('s1').onclick=()=>{
 };
 
 /* рассылка: адреса списком или Excel (каждому — только его строки) -> сохранить -> (тест) -> отправить всем */
-let PL=[],D=null,M2={test:true,tt:'',tested:false,warn:'',tid:''};
+let PL=[],D=null,M2={test:true,tt:'',tested:false,warn:'',tid:'',warned:false};
+/* учёт отправленного сегодня: 'q' — поставлено в очередь (30 мин), 's' — реально отправлено; ошибки в учёт не попадают */
+const pkey=p=>p.a+'|'+M2.tid,LK=()=>'crm.sent.'+today(),getL=()=>parse(LS.get(LK()),{}),setL=L=>LS.set(LK(),JSON.stringify(L));
+const dupOf=v=>!!v&&(typeof v!=='object'||v.s==='s'||Date.now()-v.t<18e5);
+const dupsPL=()=>{const L=getL();return okPL().filter(p=>dupOf(L[pkey(p)]))};
 $('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','other'].includes(LS.get('crm.mtsel'))?LS.get('crm.mtsel'):'me';$('mtt').value=LS.get('crm.testto')||'';$('mfn').value=LS.get('crm.mfn')||'Партнер {код}';
 function toggleT(){const on=$('mtest').checked;$('mtw').hidden=!on;$('mtt').hidden=!(on&&$('mtsel').value==='other')}
 function toggleS(){const f=$('msrc').value==='file';$('msl').hidden=f;$('msf').hidden=!f}
@@ -757,10 +761,12 @@ const gm=()=>{const v={};document.querySelectorAll('#mmv [data-m]').forEach(i=>v
 const okPL=()=>PL.filter(p=>!p.miss.length);
 function renderM2(){
   const has=PL.length,n=okPL().length;
-  $('mlsum').textContent=!has?'Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.':'Получателей: '+n+(PL.length>n?' (пропущено: '+(PL.length-n)+')':'')+(M2.warn?'\n'+M2.warn:'')+(M2.test?(M2.tested?'\nТестовое письмо отправлено на '+M2.tt+'. Всё в порядке? Тогда можно отправлять всем.':'\nСначала отправьте тестовое письмо на '+M2.tt+'.'):'');
+  $('mlsum').textContent=!has?'Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.':'Получателей: '+n+(PL.length>n?' (пропущено: '+(PL.length-n)+')':'')+(M2.warn?'\n'+M2.warn:'')+(dupsPL().length?'\nУже получали это письмо сегодня: '+dupsPL().length:'')+(M2.test?(M2.tested?'\nТестовое письмо отправлено на '+M2.tt+'. Всё в порядке? Тогда можно отправлять всем.':'\nСначала отправьте тестовое письмо на '+M2.tt+'.'):'');
   $('mpl').innerHTML=PL.map((p,i)=>'<div class="li" data-i="'+i+'" style="cursor:pointer"><span class="n">'+esc(p.a)+'<small>'+(p.codes.length?'СЦ '+esc(capC(p.codes,8))+' · ':'')+(p.file?esc(p.file.name)+' · ':'')+'строк '+p.rows+'</small></span><span class="r">'+(p.miss.length?'пропуск: нет '+esc(p.miss.join(', ')):'✓')+'</span></div>').join('');
-  $('mtestbtn').hidden=!(n&&M2.test&&!M2.tested);$('mallbtn').hidden=!(n&&(!M2.test||M2.tested));
-  if(!$('mallbtn').dataset.arm)$('mallbtn').textContent='Отправить всем ('+n+')';
+  const dn=dupsPL().length,go=n&&(!M2.test||M2.tested);
+  $('mtestbtn').hidden=!(n&&M2.test&&!M2.tested);$('mallbtn').hidden=!go;$('mnewbtn').hidden=!(go&&M2.warned&&n-dn>0);
+  if(!$('mallbtn').dataset.arm)$('mallbtn').textContent=(M2.warned&&dn?'Всё равно отправить всем (':'Отправить всем (')+n+')';
+  if(!$('mnewbtn').dataset.arm)$('mnewbtn').textContent='Только новым ('+(n-dn)+')';
 }
 $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&&PL[+r.dataset.i].html)$('pv').srcdoc=PL[+r.dataset.i].html});
 $('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
@@ -817,18 +823,28 @@ $('mtestbtn').onclick=async()=>{
     await Qsend([{from:$('mfrom').value,to:M2.tt,subject:'[ТЕСТ → '+p.a+'] '+p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)}],ok=>{if(ok){M2.tested=true;renderM2()}})}
   catch(e){ban('err','Не удалось отправить тест: '+e.message)}finally{b.disabled=false}
 };
-$('mallbtn').onclick=()=>{
-  const b=$('mallbtn'),fr=$('mfrom').value,sk='crm.sent.'+today(),sent=parse(LS.get(sk),{}),key=p=>p.a+'|'+M2.tid,todo=okPL().filter(p=>!sent[key(p)]);
-  if(!todo.length)return ban('err','Все эти адреса уже получали это письмо сегодня — повторно не отправляю.');
-  arm(b,'Подтвердить: отправить '+todo.length+' от '+ADDR[fr]+'?',async()=>{
-    b.disabled=true;
+function sendBatch(list,b){
+  const fr=$('mfrom').value;
+  arm(b,'Подтвердить: отправить '+list.length+' от '+ADDR[fr]+'?',async()=>{
+    $('mallbtn').disabled=$('mnewbtn').disabled=true;
+    const L=getL();list.forEach(p=>{L[pkey(p)]={s:'q',t:Date.now()}});setL(L);M2.warned=false;renderM2();
+    const drop=()=>{const L2=getL();list.forEach(p=>{if(L2[pkey(p)]&&L2[pkey(p)].s==='q')delete L2[pkey(p)]});setL(L2);renderM2()};
     try{const extra=await Promise.all(M.files.map(b64f));
-      if(await Qsend(todo.map(p=>({from:fr,to:p.a,subject:p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)})))){
-        todo.forEach(p=>{sent[key(p)]=1});LS.set(sk,JSON.stringify(sent));PL=[];M.files=[];renderFiles();renderM2()}}
-    catch(e){ban('err',e.message+' — проверьте историю перед повтором, часть писем могла встать')}
-    b.disabled=false;
+      const ok=await Qsend(list.map(p=>({from:fr,to:p.a,subject:p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)})),(good,lg)=>{
+        const L2=getL(),okTo=new Set(lg.filter(x=>x.ok).map(x=>String(x.to).toLowerCase()));   // в учёт попадают только реально отправленные
+        list.forEach(p=>{if(good||okTo.has(p.a))L2[pkey(p)]={s:'s',t:Date.now()};else delete L2[pkey(p)]});setL(L2);renderM2()});
+      if(!ok)drop()}
+    catch(e){drop();ban('err',e.message)}
+    $('mallbtn').disabled=$('mnewbtn').disabled=false;
   });
+}
+$('mallbtn').onclick=()=>{
+  const all=okPL(),d=dupsPL();
+  if(d.length&&!M2.warned){M2.warned=true;renderM2();
+    ban('info',d.length+' из '+all.length+' адресов уже получали это письмо сегодня ('+capC(d.map(p=>p.a),3)+'). Отправить только остальным или всё равно всем?');return}
+  sendBatch(all,$('mallbtn'));
 };
+$('mnewbtn').onclick=()=>{const d=new Set(dupsPL().map(p=>p.a)),list=okPL().filter(p=>!d.has(p.a));if(!list.length)return;sendBatch(list,$('mnewbtn'))};
 toggleT();toggleS();renderM2();renderFiles();
 
 /* шаблоны (модалка) */
