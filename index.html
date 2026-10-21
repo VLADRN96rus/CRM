@@ -289,11 +289,10 @@ details.glass>.in{margin-top:16px}
   <div class="fld"><label class="f">Получатели</label><select id="msrc"><option value="list">Список адресов</option><option value="file">Excel-файл: каждому — только его строки</option></select></div>
   <div class="fld" id="msl"><label class="f">Адреса (через запятую, пробел или с новой строки) — каждому уйдёт отдельное письмо</label><textarea id="mlist" rows="6"></textarea></div>
   <div id="msf" hidden>
-    <div class="fld"><label class="f">Excel-файл (.xlsx): код СЦ, почта, данные по СЦ</label><input id="mf" type="file" accept=".xlsx,.xls"></div>
-    <div class="row"><div><label class="f">Колонка с кодом СЦ</label><select id="mcc"></select></div><div><label class="f">Колонка с почтой</label><select id="mce"></select></div></div>
+    <div class="fld"><label class="f">Excel-файл (.xlsx). Столбцы «код СЦ» и «почта» определяются сами, листов может быть несколько</label><input id="mf" type="file" accept=".xlsx"></div>
+    <div class="hint" id="mfi" style="margin-bottom:10px;white-space:pre-wrap"></div>
+    <div class="fld" id="mcdw" hidden><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
     <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
-    <div class="fld"><label class="f">Не показывать получателям колонки (Cmd/Ctrl — несколько), необязательно. Колонка с почтой скрывается сама</label><select id="mcd" multiple size="4"></select></div>
-    <div class="hint" id="mfi" style="margin-bottom:10px"></div>
   </div>
   <div id="mmv"></div>
   <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked> Сначала отправить тестовое письмо</label>
@@ -589,7 +588,6 @@ function prog(i,fin,done,N,note){   // 4 стадии: в очередь → п�
   b.innerHTML='<div class="steps">'+L.map((x,k)=>{let ic='',s='';if(k<i||(k===i&&fin==='ok')){ic='✓ ';s='done'}else if(k===i){if(fin==='err'){ic='✗ ';s='bad'}else{ic='<i class="spin"></i>';s='cur'}}return'<span class="st '+s+'">'+ic+esc(x)+'</span>'}).join('<span class="ar">→</span>')+(note?'<small>'+esc(note)+'</small>':'')+'</div><button class="sm" id="mbx">×</button>';
   b.hidden=false;$('mbx').onclick=()=>{b.hidden=true}}
 const b64f=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok({name:f.name,type:f.type,b64:r.result.split(',')[1]});r.onerror=no;r.readAsDataURL(f)});
-const XL=()=>window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>no(new Error('Не загрузилась библиотека Excel (нужен интернет)'));document.head.appendChild(s)});
 const ERR={auth:'Неверный код доступа'};
 async function mapi(act,d){
   if(!cfg.url||!cfg.key)throw new Error('Нет подключения к таблице (⚙)');
@@ -660,20 +658,98 @@ let PL=[],D=null,M2={test:true,tt:'',tested:false,warn:'',tid:''};
 $('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','other'].includes(LS.get('crm.mtsel'))?LS.get('crm.mtsel'):'me';$('mtt').value=LS.get('crm.testto')||'';$('mfn').value=LS.get('crm.mfn')||'Партнер {код}';
 function toggleT(){const on=$('mtest').checked;$('mtw').hidden=!on;$('mtt').hidden=!(on&&$('mtsel').value==='other')}
 function toggleS(){const f=$('msrc').value==='file';$('msl').hidden=f;$('msf').hidden=!f}
-$('mtest').onchange=$('mtsel').onchange=toggleT;$('msrc').onchange=()=>{toggleS();fillMV()};$('mcc').onchange=fillMV;
-const cn=v=>v instanceof Date?'D'+Math.round(v.getTime()/36e5):v==null?'':String(v).trim();
-const nrm=a=>a.map(r=>{const x=r.map(cn);while(x.length&&x[x.length-1]==='')x.pop();return JSON.stringify(x)}).filter(s=>s!=='[]').join('|');
-async function readSheet(f){await XL();const wb=XLSX.read(await f.arrayBuffer(),{type:'array',cellDates:true});return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:''})}
-$('mf').onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  try{const a=await readSheet(f);let hi=a.findIndex(r=>r.some(c=>/код|почт|mail/i.test(String(c))));if(hi<0)hi=0;
-    const h=a[hi].map(c=>String(c).trim());D={h,rows:a.slice(hi+1).filter(r=>r.some(c=>c!==''))};
-    const opt=s=>h.map((x,i)=>x?'<option value="'+i+'"'+(i===s?' selected':'')+'>'+esc(x)+'</option>':'').join('');
-    const ci=h.findIndex(x=>/код/i.test(x)),ei=h.findIndex(x=>/почт|mail/i.test(x));
-    $('mcc').innerHTML=opt(ci<0?0:ci);$('mce').innerHTML=opt(ei<0?1:ei);$('mcd').innerHTML=opt(-1);
-    $('mfi').textContent='Файл «'+f.name+'»: строк с данными '+D.rows.length+'. Проверьте колонки кода СЦ и почты.';msgm('');fillMV()}catch(err){D=null;msgm(err.message,1)}};
+$('mtest').onchange=$('mtsel').onchange=toggleT;$('msrc').onchange=()=>{toggleS();fillMV()};
+/* ---------- Excel: разбор и фильтрация с сохранением оформления (ExcelJS) ---------- */
+const EJ=()=>window.ExcelJS?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=ok;s.onerror=()=>no(new Error('Не загрузилась библиотека Excel (нужен интернет)'));document.head.appendChild(s)});
+const ctext=c=>{try{const t=c.text;return t==null?'':String(t).trim()}catch(e){return ''}};
+const colL=n=>{let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26)}return s};
+const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+async function parseXlsx(buf){   // листы, колонки «код СЦ» и «почта» определяются сами (названия могут быть разными); запасной вариант: A — код, B — почта
+  await EJ();const wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);
+  const sheets=[],notes=[];
+  wb.eachSheet(ws=>{
+    if(ws.state&&ws.state!=='visible'){notes.push('Скрытый лист «'+ws.name+'» в файлы получателей не попадёт');return}
+    const nc=ws.columnCount,nr=ws.rowCount;let hr=0;
+    for(let r=1;r<=Math.min(nr,25)&&!hr;r++){const row=ws.getRow(r);for(let c=1;c<=nc;c++)if(/почт|mail/.test(nk(ctext(row.getCell(c))))){hr=r;break}}
+    const fb=!hr;if(fb)hr=1;
+    const heads=[];for(let c=1;c<=nc;c++)heads[c]=ctext(ws.getRow(hr).getCell(c));
+    let ec=0,cc=0;
+    for(let c=1;c<=nc;c++)if(!ec&&/почт|mail/.test(nk(heads[c])))ec=c;
+    for(let c=1;c<=nc;c++)if(c!==ec&&/код.*сц|сц.*код|codesc/.test(nk(heads[c]))){cc=c;break}
+    if(!cc)for(let c=1;c<=nc;c++)if(c!==ec&&/код|code/.test(nk(heads[c]))){cc=c;break}
+    if(!ec)ec=cc===2?1:2;if(!cc)cc=ec===1?2:1;
+    const rows=[];
+    for(let r=hr+1;r<=nr;r++){const row=ws.getRow(r),vals=[];let any=0;for(let c=1;c<=nc;c++){vals[c]=ctext(row.getCell(c));if(vals[c])any=1}
+      if(!any)continue;const s=splitE(vals[ec]);rows.push({n:r,vals,emails:s.good,bad:s.bad})}
+    if(!rows.some(x=>x.emails.length)){notes.push('Лист «'+ws.name+'»: в столбце '+colL(ec)+' нет почты — лист не включён');return}
+    sheets.push({name:ws.name,hr,ec,cc,nc,heads,rows,fb});
+  });
+  const names=[],seen=new Set();sheets.forEach(S=>{for(let c=1;c<=S.nc;c++){const h=S.heads[c];if(h&&!seen.has(nk(h))){seen.add(nk(h));names.push(h)}}});
+  return{buf,sheets,names,notes};
+}
+const colN=l=>[...l].reduce((n,ch)=>n*26+ch.charCodeAt(0)-64,0);
+function shiftF(f,o,n,hr,cm){   // формула строки при переезде o -> n и сдвиге колонок; ссылки на другие строки данных/удалённые колонки невозможны -> null (останется значение)
+  let bad=false;
+  const out=String(f).replace(/('[^']+'|[A-Za-z_][\w.]*)!|(^|[^\w.$])(\$?)([A-Z]{1,3})(\$?)(\d+)(?![\d(\w])/g,(m,sh,pre,a1,col,a2,row)=>{
+    if(sh){bad=true;return m}
+    const R=+row,nc=cm(colN(col));if(!nc){bad=true;return m}
+    const L=pre+a1+colL(nc);
+    if(a2)return L+a2+row;
+    if(R===o)return L+n;
+    if(R<=hr)return L+row;
+    bad=true;return m});
+  return bad?null:out;
+}
+function filterSheet(ws,S,keep,hide){   // оставляем только свои строки; оформление строк, ширины, объединения и формулы сохраняются
+  const nc=S.nc,del=[];for(let c=1;c<=nc;c++)if(hide.has(nk(S.heads[c]||'')))del.push(c);
+  const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length;
+  const W=[];for(let c=1;c<=nc;c++)W[c]=ws.getColumn(c).width;let w=S.hr;
+  const ms=Object.values(ws._merges||{}).map(m=>Object.assign({},m.model));
+  const saved=del.length?ms.map(m=>{const mc=ws.getCell(m.top,m.left);return{m,v:mc.value,st:Object.assign({},mc.style)}}):[];
+  if(del.length)ms.forEach(m=>ws.unMergeCells(m.top,m.left,m.bottom,m.right));
+  for(const r of keep){w++;const src=ws.getRow(r),dst=ws.getRow(w);
+    for(let c=1;c<=nc;c++){const s=src.getCell(c),d=dst.getCell(c),isF=s.type===ExcelJS.ValueType.Formula;
+      if(w===r&&!isF)continue;
+      let v=s.value;
+      if(isF){const nf=shiftF(s.formula,r,w,S.hr,idx),res=s.result;v=nf?{formula:nf,result:res}:(res===undefined?null:res)}
+      const st=w!==r?Object.assign({},s.style):null;d.value=v;if(st)d.style=st}
+    if(w!==r)dst.height=src.height}
+  for(let r=ws.rowCount;r>w;r--)ws.spliceRows(r,1);   // снизу вверх: быстро и без сдвигов
+  for(let i=del.length-1;i>=0;i--)ws.spliceColumns(del[i],1);
+  if(del.length){
+    let j=0;for(let c=1;c<=nc;c++)if(!del.includes(c)){j++;if(W[c])ws.getColumn(j).width=W[c]}
+    saved.forEach(({m,v,st})=>{if(m.bottom>S.hr)return;const ks=[];for(let c=m.left;c<=m.right;c++)if(!del.includes(c))ks.push(idx(c));if(!ks.length)return;
+      const l=Math.min(...ks),r=Math.max(...ks);if(r>l||m.bottom>m.top)ws.mergeCells(m.top,l,m.bottom,r);const mc=ws.getCell(m.top,l);mc.value=v;mc.style=st});
+  }
+  return del;
+}
+async function buildFile(D,rec,hide){   // rec: Map(имя листа -> строки получателя)
+  await EJ();const wb=new ExcelJS.Workbook();await wb.xlsx.load(D.buf);const ok=new Set();
+  for(const S of D.sheets){const mine=rec.get(S.name);if(!mine||!mine.length)continue;ok.add(S.name);filterSheet(wb.getWorksheet(S.name),S,mine.map(x=>x.n),hide)}
+  wb.worksheets.slice().forEach(ws=>{if(!ok.has(ws.name))wb.removeWorksheet(ws.id)});
+  wb.views=[{x:0,y:0,width:10000,height:20000,firstSheet:0,activeTab:0,visibility:'visible'}];
+  return new Uint8Array(await wb.xlsx.writeBuffer());
+}
+async function verifyFile(D,rec,hide,u8,email){   // сверка готового файла: только свои строки, ничего лишнего
+  await EJ();const wb=new ExcelJS.Workbook();await wb.xlsx.load(u8);
+  for(const S of D.sheets){const mine=rec.get(S.name),ws=wb.getWorksheet(S.name);
+    if(!mine||!mine.length){if(ws)throw new Error('в файле лишний лист «'+S.name+'»');continue}
+    if(!ws)throw new Error('в файле нет листа «'+S.name+'»');
+    const del=[];for(let c=1;c<=S.nc;c++)if(hide.has(nk(S.heads[c]||'')))del.push(c);
+    const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length,ne=idx(S.ec),nc2=idx(S.cc),got=[];
+    for(let r=S.hr+1;r<=ws.rowCount;r++){const row=ws.getRow(r);let any=0;row.eachCell(c=>{if(ctext(c))any=1});if(any)got.push(row)}
+    if(got.length!==mine.length)throw new Error('лист «'+S.name+'»: строк '+got.length+', ожидалось '+mine.length);
+    got.forEach((row,i)=>{if(ne&&!ctext(row.getCell(ne)).toLowerCase().includes(email))throw new Error('лист «'+S.name+'»: чужая строка');if(nc2&&ctext(row.getCell(nc2))!==mine[i].vals[S.cc])throw new Error('лист «'+S.name+'»: код СЦ не совпал')})}
+}
+$('mf').onchange=async e=>{const f=e.target.files[0];if(!f)return;msgm('Читаю файл…');
+  try{D=await parseXlsx(await f.arrayBuffer());
+    const em=new Set();D.sheets.forEach(S=>em.add(nk(S.heads[S.ec])));
+    $('mcd').innerHTML=D.names.map(n=>'<label class="chk" style="padding:4px 0"><input type="checkbox" data-h="'+esc(nk(n))+'"'+(em.has(nk(n))?' checked':'')+'> '+esc(n)+'</label>').join('');$('mcdw').hidden=false;
+    $('mfi').textContent=D.sheets.map(S=>'Лист «'+S.name+'»: код СЦ — столбец '+colL(S.cc)+(S.heads[S.cc]?' («'+S.heads[S.cc]+'»)':'')+', почта — столбец '+colL(S.ec)+(S.heads[S.ec]?' («'+S.heads[S.ec]+'»)':'')+(S.fb?' (названия не найдены, взяты A и B)':'')+', строк: '+S.rows.length).concat(D.notes).join('\n');
+    msgm('');fillMV()}catch(err){D=null;$('mcdw').hidden=true;$('mfi').textContent='';msgm(err.message,1)}};
 function fillMV(){   // поля {{…}}, которых нет в данных, — ручной ввод (одно значение на все письма); {{email}}/{{почта}} — адрес получателя
   const old={};document.querySelectorAll('#mmv [data-m]').forEach(i=>old[i.dataset.m]=i.value);
-  const t=curT(),file=$('msrc').value==='file',H=new Set(file&&D?D.h.map(nk):[]),hasCode=file&&D&&$('mcc').value!=='';
+  const t=curT(),file=$('msrc').value==='file',H=new Set(file&&D?D.names.map(nk):[]),hasCode=!!(file&&D&&D.sheets.length);
   const man=t&&t.id!==FREE?vnames(t.html+' '+t.subject).filter(n=>{const al=AL[nk(n)];return !(al==='email'||H.has(nk(n))||(al==='code'&&hasCode))}):[];
   $('mmv').innerHTML=man.length?'<div class="hint" style="margin-bottom:8px">В письме есть поля {{…}}, которых нет в данных, — заполните вручную (одно значение для всех писем):</div>'+man.map(n=>'<div class="fld"><label class="f">'+esc(n)+'</label><input data-m="'+esc(n)+'" value="'+esc(old[n]||'')+'"></div>').join(''):'';
 }
@@ -690,44 +766,44 @@ $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&
 $('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
 $('mSave').onclick=async()=>{
   const t=curT();if(!t||t.id===FREE)return msgm('Выберите шаблон (не «своё письмо»)',1);
-  const file=$('msrc').value==='file',W=[];let h,rows,ci=-1,ei=0,keep=[];
-  if(file){if(!D)return msgm('Загрузите Excel-файл',1);h=D.h;rows=D.rows;ci=+$('mcc').value;ei=+$('mce').value;
-    const drop=new Set([ei].concat([...$('mcd').selectedOptions].map(o=>+o.value)));keep=h.map((x,i)=>i).filter(i=>h[i]&&!drop.has(i))}
-  else{const s=splitE($('mlist').value);if(s.bad.length)W.push('Пропущено, не похоже на адрес: '+s.bad.join(', '));if(!s.good.length)return msgm('Добавьте хотя бы один адрес',1);h=['Почта'];rows=s.good.map(x=>[x])}
-  const man=gm(),ns=vnames(t.html+' '+t.subject),hk=new Set(h.map(nk));
-  const lack=ns.filter(n=>{const al=AL[nk(n)];return al!=='email'&&!man[n]&&!(file&&(hk.has(nk(n))||(al==='code'&&ci>=0)))});
+  const file=$('msrc').value==='file',W=[],G=new Map();let hide=new Set();
+  if(file){if(!D)return msgm('Загрузите Excel-файл',1);
+    hide=new Set([...document.querySelectorAll('#mcd input:checked')].map(i=>i.dataset.h));let orph=0,multi=0;
+    for(const S of D.sheets)S.rows.forEach(r=>{   // одна почта = один получатель = один файл со всеми её строками (по всем листам)
+      if(r.bad.length)W.push('Лист «'+S.name+'», строка '+r.n+': некорректный адрес '+r.bad.join(', '));
+      if(!r.emails.length){orph++;return}if(r.emails.length>1)multi++;
+      r.emails.forEach(a=>{if(!G.has(a))G.set(a,new Map());const m=G.get(a);if(!m.has(S.name))m.set(S.name,[]);m.get(S.name).push(r)})});
+    if(orph)W.push('Строк без корректной почты: '+orph+' — НЕ отправляются');
+    if(multi)W.push('Строк с несколькими адресами: '+multi+' — попадут в файл каждого из адресов');
+    D.notes.forEach(x=>W.push(x));
+  }else{const s=splitE($('mlist').value);if(s.bad.length)W.push('Пропущено, не похоже на адрес: '+s.bad.join(', '));if(!s.good.length)return msgm('Добавьте хотя бы один адрес',1);s.good.forEach(a=>G.set(a,null))}
+  const man=gm(),ns=vnames(t.html+' '+t.subject),hk=new Set(file?D.names.map(nk):[]),hasCode=file&&D.sheets.length>0;
+  const lack=ns.filter(n=>{const al=AL[nk(n)];return al!=='email'&&!man[n]&&!(file&&(hk.has(nk(n))||(al==='code'&&hasCode)))});
   if(lack.length)return msgm('Заполните поля: '+lack.join(', '),1);
   const test=$('mtest').checked,k=$('mtsel').value;let tt='';
   if(test){tt=k==='other'?$('mtt').value.trim().toLowerCase():ADDR[k];if(!EM.test(tt))return msgm('Укажите корректную почту для теста',1)}
-  const sb=$('mSave');sb.disabled=true;msgm('Готовлю письма…');
-  try{if(file)await XL();
-    const G=new Map();let orph=0,multi=0;   // одна почта = один получатель = один файл со всеми её строками
-    rows.forEach((r,i)=>{const s=splitE(r[ei]);if(s.bad.length)W.push('Строка '+(i+1)+': некорректный адрес '+s.bad.join(', '));if(!s.good.length){orph++;return}if(s.good.length>1)multi++;s.good.forEach(a=>{if(!G.has(a))G.set(a,[]);G.get(a).push(r)})});
-    if(orph)W.push('Строк без корректной почты: '+orph+' — НЕ отправляются');
-    if(multi)W.push('Строк с несколькими адресами: '+multi+' — попадут в файл каждого из адресов');
-    const out=[],pat=$('mfn').value.trim()||'Партнер {код}';
-    for(const[a,rs]of G){
-      const src={};h.forEach((x,i)=>{if(x)src[nk(x)]=uniq(rs.map(r=>r[i]))});
-      const codes=ci>=0?uniq(rs.map(r=>r[ci])):[],v={},vs={},miss=[];
+  if(!G.size)return msgm('Нет ни одного получателя с корректной почтой',1);
+  const sb=$('mSave');sb.disabled=true;
+  try{const out=[],pat=$('mfn').value.trim()||'Партнер {код}';let i=0;
+    for(const[a,rec]of G){
+      let codes=[];const src={},v={},vs={},miss=[];let nrow=1;
+      if(file){nrow=0;rec.forEach((rows,sn)=>{const S=D.sheets.find(x=>x.name===sn);nrow+=rows.length;rows.forEach(r=>{codes.push(r.vals[S.cc]);for(let c=1;c<=S.nc;c++){const h=S.heads[c];if(h)(src[nk(h)]=src[nk(h)]||[]).push(r.vals[c])}})});
+        codes=uniq(codes);for(const q in src)src[q]=uniq(src[q])}
       ns.forEach(n=>{const al=AL[nk(n)];let arr=src[nk(n)]||(al==='code'?codes:null);
         if((!arr||!arr.length)&&al==='email')arr=[a];
         if((!arr||!arr.length)&&man[n])arr=[man[n]];
         if(!arr||!arr.length){miss.push(n);return}v[n]=arr.join(', ');vs[n]=al==='code'?capC(arr,8):v[n]});
       let fl=null;
       if(file&&!miss.length){
-        const aoa=[keep.map(i=>h[i])].concat(rs.map(r=>keep.map(i=>r[i])));
-        const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
-        ws['!cols']=keep.map(i=>({wch:Math.min(60,Math.max(String(h[i]).length,...rs.slice(0,200).map(r=>String(r[i]).length))+2)}));
-        const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Данные');
-        const b64=XLSX.write(wb,{bookType:'xlsx',type:'base64',cellDates:true});
-        const back=XLSX.utils.sheet_to_json(XLSX.read(b64,{type:'base64',cellDates:true}).Sheets['Данные'],{header:1,raw:true,defval:''});
-        if(nrm(back)!==nrm(aoa))throw new Error('Проверка файла для '+a+' не пройдена — рассылка остановлена');
+        msgm('Готовлю файлы: '+(++i)+' из '+G.size+'…');await new Promise(r=>setTimeout(r,0));
+        const u8=await buildFile(D,rec,hide);
+        try{await verifyFile(D,rec,hide,u8,a)}catch(e){throw new Error('Проверка файла для '+a+' не пройдена ('+e.message+') — рассылка остановлена')}
         const ct=codes.length<=3?codes.join(', '):codes.slice(0,3).join(', ')+' и ещё '+(codes.length-3);
         const base=pat.replace(/\{\s*код\s*\}/gi,ct).replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,' ').trim()||'Данные';
-        fl={name:base.slice(0,100)+'.xlsx',type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64};
+        fl={name:base.slice(0,100)+'.xlsx',type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64:u8b64(u8)};
       }
       if(miss.length)W.push(a+': не отправится — нет значений для '+miss.join(', '));
-      out.push({a,codes,rows:rs.length,miss,subject:miss.length?'':fillT(t.subject,vs),html:miss.length?'':fillT(clean(t.html),v,true),file:fl});
+      out.push({a,codes,rows:nrow,miss,subject:miss.length?'':fillT(t.subject,vs),html:miss.length?'':fillT(clean(t.html),v,true),file:fl});
     }
     if(!out.some(p=>!p.miss.length))throw new Error('Некому отправлять: '+(W.join('; ')||'нет получателей'));
     PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id};
