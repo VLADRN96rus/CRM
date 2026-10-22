@@ -186,6 +186,9 @@ details.glass>.in{margin-top:16px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:10px;border:1px solid var(--line);background:var(--inp);font-size:13px;margin:8px 6px 0 0}.chip button{border:0;background:none;color:var(--bad);cursor:pointer;font-size:17px;line-height:1;padding:0}
 .acts{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}.acts .btn{min-width:130px}
 .btn.sec{background:var(--inp);color:var(--tx);border:1px solid var(--line);box-shadow:none;animation:none}
+.task{cursor:pointer}.cm a,.tkp a{color:#5b9dff;text-decoration:underline;overflow-wrap:anywhere}
+.tkp{max-height:160px;overflow:auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--inp);color:var(--tx);font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tkacts{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:14px}.tkacts>div{display:flex;gap:10px;flex-wrap:wrap}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
@@ -300,6 +303,15 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="mmsg2"></div>
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
+<div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
+  <h2>Задача</h2>
+  <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
+  <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
+  <div class="fld"><label class="f">Комментарий. Ссылки (https://…) становятся кликабельными, можно написать [текст](ссылка)</label><textarea id="tk_c" rows="6"></textarea></div>
+  <div class="fld" id="tk_pvw" hidden><label class="f">Как выглядит комментарий</label><div class="tkp" id="tk_p"></div></div>
+  <div class="err" id="tk_err"></div>
+  <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
+</div></div>
 
 <div class="modal" id="cfgm" hidden><div class="glass">
   <h2>Подключение к таблице</h2>
@@ -312,6 +324,19 @@ details.glass>.in{margin-top:16px}
 
 <script>
 const $=id=>document.getElementById(id);
+function linkify(s){   // ссылки в тексте: https://…, www.…, почта и [текст](ссылка) — только безопасные схемы
+  s=String(s==null?'':s);const re=/\[([^\]\n]+)\]\(((?:https?:\/\/|www\.|mailto:)[^)\s]+)\)|((?:https?:\/\/|www\.)[^\s<>"']+)|([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/gi;
+  let out='',i=0,m;
+  while((m=re.exec(s))){
+    out+=esc(s.slice(i,m.index));i=m.index+m[0].length;let txt,url,tail='';
+    if(m[2]){txt=m[1];url=m[2]}
+    else if(m[3]){url=m[3];const t=url.match(/[.,;:!?)»”]+$/);if(t){tail=t[0];url=url.slice(0,-tail.length)}txt=url}
+    else{url='mailto:'+m[4];txt=m[4]}
+    if(/^www\./i.test(url))url='https://'+url;
+    out+='<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(txt)+'</a>'+esc(tail);
+  }
+  return out+esc(s.slice(i));
+}
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n||0))+' ₽';
 const p2=n=>String(n).padStart(2,'0');
@@ -428,12 +453,12 @@ function dueChip(t){
 }
 function card(t){
   const id=t.id,cls=t.archived?'dn':(t.important?'hot':'');
-  let h='<div class="task '+cls+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t);
+  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t);
   if(editC===id){
     h+='<textarea class="ced" id="ce" placeholder="Комментарий">'+esc(t.comment||'')+'</textarea>'
      +'<div class="ta"><div class="tb two"><button class="sm okb" data-a="csave" data-id="'+id+'">Сохранить</button><button class="sm" data-a="ccancel">Отмена</button></div></div>';
   }else{
-    h+='<div class="cm">'+(t.comment?esc(t.comment):'')+'</div>';
+    h+='<div class="cm">'+(t.comment?linkify(t.comment):'')+'</div>';
     if(t.archived){
       h+='<div class="ta"><div class="tb two"><button class="sm" data-a="restore" data-id="'+id+'">Вернуть</button><button class="sm bad" data-a="del" data-id="'+id+'">'+(delC===id?'Точно?':'Удалить')+'</button></div></div>';
     }else{
@@ -460,12 +485,15 @@ function renderTasks(){
     col('Важно','hot',all.filter(t=>t.important),'Важных задач нет','hot')+'<div class="vr"></div>'+col('Не важно','',all.filter(t=>!t.important),'Пусто — добавьте задачу','cool');
 }
 $('board').addEventListener('click',e=>{
-  const b=e.target.closest('[data-a]');if(!b||b.tagName==='INPUT')return;
+  if(e.target.closest('a'))return;   // клик по ссылке в комментарии не открывает задачу
+  const b=e.target.closest('[data-a]');
+  if(!b){const c=e.target.closest('[data-tid]');if(c&&!e.target.closest('input,textarea'))openTask(c.dataset.tid);return}
+  if(b.tagName==='INPUT')return;
   const a=b.dataset.a,id=b.dataset.id,t=items[id]||{};
   if(a==='done')save(id,{archived:true});
   else if(a==='restore')save(id,{archived:false});
   else if(a==='flag')save(id,{important:!t.important});
-  else if(a==='cedit'){editC=id;renderTasks();const x=$('ce');if(x)x.focus()}
+  else if(a==='cedit')openTask(id,true)
   else if(a==='ccancel'){editC=null;renderTasks()}
   else if(a==='csave'){const v=$('ce').value.trim();editC=null;save(id,{comment:v})}
   else if(a==='del'){if(delC===id){delC=null;remove(id)}else{delC=id;renderTasks();setTimeout(()=>{if(delC===id){delC=null;renderTasks()}},4000)}}
@@ -481,6 +509,23 @@ $('addT').onclick=()=>{
 $('doneBtn').onclick=()=>{showDone=!showDone;editC=null;renderTasks()};
 $('fab').onclick=()=>{$('side').classList.add('open');$('nt').focus()};
 $('closeAdd').onclick=()=>$('side').classList.remove('open');
+/* задача в модалке */
+let tkId=null;
+const tkClose=()=>{$('tkmod').hidden=true;tkId=null};
+function tkPrev(){const v=$('tk_c').value;$('tk_pvw').hidden=!v.trim();$('tk_p').innerHTML=linkify(v)}
+function openTask(id,focusC){
+  const t=items[id];if(!t)return;tkId=id;
+  $('tk_t').value=t.title||'';$('tk_d').value=t.deadline||'';$('tk_i').checked=!!t.important;$('tk_c').value=t.comment||'';$('tk_err').textContent='';
+  $('tk_done').textContent=t.archived?'↩ Вернуть':'✓ Выполнено';tkPrev();$('tkmod').hidden=false;
+  if(focusC)$('tk_c').focus();
+}
+$('tk_c').addEventListener('input',tkPrev);
+$('tk_cancel').onclick=tkClose;
+$('tk_save').onclick=()=>{const t=$('tk_t').value.trim();if(!t)return $('tk_err').textContent='Укажите название задачи';
+  save(tkId,{title:t,deadline:$('tk_d').value,important:$('tk_i').checked,comment:$('tk_c').value.trim()});tkClose()};
+$('tk_done').onclick=()=>{const t=items[tkId]||{};save(tkId,{archived:!t.archived});tkClose()};
+$('tk_del').onclick=()=>arm($('tk_del'),'Точно удалить?',()=>{remove(tkId);tkClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('tkmod').hidden)tkClose()});
 $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   $('p1').dataset.tf=b.dataset.f;[...$('chips').children].forEach(x=>x.className=x===b?'on':'')});
 
@@ -637,6 +682,16 @@ $('mClose').onclick=()=>{$('mmod').hidden=true};
 $('mccx').onchange=()=>{$('mcopyw').hidden=!$('mccx').checked;if(!$('mccx').checked)$('mcopy').value=''};
 function arm(b,txt,fn){if(!b.dataset.arm){b.dataset.arm=1;b._o=b.textContent;b.textContent=txt;clearTimeout(b._t);b._t=setTimeout(()=>{if(b.dataset.arm){b.dataset.arm='';b.textContent=b._o}},5000);return}b.dataset.arm='';clearTimeout(b._t);b.textContent=b._o;fn()}
 
+/* после отправки форма очищается, чтобы сразу писать новое письмо */
+function resetSingle(){
+  const t=curT();$('me').value='';$('mccx').checked=false;$('mccx').onchange();$('mbody').value='';
+  document.querySelectorAll('#mv [data-v]').forEach(i=>{i.value=''});if(t&&t.id===FREE)$('ms').value='';
+  M.files=[];renderFiles();$('ms')._man=0;preview();
+}
+function resetMass(){
+  PL=[];D=null;M2.tested=false;M2.warned=false;M2.warn='';$('mlist').value='';$('mf').value='';$('mcd').innerHTML='';$('mcdw').hidden=true;$('mfi').textContent='';$('mmv').innerHTML='';
+  M.files=[];renderFiles();preview();renderM2();
+}
 /* одно письмо */
 $('s1').onclick=()=>{
   const t=curT(),to=$('me').value.trim().toLowerCase(),v=gv(),b=$('s1'),miss=Object.keys(v).filter(k=>!v[k]),cc=splitE($('mccx').checked?$('mcopy').value:''),fr=$('mfrom').value;
@@ -649,7 +704,7 @@ $('s1').onclick=()=>{
   arm(b,'Подтвердить: '+ADDR[fr]+' → '+to,async()=>{
     b.disabled=true;
     try{const html=fillT(clean(t.html),v,true),files=await Promise.all(M.files.map(b64f));
-      if(await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}])){$('me').value='';$('mccx').checked=false;$('mccx').onchange();M.files=[];renderFiles()}}
+      if(await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}]))resetSingle()}
     catch(e){ban('err','Не удалось поставить в очередь: '+e.message)}finally{b.disabled=false}});
 };
 
@@ -832,7 +887,7 @@ function sendBatch(list,b){
     try{const extra=await Promise.all(M.files.map(b64f));
       const ok=await Qsend(list.map(p=>({from:fr,to:p.a,subject:p.subject,html:p.html,text:toText(p.html),files:(p.file?[p.file]:[]).concat(extra)})),(good,lg)=>{
         const L2=getL(),okTo=new Set(lg.filter(x=>x.ok).map(x=>String(x.to).toLowerCase()));   // в учёт попадают только реально отправленные
-        list.forEach(p=>{if(good||okTo.has(p.a))L2[pkey(p)]={s:'s',t:Date.now()};else delete L2[pkey(p)]});setL(L2);renderM2()});
+        list.forEach(p=>{if(good||okTo.has(p.a))L2[pkey(p)]={s:'s',t:Date.now()};else delete L2[pkey(p)]});setL(L2);if(good)resetMass();else renderM2()});   // всё ушло — данные рассылки очищаются; при ошибках остаются для повтора
       if(!ok)drop()}
     catch(e){drop();ban('err',e.message)}
     $('mallbtn').disabled=$('mnewbtn').disabled=false;
