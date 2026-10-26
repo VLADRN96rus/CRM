@@ -188,6 +188,7 @@ details.glass>.in{margin-top:16px}
 .btn.sec{background:var(--inp);color:var(--tx);border:1px solid var(--line);box-shadow:none;animation:none}
 .task{cursor:pointer}.cm a,.tkp a{color:#5b9dff;text-decoration:underline;overflow-wrap:anywhere}
 .tkp{max-height:160px;overflow:auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--inp);color:var(--tx);font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.tkp:empty::before{content:"Комментария нет";color:var(--mu)}
 .tkacts{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:14px}.tkacts>div{display:flex;gap:10px;flex-wrap:wrap}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
@@ -294,6 +295,11 @@ details.glass>.in{margin-top:16px}
   <div id="msf" hidden>
     <div class="fld"><label class="f">Excel-файл (.xlsx). Столбцы «код СЦ» и «почта» определяются сами, листов может быть несколько</label><input id="mf" type="file" accept=".xlsx"></div>
     <div class="hint" id="mfi" style="margin-bottom:10px;white-space:pre-wrap"></div>
+    <div class="fld"><div class="tkh"><label class="f" style="margin:0">Реестр партнёров (код СЦ → почта)</label><button class="sm" id="regbtn">Загрузить / обновить</button></div>
+      <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden></div>
+    <div class="fld" id="mmissw" hidden><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div id="mmiss" class="scroll" style="max-height:200px;overflow:auto"></div>
+      <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked> Сохранить введённые адреса в реестр</label>
+      <div class="btns"><button class="sm" id="mmskip">Продолжить без этих СЦ</button></div></div>
     <div class="fld" id="mcdw" hidden><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
     <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
   </div>
@@ -307,12 +313,12 @@ details.glass>.in{margin-top:16px}
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
   <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
-  <div class="fld"><label class="f">Комментарий. Ссылки (https://…) становятся кликабельными, можно написать [текст](ссылка)</label><textarea id="tk_c" rows="6"></textarea></div>
-  <div class="fld" id="tk_pvw" hidden><label class="f">Как выглядит комментарий</label><div class="tkp" id="tk_p"></div></div>
+  <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
+    <div class="tkp" id="tk_p"></div>
+    <textarea id="tk_c" rows="6" hidden placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
-
 <div class="modal" id="cfgm" hidden><div class="glass">
   <h2>Подключение к таблице</h2>
   <p>Адрес и код вы получаете при настройке Apps Script. Достаточно ввести их один раз на каждом устройстве.</p>
@@ -512,14 +518,16 @@ $('closeAdd').onclick=()=>$('side').classList.remove('open');
 /* задача в модалке */
 let tkId=null;
 const tkClose=()=>{$('tkmod').hidden=true;tkId=null};
-function tkPrev(){const v=$('tk_c').value;$('tk_pvw').hidden=!v.trim();$('tk_p').innerHTML=linkify(v)}
+function tkMode(edit){   // просмотр комментария со ссылками <-> редактирование (карандаш)
+  $('tk_c').hidden=!edit;$('tk_p').hidden=edit;$('tk_edit').textContent=edit?'✓':'✎';$('tk_edit').title=edit?'Готово':'Редактировать комментарий';
+  if(edit)$('tk_c').focus();else $('tk_p').innerHTML=linkify($('tk_c').value);
+}
 function openTask(id,focusC){
   const t=items[id];if(!t)return;tkId=id;
   $('tk_t').value=t.title||'';$('tk_d').value=t.deadline||'';$('tk_i').checked=!!t.important;$('tk_c').value=t.comment||'';$('tk_err').textContent='';
-  $('tk_done').textContent=t.archived?'↩ Вернуть':'✓ Выполнено';tkPrev();$('tkmod').hidden=false;
-  if(focusC)$('tk_c').focus();
+  $('tk_done').textContent=t.archived?'↩ Вернуть':'✓ Выполнено';$('tkmod').hidden=false;tkMode(!!focusC);
 }
-$('tk_c').addEventListener('input',tkPrev);
+$('tk_edit').onclick=()=>tkMode($('tk_c').hidden);
 $('tk_cancel').onclick=tkClose;
 $('tk_save').onclick=()=>{const t=$('tk_t').value.trim();if(!t)return $('tk_err').textContent='Укажите название задачи';
   save(tkId,{title:t,deadline:$('tk_d').value,important:$('tk_i').checked,comment:$('tk_c').value.trim()});tkClose()};
@@ -611,7 +619,7 @@ $('addW').onclick=()=>{const n=$('wn').value.trim(),a=num($('wa').value);if(!n||
 $('pm').onclick=()=>shiftMon(-1);$('nm').onclick=()=>shiftMon(1);
 
 /* ---------- Письма ---------- */
-const M={tpl:[],ok:false,files:[],q:null,q0:{s:0,e:0}};
+const M={tpl:[],ok:false,files:[],q:null,q0:{s:0,e:0},reg:new Map()};
 const VR=/\{\{\s*([^{}]+?)\s*\}\}/g,EM=/^[^@\s,;<>]+@[^@\s,;<>]+\.[^@\s,;<>]+$/;
 const nk=s=>String(s==null?'':s).toLowerCase().replace(/[\s_]+/g,'');
 const AL={code:'code','код':'code','кодсц':'code','сц':'code',email:'email','почта':'email'};
@@ -646,7 +654,7 @@ function renderQ(j){
 }
 async function loadMail(){
   if(!navigator.onLine)return msg('Письма работают только при подключении к интернету',1);
-  try{const j=await mapi('init');M.tpl=j.tpl||[];M.ok=true;renderQ(j);fillTpl();msg('')}
+  try{const j=await mapi('init');M.tpl=j.tpl||[];buildReg(j.dir);M.ok=true;renderQ(j);fillTpl();msg('')}
   catch(e){msg(e.message,1)}
 }
 let wT=0;
@@ -689,7 +697,7 @@ function resetSingle(){
   M.files=[];renderFiles();$('ms')._man=0;preview();
 }
 function resetMass(){
-  PL=[];D=null;M2.tested=false;M2.warned=false;M2.warn='';$('mlist').value='';$('mf').value='';$('mcd').innerHTML='';$('mcdw').hidden=true;$('mfi').textContent='';$('mmv').innerHTML='';
+  PL=[];D=null;M2.tested=false;M2.warned=false;M2.warn='';$('mlist').value='';$('mf').value='';$('mcd').innerHTML='';$('mcdw').hidden=true;$('mfi').textContent='';$('mmv').innerHTML='';$('mmissw').hidden=true;$('mmiss').innerHTML='';
   M.files=[];renderFiles();preview();renderM2();
 }
 /* одно письмо */
@@ -718,29 +726,36 @@ $('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','ot
 function toggleT(){const on=$('mtest').checked;$('mtw').hidden=!on;$('mtt').hidden=!(on&&$('mtsel').value==='other')}
 function toggleS(){const f=$('msrc').value==='file';$('msl').hidden=f;$('msf').hidden=!f}
 $('mtest').onchange=$('mtsel').onchange=toggleT;$('msrc').onchange=()=>{toggleS();fillMV()};
+/* ---------- реестр партнёров: код СЦ -> почта(ы); хранится в Таблице, общий для всех устройств ---------- */
+const ncode=s=>String(s==null?'':s).trim().toLowerCase().replace(/\s+/g,'');
+function regInfo(){$('reginfo').textContent=M.reg.size?'В реестре партнёров: '+M.reg.size+'. Если в файле рассылки нет почты, она берётся отсюда по коду СЦ.':'Реестр пуст. Загрузите файл с кодами СЦ и почтами — тогда рассылку можно делать по файлу только с кодами.'}
+function buildReg(list){M.reg=new Map();(list||[]).forEach(x=>{if(x&&x.c&&x.e&&x.e.length)M.reg.set(ncode(x.c),{c:String(x.c),e:x.e})});regInfo()}
+async function saveReg(){const a=[...M.reg.values()],ch=[];for(let i=0;i<a.length;i+=300)ch.push(a.slice(i,i+300));await mapi('dir',{list:ch})}
 /* ---------- Excel: разбор и фильтрация с сохранением оформления (ExcelJS) ---------- */
 const EJ=()=>window.ExcelJS?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js';s.onload=ok;s.onerror=()=>no(new Error('Не загрузилась библиотека Excel (нужен интернет)'));document.head.appendChild(s)});
 const ctext=c=>{try{const t=c.text;return t==null?'':String(t).trim()}catch(e){return ''}};
 const colL=n=>{let s='';while(n>0){s=String.fromCharCode(65+(n-1)%26)+s;n=Math.floor((n-1)/26)}return s};
 const u8b64=u=>{let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
-async function parseXlsx(buf){   // листы, колонки «код СЦ» и «почта» определяются сами (названия могут быть разными); запасной вариант: A — код, B — почта
+async function parseXlsx(buf){   // листы; столбцы «код СЦ» и «почта» ищутся по названию (иначе A — код, B — почта). Если почты в листе нет — ec=0: почту подставит реестр партнёров
   await EJ();const wb=new ExcelJS.Workbook();await wb.xlsx.load(buf);
   const sheets=[],notes=[];
   wb.eachSheet(ws=>{
     if(ws.state&&ws.state!=='visible'){notes.push('Скрытый лист «'+ws.name+'» в файлы получателей не попадёт');return}
     const nc=ws.columnCount,nr=ws.rowCount;let hr=0;
-    for(let r=1;r<=Math.min(nr,25)&&!hr;r++){const row=ws.getRow(r);for(let c=1;c<=nc;c++)if(/почт|mail/.test(nk(ctext(row.getCell(c))))){hr=r;break}}
+    for(let r=1;r<=Math.min(nr,25)&&!hr;r++){const row=ws.getRow(r);for(let c=1;c<=nc;c++)if(/почт|mail|код|code/.test(nk(ctext(row.getCell(c))))){hr=r;break}}
     const fb=!hr;if(fb)hr=1;
     const heads=[];for(let c=1;c<=nc;c++)heads[c]=ctext(ws.getRow(hr).getCell(c));
     let ec=0,cc=0;
     for(let c=1;c<=nc;c++)if(!ec&&/почт|mail/.test(nk(heads[c])))ec=c;
     for(let c=1;c<=nc;c++)if(c!==ec&&/код.*сц|сц.*код|codesc/.test(nk(heads[c]))){cc=c;break}
     if(!cc)for(let c=1;c<=nc;c++)if(c!==ec&&/код|code/.test(nk(heads[c]))){cc=c;break}
-    if(!ec)ec=cc===2?1:2;if(!cc)cc=ec===1?2:1;
+    const ccH=!!cc;if(!cc)cc=ec===1?2:1;
+    if(!ec){const cand=cc===2?1:2;let found=false;for(let r=hr+1;r<=nr&&!found;r++)if(splitE(ctext(ws.getRow(r).getCell(cand))).good.length)found=true;if(found)ec=cand}
+    if(!ec&&!ccH){notes.push('Лист «'+ws.name+'»: не нашла ни почты, ни кода СЦ — лист не включён');return}
     const rows=[];
     for(let r=hr+1;r<=nr;r++){const row=ws.getRow(r),vals=[];let any=0;for(let c=1;c<=nc;c++){vals[c]=ctext(row.getCell(c));if(vals[c])any=1}
-      if(!any)continue;const s=splitE(vals[ec]);rows.push({n:r,vals,emails:s.good,bad:s.bad})}
-    if(!rows.some(x=>x.emails.length)){notes.push('Лист «'+ws.name+'»: в столбце '+colL(ec)+' нет почты — лист не включён');return}
+      if(!any)continue;const s=ec?splitE(vals[ec]):{good:[],bad:[]};rows.push({n:r,vals,emails:s.good,bad:s.bad})}
+    if(!rows.some(x=>x.emails.length||x.vals[cc])){notes.push('Лист «'+ws.name+'»: нет ни почты, ни кодов СЦ — лист не включён');return}
     sheets.push({name:ws.name,hr,ec,cc,nc,heads,rows,fb});
   });
   const names=[],seen=new Set();sheets.forEach(S=>{for(let c=1;c<=S.nc;c++){const h=S.heads[c];if(h&&!seen.has(nk(h))){seen.add(nk(h));names.push(h)}}});
@@ -798,14 +813,32 @@ async function verifyFile(D,rec,hide,u8,email){   // сверка готовог
     const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length,ne=idx(S.ec),nc2=idx(S.cc),got=[];
     for(let r=S.hr+1;r<=ws.rowCount;r++){const row=ws.getRow(r);let any=0;row.eachCell(c=>{if(ctext(c))any=1});if(any)got.push(row)}
     if(got.length!==mine.length)throw new Error('лист «'+S.name+'»: строк '+got.length+', ожидалось '+mine.length);
-    got.forEach((row,i)=>{if(ne&&!ctext(row.getCell(ne)).toLowerCase().includes(email))throw new Error('лист «'+S.name+'»: чужая строка');if(nc2&&ctext(row.getCell(nc2))!==mine[i].vals[S.cc])throw new Error('лист «'+S.name+'»: код СЦ не совпал')})}
+    got.forEach((row,i)=>{if(ne&&!mine[i].reg&&!ctext(row.getCell(ne)).toLowerCase().includes(email))throw new Error('лист «'+S.name+'»: чужая строка');if(nc2&&ctext(row.getCell(nc2))!==mine[i].vals[S.cc])throw new Error('лист «'+S.name+'»: код СЦ не совпал')})}
 }
 $('mf').onchange=async e=>{const f=e.target.files[0];if(!f)return;msgm('Читаю файл…');
   try{D=await parseXlsx(await f.arrayBuffer());
-    const em=new Set();D.sheets.forEach(S=>em.add(nk(S.heads[S.ec])));
+    const em=new Set();D.sheets.forEach(S=>{if(S.ec)em.add(nk(S.heads[S.ec]))});
     $('mcd').innerHTML=D.names.map(n=>'<label class="chk" style="padding:4px 0"><input type="checkbox" data-h="'+esc(nk(n))+'"'+(em.has(nk(n))?' checked':'')+'> '+esc(n)+'</label>').join('');$('mcdw').hidden=false;
-    $('mfi').textContent=D.sheets.map(S=>'Лист «'+S.name+'»: код СЦ — столбец '+colL(S.cc)+(S.heads[S.cc]?' («'+S.heads[S.cc]+'»)':'')+', почта — столбец '+colL(S.ec)+(S.heads[S.ec]?' («'+S.heads[S.ec]+'»)':'')+(S.fb?' (названия не найдены, взяты A и B)':'')+', строк: '+S.rows.length).concat(D.notes).join('\n');
-    msgm('');fillMV()}catch(err){D=null;$('mcdw').hidden=true;$('mfi').textContent='';msgm(err.message,1)}};
+    $('mfi').textContent=D.sheets.map(S=>'Лист «'+S.name+'»: код СЦ — столбец '+colL(S.cc)+(S.heads[S.cc]?' («'+S.heads[S.cc]+'»)':'')+(S.ec?', почта — столбец '+colL(S.ec)+(S.heads[S.ec]?' («'+S.heads[S.ec]+'»)':''):', почты в листе нет — возьму из реестра по коду СЦ')+(S.fb?' (названия не найдены, взяты A и B)':'')+', строк: '+S.rows.length).concat(D.notes).join('\n');
+    $('mmissw').hidden=true;$('mmiss').innerHTML='';msgm('');fillMV()}catch(err){D=null;$('mcdw').hidden=true;$('mfi').textContent='';msgm(err.message,1)}};
+$('regbtn').onclick=()=>$('regf').click();
+$('regf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+  const prev=new Map(M.reg);
+  try{msgm('Читаю реестр…');const R=await parseXlsx(await f.arrayBuffer()),seen=new Map();
+    R.sheets.forEach(S=>{if(!S.ec)return;S.rows.forEach(r=>{const code=r.vals[S.cc];if(!code||!r.emails.length)return;const k=ncode(code),cur=seen.get(k)||{c:code,e:[]};r.emails.forEach(a=>{if(!cur.e.includes(a))cur.e.push(a)});seen.set(k,cur)})});
+    if(!seen.size)throw new Error('В файле не нашла строк, где есть и код СЦ, и почта — проверьте столбцы');
+    let add=0,upd=0;seen.forEach((v,k)=>{if(M.reg.has(k))upd++;else add++;M.reg.set(k,v)});   // новые коды добавляются, существующие обновляются, остальные не трогаются
+    await saveReg();regInfo();msgm('Реестр обновлён: новых '+add+', обновлено '+upd+', всего '+M.reg.size+'. Нажмите «Сохранить» ещё раз.')}
+  catch(err){M.reg=prev;regInfo();msgm(err.message,1)}};
+let skipMiss=false;
+$('mmskip').onclick=()=>{skipMiss=true;$('mSave').click()};
+const readMiss=()=>{const m={};document.querySelectorAll('#mmiss [data-code]').forEach(i=>{const s=splitE(i.value);if(s.good.length)m[i.dataset.code]=s.good});return m};
+function renderMiss(missing){
+  const old={};document.querySelectorAll('#mmiss [data-code]').forEach(i=>{old[i.dataset.code]=i.value});
+  $('mmiss').innerHTML=[...missing].map(([k,code])=>'<div class="fld" style="margin-bottom:8px"><label class="f">СЦ '+esc(code)+'</label><input data-code="'+esc(k)+'" placeholder="почта партнёра" value="'+esc(old[k]||'')+'" autocapitalize="off"></div>').join('');
+  $('mmissh').textContent='Не нашла в реестре почту для СЦ: '+missing.size+'. Обновите реестр и повторите, либо впишите почту сами ниже. Можно продолжить без них — этим СЦ письмо не уйдёт.';
+  $('mmissw').hidden=false;
+}
 function fillMV(){   // поля {{…}}, которых нет в данных, — ручной ввод (одно значение на все письма); {{email}}/{{почта}} — адрес получателя
   const old={};document.querySelectorAll('#mmv [data-m]').forEach(i=>old[i.dataset.m]=i.value);
   const t=curT(),file=$('msrc').value==='file',H=new Set(file&&D?D.names.map(nk):[]),hasCode=!!(file&&D&&D.sheets.length);
@@ -827,12 +860,20 @@ $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&
 $('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
 $('mSave').onclick=async()=>{
   const t=curT();if(!t||t.id===FREE)return msgm('Выберите шаблон (не «своё письмо»)',1);
-  const file=$('msrc').value==='file',W=[],G=new Map();let hide=new Set();
+  const file=$('msrc').value==='file',W=[],G=new Map(),used=[],skip=skipMiss;skipMiss=false;let hide=new Set();
   if(file){if(!D)return msgm('Загрузите Excel-файл',1);
-    hide=new Set([...document.querySelectorAll('#mcd input:checked')].map(i=>i.dataset.h));let orph=0,multi=0;
+    hide=new Set([...document.querySelectorAll('#mcd input:checked')].map(i=>i.dataset.h));let orph=0,multi=0,viaReg=0;
+    const manual=readMiss(),missing=new Map();   // строки без почты: ищем по коду СЦ в реестре, потом в ручном вводе
+    for(const S of D.sheets)S.rows.forEach(r=>{if(r.reg){r.emails=[];r.reg=0}
+      if(r.emails.length)return;const code=r.vals[S.cc];if(!code)return;const k=ncode(code),g=M.reg.get(k);
+      if(g){r.emails=g.e.slice();r.reg=1;viaReg++}else if(manual[k]){r.emails=manual[k].slice();r.reg=1;used.push({c:code,e:manual[k]})}else missing.set(k,code)});
+    if(missing.size&&!skip){renderMiss(missing);return msgm('Не нашла почту в реестре для СЦ: '+capC([...missing.values()],10)+'. Обновите реестр и повторите, либо впишите почту сами.',1)}
+    $('mmissw').hidden=!missing.size;
+    if(missing.size)W.push('Нет почты в реестре, письмо не уйдёт: СЦ '+capC([...missing.values()],10));
+    if(viaReg)W.push('Почта взята из реестра для строк: '+viaReg);
     for(const S of D.sheets)S.rows.forEach(r=>{   // одна почта = один получатель = один файл со всеми её строками (по всем листам)
       if(r.bad.length)W.push('Лист «'+S.name+'», строка '+r.n+': некорректный адрес '+r.bad.join(', '));
-      if(!r.emails.length){orph++;return}if(r.emails.length>1)multi++;
+      if(!r.emails.length){if(!(r.vals[S.cc]&&missing.has(ncode(r.vals[S.cc]))))orph++;return}if(r.emails.length>1)multi++;
       r.emails.forEach(a=>{if(!G.has(a))G.set(a,new Map());const m=G.get(a);if(!m.has(S.name))m.set(S.name,[]);m.get(S.name).push(r)})});
     if(orph)W.push('Строк без корректной почты: '+orph+' — НЕ отправляются');
     if(multi)W.push('Строк с несколькими адресами: '+multi+' — попадут в файл каждого из адресов');
@@ -868,6 +909,7 @@ $('mSave').onclick=async()=>{
     }
     if(!out.some(p=>!p.miss.length))throw new Error('Некому отправлять: '+(W.join('; ')||'нет получателей'));
     PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id};
+    if(used.length&&$('mmsave').checked){used.forEach(x=>M.reg.set(ncode(x.c),{c:x.c,e:x.e}));saveReg().then(regInfo).catch(()=>ban('err','Не удалось сохранить новые адреса в реестр'))}
     LS.set('crm.mtest',test?'1':'0');LS.set('crm.mtsel',k);if(k==='other')LS.set('crm.testto',tt);LS.set('crm.mfn',pat);
     $('pv').srcdoc=okPL()[0].html;$('mmod').hidden=true;msgm('');renderM2();
   }catch(err){msgm(err.message,1)}finally{sb.disabled=false}
