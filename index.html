@@ -270,7 +270,7 @@ details.glass>.in{margin-top:16px}
       <div class="glass mb" id="m2" hidden><h3>Рассылка</h3>
         <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px"></div>
         <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
-        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button></div>
+        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button><button class="sm" id="mmissbtn" hidden>Скачать СЦ без почты</button></div>
       </div>
       <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div id="mlog"></div></div></details>
     </div>
@@ -297,9 +297,10 @@ details.glass>.in{margin-top:16px}
     <div class="hint" id="mfi" style="margin-bottom:10px;white-space:pre-wrap"></div>
     <div class="fld"><div class="tkh"><label class="f" style="margin:0">Реестр партнёров (код СЦ → почта)</label><button class="sm" id="regbtn">Загрузить / обновить</button></div>
       <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden></div>
-    <div class="fld" id="mmissw" hidden><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div id="mmiss" class="scroll" style="max-height:200px;overflow:auto"></div>
+    <div class="fld" id="mmissw" hidden><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div class="hint" id="mmissl" style="margin-bottom:8px;user-select:text"></div>
+      <div id="mmiss" class="scroll" style="max-height:200px;overflow:auto"></div>
       <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked> Сохранить введённые адреса в реестр</label>
-      <div class="btns"><button class="sm" id="mmskip">Продолжить без этих СЦ</button></div></div>
+      <div class="btns"><button class="sm" id="mmdl">Скачать список (xlsx)</button><button class="sm" id="mmskip">Продолжить без этих СЦ</button></div></div>
     <div class="fld" id="mcdw" hidden><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
     <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
   </div>
@@ -659,13 +660,17 @@ async function loadMail(){
 }
 let wT=0;
 async function refreshQ(){try{renderQ(await mapi('status'))}catch(e){}}
-function watchQ(N,cb){clearInterval(wT);let n=0;const q0=M.q0;
+function watchQ(N,cb){clearInterval(wT);const q0=M.q0;let last=Date.now(),prev='';
   wT=setInterval(async()=>{const j=await mapi('status').catch(()=>null);
-    if(j){renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4;
+    if(j){renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4,k=left+'|'+(ds+de);
+      if(k!==prev){prev=k;last=Date.now()}   // есть движение — продолжаем следить (большая рассылка идёт десятки минут)
       if(left===0){clearInterval(wT);prog(3,de>0?'err':'ok',ds,N);if(cb){let lg=j.log||[];if(ds+de>lg.length)lg=((await mapi('status',{n:Math.min(300,ds+de)}).catch(()=>null))||j).log||lg;cb(de===0,lg.slice(0,ds+de))}return}
       if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}
-    if(++n>90){clearInterval(wT);ban('info','Письмо пока в очереди: отправщик на Mac не успел. Проверьте, что Mac включён.')}},2000)}
-const Q=async jobs=>{for(let i=0;i<jobs.length;i+=3)await mapi('queue',{jobs:jobs.slice(i,i+3)})};
+    if(Date.now()-last>18e4){clearInterval(wT);ban('info','Отправка остановилась: за 3 минуты нет движения. Проверьте, что Mac включён и не спит; письма останутся в очереди и уйдут сами.')}},2000)}
+const Q=async jobs=>{   // пачками по размеру (до ~1,5 МБ за запрос): 485 писем уходят в очередь за считанные запросы
+  const sz=jobs.map(x=>JSON.stringify(x).length);let i=0;
+  while(i<jobs.length){let k=i,s=0;while(k<jobs.length&&(k===i||s+sz[k]<1.5e6)){s+=sz[k];k++}await mapi('queue',{jobs:jobs.slice(i,k)});i=k}
+};
 async function Qsend(jobs,cb){const N=jobs.length;let j;prog(0,'',0,N);try{j=await mapi('status');M.q0=j.q;await Q(jobs)}catch(e){prog(0,'err',0,N,e.message);return false}renderQ(j);prog(1,'',0,N);watchQ(N,cb);return true}
 const FREE='__free',t2h=x=>'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+esc(x).replace(/\n/g,'<br>')+'</div>';
 const curT=()=>$('mt').value===FREE?{id:FREE,name:'',subject:'',html:t2h($('mbody').value)}:M.tpl.find(t=>t.id===$('mt').value);
@@ -697,7 +702,7 @@ function resetSingle(){
   M.files=[];renderFiles();$('ms')._man=0;preview();
 }
 function resetMass(){
-  PL=[];D=null;M2.tested=false;M2.warned=false;M2.warn='';$('mlist').value='';$('mf').value='';$('mcd').innerHTML='';$('mcdw').hidden=true;$('mfi').textContent='';$('mmv').innerHTML='';$('mmissw').hidden=true;$('mmiss').innerHTML='';
+  PL=[];D=null;M2.tested=false;M2.warned=false;M2.warn='';M2.miss=[];$('mlist').value='';$('mf').value='';$('mcd').innerHTML='';$('mcdw').hidden=true;$('mfi').textContent='';$('mmv').innerHTML='';$('mmissw').hidden=true;$('mmiss').innerHTML='';
   M.files=[];renderFiles();preview();renderM2();
 }
 /* одно письмо */
@@ -720,7 +725,7 @@ $('s1').onclick=()=>{
 let PL=[],D=null,M2={test:true,tt:'',tested:false,warn:'',tid:'',warned:false};
 /* учёт отправленного сегодня: 'q' — поставлено в очередь (30 мин), 's' — реально отправлено; ошибки в учёт не попадают */
 const pkey=p=>p.a+'|'+M2.tid,LK=()=>'crm.sent.'+today(),getL=()=>parse(LS.get(LK()),{}),setL=L=>LS.set(LK(),JSON.stringify(L));
-const dupOf=v=>!!v&&(typeof v!=='object'||v.s==='s'||Date.now()-v.t<18e5);
+const dupOf=v=>!!v&&(typeof v!=='object'||v.s==='s'||Date.now()-v.t<54e5);
 const dupsPL=()=>{const L=getL();return okPL().filter(p=>dupOf(L[pkey(p)]))};
 $('mtest').checked=LS.get('crm.mtest')!=='0';$('mtsel').value=['me','shared','other'].includes(LS.get('crm.mtsel'))?LS.get('crm.mtsel'):'me';$('mtt').value=LS.get('crm.testto')||'';$('mfn').value=LS.get('crm.mfn')||'Партнер {код}';
 function toggleT(){const on=$('mtest').checked;$('mtw').hidden=!on;$('mtt').hidden=!(on&&$('mtsel').value==='other')}
@@ -830,13 +835,23 @@ $('regf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)r
     let add=0,upd=0;seen.forEach((v,k)=>{if(M.reg.has(k))upd++;else add++;M.reg.set(k,v)});   // новые коды добавляются, существующие обновляются, остальные не трогаются
     await saveReg();regInfo();msgm('Реестр обновлён: новых '+add+', обновлено '+upd+', всего '+M.reg.size+'. Нажмите «Сохранить» ещё раз.')}
   catch(err){M.reg=prev;regInfo();msgm(err.message,1)}};
-let skipMiss=false;
+let skipMiss=false,MM=[];
+async function dlMissing(list){   // файл «код СЦ — почта» для заполнения; после заполнения его можно загрузить как реестр
+  await EJ();const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('СЦ без почты');
+  ws.columns=[{header:'Код СЦ',key:'c',width:16},{header:'Почта',key:'e',width:38},{header:'Строк в файле рассылки',key:'n',width:24}];
+  list.forEach(q=>ws.addRow({c:q.c,e:'',n:q.n}));ws.getRow(1).font={bold:true};
+  const u=await wb.xlsx.writeBuffer(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a.download='СЦ без почты '+today()+'.xlsx';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+$('mmdl').onclick=()=>dlMissing(MM).catch(e=>msgm(e.message,1));
+$('mmissbtn').onclick=()=>dlMissing(M2.miss||[]).catch(e=>ban('err',e.message));
 $('mmskip').onclick=()=>{skipMiss=true;$('mSave').click()};
 const readMiss=()=>{const m={};document.querySelectorAll('#mmiss [data-code]').forEach(i=>{const s=splitE(i.value);if(s.good.length)m[i.dataset.code]=s.good});return m};
 function renderMiss(missing){
   const old={};document.querySelectorAll('#mmiss [data-code]').forEach(i=>{old[i.dataset.code]=i.value});
-  $('mmiss').innerHTML=[...missing].map(([k,code])=>'<div class="fld" style="margin-bottom:8px"><label class="f">СЦ '+esc(code)+'</label><input data-code="'+esc(k)+'" placeholder="почта партнёра" value="'+esc(old[k]||'')+'" autocapitalize="off"></div>').join('');
+  $('mmiss').innerHTML=[...missing].map(([k,q])=>'<div class="fld" style="margin-bottom:8px"><label class="f">СЦ '+esc(q.c)+'</label><input data-code="'+esc(k)+'" placeholder="почта партнёра" value="'+esc(old[k]||'')+'" autocapitalize="off"></div>').join('');
   $('mmissh').textContent='Не нашла в реестре почту для СЦ: '+missing.size+'. Обновите реестр и повторите, либо впишите почту сами ниже. Можно продолжить без них — этим СЦ письмо не уйдёт.';
+  $('mmissl').textContent='Список СЦ без почты ('+missing.size+'): '+[...missing.values()].map(q=>q.c).join(', ');MM=[...missing.values()];
   $('mmissw').hidden=false;
 }
 function fillMV(){   // поля {{…}}, которых нет в данных, — ручной ввод (одно значение на все письма); {{email}}/{{почта}} — адрес получателя
@@ -852,6 +867,7 @@ function renderM2(){
   $('mlsum').textContent=!has?'Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.':'Получателей: '+n+(PL.length>n?' (пропущено: '+(PL.length-n)+')':'')+(M2.warn?'\n'+M2.warn:'')+(dupsPL().length?'\nУже получали это письмо сегодня: '+dupsPL().length:'')+(M2.test?(M2.tested?'\nТестовое письмо отправлено на '+M2.tt+'. Всё в порядке? Тогда можно отправлять всем.':'\nСначала отправьте тестовое письмо на '+M2.tt+'.'):'');
   $('mpl').innerHTML=PL.map((p,i)=>'<div class="li" data-i="'+i+'" style="cursor:pointer"><span class="n">'+esc(p.a)+'<small>'+(p.codes.length?'СЦ '+esc(capC(p.codes,8))+' · ':'')+(p.file?esc(p.file.name)+' · ':'')+'строк '+p.rows+'</small></span><span class="r">'+(p.miss.length?'пропуск: нет '+esc(p.miss.join(', ')):'✓')+'</span></div>').join('');
   const dn=dupsPL().length,go=n&&(!M2.test||M2.tested);
+  const ml=(M2.miss||[]).length;$('mmissbtn').hidden=!(PL.length&&ml);$('mmissbtn').textContent='Скачать СЦ без почты ('+ml+')';
   $('mtestbtn').hidden=!(n&&M2.test&&!M2.tested);$('mallbtn').hidden=!go;$('mnewbtn').hidden=!(go&&M2.warned&&n-dn>0);
   if(!$('mallbtn').dataset.arm)$('mallbtn').textContent=(M2.warned&&dn?'Всё равно отправить всем (':'Отправить всем (')+n+')';
   if(!$('mnewbtn').dataset.arm)$('mnewbtn').textContent='Только новым ('+(n-dn)+')';
@@ -860,16 +876,17 @@ $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&
 $('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
 $('mSave').onclick=async()=>{
   const t=curT();if(!t||t.id===FREE)return msgm('Выберите шаблон (не «своё письмо»)',1);
-  const file=$('msrc').value==='file',W=[],G=new Map(),used=[],skip=skipMiss;skipMiss=false;let hide=new Set();
+  const file=$('msrc').value==='file',W=[],G=new Map(),used=[],missL=[],skip=skipMiss;skipMiss=false;let hide=new Set();
   if(file){if(!D)return msgm('Загрузите Excel-файл',1);
     hide=new Set([...document.querySelectorAll('#mcd input:checked')].map(i=>i.dataset.h));let orph=0,multi=0,viaReg=0;
     const manual=readMiss(),missing=new Map();   // строки без почты: ищем по коду СЦ в реестре, потом в ручном вводе
     for(const S of D.sheets)S.rows.forEach(r=>{if(r.reg){r.emails=[];r.reg=0}
       if(r.emails.length)return;const code=r.vals[S.cc];if(!code)return;const k=ncode(code),g=M.reg.get(k);
-      if(g){r.emails=g.e.slice();r.reg=1;viaReg++}else if(manual[k]){r.emails=manual[k].slice();r.reg=1;used.push({c:code,e:manual[k]})}else missing.set(k,code)});
-    if(missing.size&&!skip){renderMiss(missing);return msgm('Не нашла почту в реестре для СЦ: '+capC([...missing.values()],10)+'. Обновите реестр и повторите, либо впишите почту сами.',1)}
+      if(g){r.emails=g.e.slice();r.reg=1;viaReg++}else if(manual[k]){r.emails=manual[k].slice();r.reg=1;used.push({c:code,e:manual[k]})}else{const q=missing.get(k)||{c:code,n:0};q.n++;missing.set(k,q)}});
+    if(missing.size&&!skip){renderMiss(missing);return msgm('Не нашла почту в реестре для СЦ: '+capC([...missing.values()].map(q=>q.c),10)+'. Обновите реестр и повторите, либо впишите почту сами.',1)}
     $('mmissw').hidden=!missing.size;
-    if(missing.size)W.push('Нет почты в реестре, письмо не уйдёт: СЦ '+capC([...missing.values()],10));
+    missL.push(...missing.values());
+    if(missing.size)W.push('Нет почты в реестре, письмо не уйдёт: СЦ '+capC([...missing.values()].map(q=>q.c),10)+' (полный список — кнопка «Скачать СЦ без почты»)');
     if(viaReg)W.push('Почта взята из реестра для строк: '+viaReg);
     for(const S of D.sheets)S.rows.forEach(r=>{   // одна почта = один получатель = один файл со всеми её строками (по всем листам)
       if(r.bad.length)W.push('Лист «'+S.name+'», строка '+r.n+': некорректный адрес '+r.bad.join(', '));
@@ -908,7 +925,7 @@ $('mSave').onclick=async()=>{
       out.push({a,codes,rows:nrow,miss,subject:miss.length?'':fillT(t.subject,vs),html:miss.length?'':fillT(clean(t.html),v,true),file:fl});
     }
     if(!out.some(p=>!p.miss.length))throw new Error('Некому отправлять: '+(W.join('; ')||'нет получателей'));
-    PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id};
+    PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id,miss:missL};
     if(used.length&&$('mmsave').checked){used.forEach(x=>M.reg.set(ncode(x.c),{c:x.c,e:x.e}));saveReg().then(regInfo).catch(()=>ban('err','Не удалось сохранить новые адреса в реестр'))}
     LS.set('crm.mtest',test?'1':'0');LS.set('crm.mtsel',k);if(k==='other')LS.set('crm.testto',tt);LS.set('crm.mfn',pat);
     $('pv').srcdoc=okPL()[0].html;$('mmod').hidden=true;msgm('');renderM2();
