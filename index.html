@@ -787,7 +787,9 @@ function fixTables(ws,S,w,del,idx){   // «умные таблицы» и авт
     const c1=colN(m[1]),r1=+m[2],c2=colN(m[3]),kept=[];for(let c=c1;c<=c2;c++)if(!del.includes(c))kept.push(c);
     if(r1!==S.hr||!kept.length){ws.removeTable(name);return}   // таблица не по шапке листа — безопаснее убрать, чем отдать «повреждённый» файл
     const ref=colL(idx(kept[0]))+r1+':'+colL(idx(kept[kept.length-1]))+w;
-    t.tableRef=ref;t.autoFilterRef=ref;t.totalsRow=false;t.columns=kept.map(c=>t.columns[c-c1]);t.columns.forEach(c=>{if(c.filterButton===undefined)c.filterButton=true});   // иначе ExcelJS прячет кнопки фильтра
+    const hadAF=!!t.autoFilterRef;   // был ли у таблицы автофильтр (ExcelJS пишет его всегда; без него кнопки фильтра прячем, как в оригинале)
+    t.tableRef=ref;t.autoFilterRef=ref;t.totalsRow=false;t.headerRow=true;   // headerRow: ExcelJS читает отсутствие headerRowCount как «без шапки» и пишет 0 — отсюда «повреждённый» файл
+    t.columns=kept.map(c=>t.columns[c-c1]);t.columns.forEach(c=>{c.filterButton=hadAF?(c.filterButton!==false):false});
   });
   const af=ws.autoFilter;
   if(af){let c1,r1,c2;
@@ -835,7 +837,7 @@ async function verifyFile(D,rec,hide,u8,email){   // сверка готовог
     if(!ws)throw new Error('в файле нет листа «'+S.name+'»');
     const del=[];for(let c=1;c<=S.nc;c++)if(hide.has(nk(S.heads[c]||'')))del.push(c);
     const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length,ne=idx(S.ec),nc2=idx(S.cc),got=[];
-    Object.values(ws.tables||{}).forEach(tb=>{const m=/^[A-Z]+\d+:[A-Z]+(\d+)$/.exec(tb.table.tableRef||'');if(!m||+m[1]!==S.hr+mine.length)throw new Error('лист «'+S.name+'»: размер таблицы не совпал с данными')});
+    Object.values(ws.tables||{}).forEach(tb=>{const m=/^[A-Z]+\d+:[A-Z]+(\d+)$/.exec(tb.table.tableRef||'');if(!m||+m[1]!==S.hr+mine.length||tb.table.headerRow!==true)throw new Error('лист «'+S.name+'»: параметры таблицы не совпали с данными')});
     for(let r=S.hr+1;r<=ws.rowCount;r++){const row=ws.getRow(r);let any=0;row.eachCell(c=>{if(ctext(c))any=1});if(any)got.push(row)}
     if(got.length!==mine.length)throw new Error('лист «'+S.name+'»: строк '+got.length+', ожидалось '+mine.length);
     got.forEach((row,i)=>{if(ne&&!mine[i].reg&&!ctext(row.getCell(ne)).toLowerCase().includes(email))throw new Error('лист «'+S.name+'»: чужая строка');if(nc2&&ctext(row.getCell(nc2))!==mine[i].vals[S.cc])throw new Error('лист «'+S.name+'»: код СЦ не совпал')})}
