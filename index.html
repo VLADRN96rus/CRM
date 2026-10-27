@@ -779,6 +779,24 @@ function shiftF(f,o,n,hr,cm){   // формула строки при перее
     bad=true;return m});
   return bad?null:out;
 }
+function fixTables(ws,S,w,del,idx){   // «умные таблицы» и автофильтр: размер подгоняется под оставшиеся строки/столбцы, иначе Excel предлагает «восстановить» файл
+  const rng=/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/;
+  Object.keys(ws.tables||{}).forEach(name=>{
+    const t=ws.tables[name].table,m=rng.exec(t.tableRef||'');
+    if(!m){ws.removeTable(name);return}
+    const c1=colN(m[1]),r1=+m[2],c2=colN(m[3]),kept=[];for(let c=c1;c<=c2;c++)if(!del.includes(c))kept.push(c);
+    if(r1!==S.hr||!kept.length){ws.removeTable(name);return}   // таблица не по шапке листа — безопаснее убрать, чем отдать «повреждённый» файл
+    const ref=colL(idx(kept[0]))+r1+':'+colL(idx(kept[kept.length-1]))+w;
+    t.tableRef=ref;t.autoFilterRef=ref;t.totalsRow=false;t.columns=kept.map(c=>t.columns[c-c1]);t.columns.forEach(c=>{if(c.filterButton===undefined)c.filterButton=true});   // иначе ExcelJS прячет кнопки фильтра
+  });
+  const af=ws.autoFilter;
+  if(af){let c1,r1,c2;
+    if(typeof af==='string'){const m=rng.exec(af);if(m){c1=colN(m[1]);r1=+m[2];c2=colN(m[3])}}
+    else if(af.from&&af.to){c1=af.from.column;r1=af.from.row;c2=af.to.column}
+    const kept=[];if(c1)for(let c=c1;c<=c2;c++)if(!del.includes(c))kept.push(c);
+    ws.autoFilter=(c1&&r1===S.hr&&kept.length)?colL(idx(kept[0]))+r1+':'+colL(idx(kept[kept.length-1]))+w:null;
+  }
+}
 function filterSheet(ws,S,keep,hide){   // оставляем только свои строки; оформление строк, ширины, объединения и формулы сохраняются
   const nc=S.nc,del=[];for(let c=1;c<=nc;c++)if(hide.has(nk(S.heads[c]||'')))del.push(c);
   const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length;
@@ -800,6 +818,7 @@ function filterSheet(ws,S,keep,hide){   // оставляем только св�
     saved.forEach(({m,v,st})=>{if(m.bottom>S.hr)return;const ks=[];for(let c=m.left;c<=m.right;c++)if(!del.includes(c))ks.push(idx(c));if(!ks.length)return;
       const l=Math.min(...ks),r=Math.max(...ks);if(r>l||m.bottom>m.top)ws.mergeCells(m.top,l,m.bottom,r);const mc=ws.getCell(m.top,l);mc.value=v;mc.style=st});
   }
+  fixTables(ws,S,w,del,idx);
   return del;
 }
 async function buildFile(D,rec,hide){   // rec: Map(имя листа -> строки получателя)
@@ -816,6 +835,7 @@ async function verifyFile(D,rec,hide,u8,email){   // сверка готовог
     if(!ws)throw new Error('в файле нет листа «'+S.name+'»');
     const del=[];for(let c=1;c<=S.nc;c++)if(hide.has(nk(S.heads[c]||'')))del.push(c);
     const idx=c=>del.includes(c)?0:c-del.filter(x=>x<c).length,ne=idx(S.ec),nc2=idx(S.cc),got=[];
+    Object.values(ws.tables||{}).forEach(tb=>{const m=/^[A-Z]+\d+:[A-Z]+(\d+)$/.exec(tb.table.tableRef||'');if(!m||+m[1]!==S.hr+mine.length)throw new Error('лист «'+S.name+'»: размер таблицы не совпал с данными')});
     for(let r=S.hr+1;r<=ws.rowCount;r++){const row=ws.getRow(r);let any=0;row.eachCell(c=>{if(ctext(c))any=1});if(any)got.push(row)}
     if(got.length!==mine.length)throw new Error('лист «'+S.name+'»: строк '+got.length+', ожидалось '+mine.length);
     got.forEach((row,i)=>{if(ne&&!mine[i].reg&&!ctext(row.getCell(ne)).toLowerCase().includes(email))throw new Error('лист «'+S.name+'»: чужая строка');if(nc2&&ctext(row.getCell(nc2))!==mine[i].vals[S.cc])throw new Error('лист «'+S.name+'»: код СЦ не совпал')})}
