@@ -272,7 +272,7 @@ details.glass>.in{margin-top:16px}
         <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
         <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button><button class="sm" id="mmissbtn" hidden>Скачать СЦ без почты</button></div>
       </div>
-      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div id="mlog"></div></div></details>
+      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div class="btns" id="mqact" hidden style="margin:0 0 10px"><button class="sm" id="mq_r">Обновить</button><button class="sm" id="mq_q">Вернуть зависшие в очередь</button><button class="sm" id="mq_c">Очистить очередь</button></div><div id="mlog"></div></div></details>
     </div>
     <div class="glass mb mpv"><h3>Предпросмотр</h3><iframe id="pv" class="pv" sandbox></iframe></div>
   </div>
@@ -635,7 +635,9 @@ const mk=id=>(t,bad)=>{$(id).textContent=t||'';$(id).style.color=bad?'var(--bad)
 const msgm=mk('mmsg2'),ADDR={me:'paramuzov@skbkontur.ru',shared:'ornp@skbkontur.ru'};
 let bT=0;
 const msg=(t,bad)=>{if(t)ban(bad?'err':'ok',t)};   // все статусы показываем плашкой сверху
-function ban(k,t){const b=$('mban');clearTimeout(bT);if(!k){b.hidden=true;return}b.className='ban '+k;b.innerHTML='<span>'+esc(t)+'</span><button class="sm" id="mbx">×</button>';b.hidden=false;$('mbx').onclick=()=>{b.hidden=true};if(k==='ok')bT=setTimeout(()=>{b.hidden=true},9000)}
+function ban(k,t,acts){const b=$('mban');clearTimeout(bT);if(!k){b.hidden=true;return}b.className='ban '+k;
+  b.innerHTML='<span>'+esc(t)+'</span><div class="btns" style="margin:0">'+(acts||[]).map((x,i)=>'<button class="sm" data-i="'+i+'">'+esc(x[0])+'</button>').join('')+'<button class="sm" id="mbx">×</button></div>';
+  (acts||[]).forEach((x,i)=>{b.querySelector('[data-i="'+i+'"]').onclick=x[1]});b.hidden=false;$('mbx').onclick=()=>{b.hidden=true};if(k==='ok'&&!acts)bT=setTimeout(()=>{b.hidden=true},9000)}
 function prog(i,fin,done,N,note){   // 4 стадии: в очередь → принято → отправляется → отправлено (кружок — идёт, ✓ — готово, ✗ — ошибка)
   const b=$('mban');clearTimeout(bT);b.className='ban '+(fin||'info');
   const L=['Добавляется в очередь','Принято к отправке','Отправляется'+(i===2&&N>1?' ('+done+' из '+N+')':''),fin==='err'&&i===3?'Ошибка отправки — см. «История отправки»':'Отправлено'+(fin==='ok'&&N>1?' ('+N+')':'')];
@@ -650,23 +652,34 @@ async function mapi(act,d){
 }
 function renderQ(j){
   const q=j.q,live=j.hb&&Date.now()-j.hb<9e4;M.q=q;
-  $('mq').textContent='Очередь: ждут '+q.p+' · отправлено сегодня '+q.s+' · ошибок '+q.e+(q.c?' · в работе '+q.c:'')+' · '+(live?'● отправщик на Mac работает':'○ отправщик на Mac не отвечает'+(j.hb?' (был на связи '+new Date(j.hb).toLocaleString('ru')+')':'')+' — письма уйдут, когда он запустится');
+  $('mq').textContent='Очередь: ждут '+q.p+' · отправлено сегодня '+q.s+' · ошибок '+q.e+(q.c?' · в работе '+q.c:'')+' · '+(live?'● отправщик на Mac работает':'○ отправщик на Mac не отвечает'+(j.hb?' (был на связи '+new Date(j.hb).toLocaleString('ru')+')':'')+' — письма уйдут, когда он запустится')+(live&&j.hbm?' · отправщик: '+j.hbm:'');
+  $('mqact').hidden=!(q.p+q.c);
   $('mlog').innerHTML=(j.log||[]).map(x=>'<div class="li"><span class="n">'+esc(x.to)+'<small>'+esc(x.t+' · '+x.s+(x.from?' · '+x.from:'')+(x.ok?'':' · '+x.err))+'</small></span><span class="r" style="color:'+(x.ok?'inherit':'var(--bad)')+'">'+(x.ok?'✓':'ошибка')+'</span></div>').join('')||'<div class="hint">Пока пусто</div>';
 }
 async function loadMail(){
   if(!navigator.onLine)return msg('Письма работают только при подключении к интернету',1);
-  try{const j=await mapi('init');M.tpl=j.tpl||[];buildReg(j.dir);M.ok=true;renderQ(j);fillTpl();msg('')}
+  try{const j=await mapi('init');M.tpl=j.tpl||[];buildReg(j.dir);M.ok=true;renderQ(j);fillTpl();msg('');
+    if(j.q.p+j.q.c>0&&!$('mban').offsetParent){M.q0=j.q;const n=j.q.p+j.q.c;prog(1,'',0,n);watchQ(n)}}
   catch(e){msg(e.message,1)}
 }
 let wT=0;
 async function refreshQ(){try{renderQ(await mapi('status'))}catch(e){}}
-function watchQ(N,cb){clearInterval(wT);const q0=M.q0;let last=Date.now(),prev='';
+async function requeueQ(){try{const r=await mapi('outbox_requeue');await refreshQ();ban('info','Вернула в очередь зависших писем: '+r.n+'. Отправщик заберёт их при следующей проверке.')}catch(e){ban('err',e.message)}}
+async function clearQ(){if(!confirm('Убрать из очереди все неотправленные письма? Уже отправленные это не затронет.'))return;
+  try{M.cancel=true;const r=await mapi('outbox_clear',{all:1});await refreshQ();ban('info','Очередь очищена: убрано писем '+r.n+'. Если Mac в этот момент отправлял письмо, оно может ещё уйти.')}catch(e){ban('err',e.message)}}
+$('mq_r').onclick=refreshQ;$('mq_q').onclick=requeueQ;$('mq_c').onclick=clearQ;
+function watchQ(N,cb){clearInterval(wT);const q0=M.q0;let last=Date.now(),prev='',stalled=false,lastJ=null;M.cancel=false;
+  const stall=j=>{const ds=j.q.s-q0.s+(j.q.e-q0.e),live=j.hb&&Date.now()-j.hb<9e4;
+    ban('info','Отправка приостановлена: обработано '+ds+' из '+N+', в очереди '+(j.q.p+j.q.c)+'. '+(live?'Отправщик на Mac на связи'+(j.hbm?' («'+j.hbm+'»)':'')+': возможно, почтовый сервер притормаживает отправку — тогда достаточно подождать, она продолжится сама.':'Отправщик на Mac не отвечает: проверьте, что Mac включён, не спит и подключён к интернету. Письма не потеряются и уйдут, когда он снова заработает.')+' Нажмите «Проверить»; если ничего не меняется — «Вернуть зависшие в очередь».',
+      [['Проверить',async()=>{last=Date.now();try{const x=await mapi('status');renderQ(x);stall(x)}catch(e){ban('err',e.message)}}],['Вернуть зависшие в очередь',requeueQ],['Очистить очередь',clearQ]])};
   wT=setInterval(async()=>{const j=await mapi('status').catch(()=>null);
-    if(j){renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4,k=left+'|'+(ds+de);
-      if(k!==prev){prev=k;last=Date.now()}   // есть движение — продолжаем следить (большая рассылка идёт десятки минут)
-      if(left===0){clearInterval(wT);prog(3,de>0?'err':'ok',ds,N);if(cb){let lg=j.log||[];if(ds+de>lg.length)lg=((await mapi('status',{n:Math.min(300,ds+de)}).catch(()=>null))||j).log||lg;cb(de===0,lg.slice(0,ds+de))}return}
-      if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}
-    if(Date.now()-last>18e4){clearInterval(wT);ban('info','Отправка остановилась: за 3 минуты нет движения. Проверьте, что Mac включён и не спит; письма останутся в очереди и уйдут сами.')}},2000)}
+    if(j){lastJ=j;renderQ(j);const ds=j.q.s-q0.s,de=j.q.e-q0.e,left=j.q.p+j.q.c,live=j.hb&&Date.now()-j.hb<9e4,k=left+'|'+(ds+de);
+      if(k!==prev){prev=k;last=Date.now();stalled=false}   // есть движение — продолжаем следить (большая рассылка идёт десятки минут)
+      if(left===0){clearInterval(wT);
+        if(M.cancel){ban('info','Очередь очищена. Отправлено писем: '+ds+(de?', с ошибкой: '+de:'')+'. Остальные отменены.');if(cb)cb(false,(j.log||[]).slice(0,ds+de));return}
+        prog(3,de>0?'err':'ok',ds,N);if(cb){let lg=j.log||[];if(ds+de>lg.length)lg=((await mapi('status',{n:Math.min(300,ds+de)}).catch(()=>null))||j).log||lg;cb(de===0,lg.slice(0,ds+de))}return}
+      if(!stalled){if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}}
+    if(!stalled&&Date.now()-last>18e4&&lastJ){stalled=true;stall(lastJ)}},N>100?4000:2000)}
 const Q=async jobs=>{   // пачками по размеру (до ~1,5 МБ за запрос): 485 писем уходят в очередь за считанные запросы
   const sz=jobs.map(x=>JSON.stringify(x).length);let i=0;
   while(i<jobs.length){let k=i,s=0;while(k<jobs.length&&(k===i||s+sz[k]<1.5e6)){s+=sz[k];k++}await mapi('queue',{jobs:jobs.slice(i,k)});i=k}
