@@ -198,11 +198,18 @@ details.glass>.in{margin-top:16px}
 .chrow{display:flex;flex-wrap:wrap;gap:4px;flex:0 0 auto}.chrow .chip{align-self:auto}
 .task.s0::before{background:var(--line)}.task.sc::before{background:linear-gradient(90deg,#ff9a56,#ffd166)}
 #dchips{display:flex;flex-wrap:wrap}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.cw{text-align:center;font-size:12px;color:var(--mu);font-weight:600;padding:4px 0}
+.cd{min-height:104px;padding:6px;border-radius:14px;border:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
+.cd>span{font-size:12px;color:var(--mu);font-weight:600}.cd.oth{opacity:.45}.cd.td{border-color:#7c5cff;box-shadow:0 0 0 2px rgba(124,92,255,.35)}
+.ce{border:0;border-radius:8px;padding:3px 6px;font:500 11.5px Onest,system-ui,sans-serif;color:#fff;background:var(--gcool);text-align:left;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:759px){.cd{min-height:70px;padding:4px}.ce{font-size:10.5px;padding:2px 4px}}
+@media(max-width:899px){nav button{padding:12px 2px;font-size:12.5px}}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
 <header><div class="hl"><h1 id="logo" style="cursor:pointer">Моя CRM</h1>
-  <nav id="navbar" hidden><button id="n1" class="on">Личные</button><button id="n4">Отдел</button><button id="n2">Бюджет</button><button id="n3">Письма</button></nav></div>
+  <nav id="navbar" hidden><button id="n1" class="on">Личные</button><button id="n4">Отдел</button><button id="n2">Бюджет</button><button id="n3">Письма</button><button id="n5">Медиаплан</button></nav></div>
   <div class="hr2"><button id="sync" title="Синхронизировать"><i></i><span>Загрузка…</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
 
 <section id="home" class="panel on"><div class="hello" id="hello"></div><div class="tiles" id="tiles"></div></section>
@@ -228,6 +235,12 @@ details.glass>.in{margin-top:16px}
   <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
   <div id="dboard"></div>
   <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn"></em></h2><div id="dshared"></div>
+</section>
+
+<section id="p5" class="panel">
+  <div class="mnav"><button class="sm" id="mpp" aria-label="Предыдущий месяц">←</button><b id="mpname"></b><button class="sm" id="mpn" aria-label="Следующий месяц">→</button><button class="btn" id="mpadd" style="margin-left:auto">＋ Рассылка</button></div>
+  <div class="cal" id="cal"></div>
+  <div class="hint" style="margin-top:10px">Нажмите на день, чтобы запланировать рассылку. Она появится в ваших личных задачах.</div>
 </section>
 
 <section id="p2" class="panel">
@@ -326,6 +339,20 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="mmsg2"></div>
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
+<div class="modal" id="onb" hidden><div class="glass" style="max-height:92vh;overflow:auto">
+  <h2>Добро пожаловать!</h2><p>Укажите имя и фамилию и отметьте разделы, которыми будете пользоваться. Остальные не будут вам мешать. Позже это можно изменить в ⚙.</p>
+  <div class="fld"><label class="f">Имя Фамилия</label><input id="ob_n" autocomplete="name"></div>
+  <div class="fld"><label class="f">Разделы</label><div id="ob_s"></div></div>
+  <div class="err" id="ob_e"></div><div class="acts"><button class="btn" id="ob_ok">Продолжить</button></div>
+</div></div>
+<div class="modal" id="mpmod" hidden><div class="glass" style="max-width:480px">
+  <h2 id="mp_h2">Рассылка</h2>
+  <div class="fld"><label class="f">Название</label><input id="mp_t"></div>
+  <div class="fld"><label class="f">Дата рассылки</label><input id="mp_d" type="date"></div>
+  <div class="fld"><label class="f">Комментарий</label><textarea id="mp_c" rows="3"></textarea></div>
+  <div class="hint" id="mp_a" style="margin-bottom:8px"></div><div class="err" id="mp_e"></div>
+  <div class="tkacts"><div><button class="btn sec" id="mp_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="mp_cancel">Отмена</button><button class="btn" id="mp_save">Сохранить</button></div></div>
+</div></div>
 <div class="modal" id="dmod" hidden><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
   <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
@@ -353,12 +380,18 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="cfgm" hidden><div class="glass">
+<div class="modal" id="cfgm" hidden><div class="glass" style="max-height:92vh;overflow:auto">
   <h2>Подключение к таблице</h2>
   <p>Адрес и код вы получаете при настройке Apps Script. Достаточно ввести их один раз на каждом устройстве.</p>
   <label class="f">Адрес веб-приложения (заканчивается на /exec)</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off">
   <label class="f" style="margin-top:10px">Код доступа</label><input id="ck" placeholder="Код из setup()" autocapitalize="off" autocorrect="off">
   <div class="err" id="cerr"></div>
+  <div id="prof" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+    <h2 style="font-size:16px">Профиль</h2>
+    <label class="f">Имя Фамилия</label><input id="pf_n" autocomplete="name">
+    <label class="f" style="margin-top:10px">Мои разделы</label><div id="pf_s"></div>
+    <div class="err" id="pf_e"></div><div class="row end" style="margin:6px 0 0"><button class="btn" id="pf_save">Сохранить профиль</button></div>
+  </div>
   <div class="row end" style="margin:10px 0 0"><button class="sm" id="cLater">Позже</button><button class="btn" id="cOk">Подключить</button></div>
 </div></div>
 
@@ -392,7 +425,7 @@ const nextMon=s=>{const[y,m]=s.split('-').map(Number),d=new Date(y,m,1);return d
 /* ---------- Хранилище и офлайн-очередь ---------- */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const parse=(s,d)=>{try{return JSON.parse(s)||d}catch(e){return d}};
-let ME={id:'',name:''},USERS=[];
+let ME=parse(LS.get('crm.me'),{id:'',name:''}),USERS=parse(LS.get('crm.users'),[]);   // помним, кто вошёл: задачи видны сразу, даже офлайн
 let cfg=parse(LS.get('crm.cfg'),{});
 let st=parse(LS.get('crm.state'),{base:{},queue:[]});
 if(!st.base)st.base={};if(!st.queue)st.queue=[];
@@ -431,7 +464,7 @@ async function sync(){
     if(!j.ok){if(j.error==='auth'){res='auth';showCfg('Неверный код доступа')}else throw new Error(j.error)}
     else{
       const before=JSON.stringify(items);
-      st.queue.splice(0,n);st.base=j.items||{};ME=j.me||ME;USERS=j.users||[];derive();persist();if($('home').classList.contains('on'))tab('home');
+      st.queue.splice(0,n);st.base=j.items||{};ME=j.me||ME;USERS=j.users||[];LS.set('crm.me',JSON.stringify(ME));LS.set('crm.users',JSON.stringify(USERS));derive();persist();afterAuth();
       if(JSON.stringify(items)!==before)render();
       if(!filled)fillSettings();
     }
@@ -446,14 +479,15 @@ setInterval(()=>{if(!document.hidden)sync()},20000);
 $('sync').onclick=()=>sync();
 
 /* подключение */
-function showCfg(msg){$('cu').value=cfg.url||'';$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('cfgm').hidden=false}
+function showCfg(msg){$('prof').hidden=!ME.id;if(ME.id){$('pf_n').value=ME.name||'';secBoxes('pf_s',secSel());$('pf_e').textContent=''}
+  $('cu').value=cfg.url||'';$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('cfgm').hidden=false}
 $('gear').onclick=()=>showCfg();
 $('cLater').onclick=()=>{$('cfgm').hidden=true};
 $('cOk').onclick=()=>{
   const u=$('cu').value.trim(),k=$('ck').value.trim();
   if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)){$('cerr').textContent='Адрес должен начинаться с https://script.google.com и заканчиваться на /exec';return}
   if(!k){$('cerr').textContent='Введите код доступа';return}
-  if(cfg.key&&cfg.key!==k){st={base:{},queue:[]};persist();derive();render()}   // другой сотрудник на этом устройстве — чужой кэш не оставляем
+  if(cfg.key&&cfg.key!==k){st={base:{},queue:[]};ME={id:'',name:''};LS.set('crm.me','{}');persist();derive();render()}   // другой сотрудник на этом устройстве — чужой кэш не оставляем
   cfg={url:u,key:k};LS.set('crm.cfg',JSON.stringify(cfg));$('cfgm').hidden=true;sync();
 };
 (function(){ // ссылка вида ...#u=<адрес>&k=<код> настраивает устройство автоматически
@@ -481,7 +515,7 @@ function fillSettings(){
   if(s.start)$('ss').value=s.start;
   if(!num(s.salary??s.monthly))$('setBox').open=true;
 }
-function render(){renderTasks();renderDept();renderBudget()}
+function render(){renderTasks();renderDept();renderMp();renderBudget();applySections()}
 
 /* ---------- Задачи ---------- */
 function dueChip(t){
@@ -495,7 +529,7 @@ function dueChip(t){
 }
 function card(t){
   const id=t.id,cls=t.archived?'dn':(t.important?'hot':'');
-  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t)+(t.ref?'<span class="chip">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.shared?'<span class="chip">Видна отделу</span>':'');
+  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t)+(t.ref?'<span class="chip">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.mpref?'<span class="chip">Медиаплан</span>':'')+(t.shared?'<span class="chip">Видна отделу</span>':'');
   if(editC===id){
     h+='<textarea class="ced" id="ce" placeholder="Комментарий">'+esc(t.comment||'')+'</textarea>'
      +'<div class="ta"><div class="tb two"><button class="sm okb" data-a="csave" data-id="'+id+'">Сохранить</button><button class="sm" data-a="ccancel">Отмена</button></div></div>';
@@ -1121,14 +1155,56 @@ $('mtDel').onclick=()=>{const t=curT();if(!t||t.id===FREE)return msg('Выбер
 })();
 function tab(n){
   $('home').className='panel'+(n==='home'?' on':'');
-  [1,2,3,4].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
+  [1,2,3,4,5].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
   $('navbar').hidden=n==='home';
   if(n==='home')$('hello').textContent='Здравствуйте'+(ME.name?', '+ME.name.split(' ')[0]:'')+'! Выберите раздел';
 }
-const SECS=[[1,'✓','Личные задачи'],[4,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[0,'📅','Медиаплан']];
-$('tiles').innerHTML=SECS.map(x=>'<button class="tile'+(x[0]?'':' soon')+'" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+(x[0]?'':'<small>скоро</small>')+'</button>').join('');
+const SECS=[[1,'✓','Личные задачи'],[4,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[5,'📅','Медиаплан']];
+const secSel=()=>{const v=(items.prefs||{}).sections;return Array.isArray(v)&&v.length?v.map(Number):[1,4,2,3,5]};
+function applySections(){const sel=secSel();[1,2,3,4,5].forEach(i=>{$('n'+i).hidden=!sel.includes(i)});
+  $('tiles').innerHTML=SECS.filter(x=>sel.includes(x[0])).map(x=>'<button class="tile" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>').join('')}
+function secBoxes(el,sel){$(el).innerHTML=SECS.map(x=>'<label class="chk" style="padding-bottom:6px"><input type="checkbox" value="'+x[0]+'"'+(sel.includes(x[0])?' checked':'')+'> '+x[1]+' '+x[2]+'</label>').join('')}
+const secGet=el=>[...document.querySelectorAll('#'+el+' input:checked')].map(i=>+i.value).sort((a,b)=>[1,4,2,3,5].indexOf(a)-[1,4,2,3,5].indexOf(b));
+async function saveProfile(nEl,bEl,eEl){
+  const nm=$(nEl).value.trim().replace(/\s+/g,' '),sec=secGet(bEl),e=$(eEl);e.textContent='';
+  if(nm.length<2){e.textContent='Укажите имя и фамилию';return false}
+  if(!sec.length){e.textContent='Выберите хотя бы один раздел';return false}
+  try{if(nm!==ME.name){const r=await mapi('rename',{name:nm});ME=Object.assign({},ME,{name:r.me.name});LS.set('crm.me',JSON.stringify(ME))}}
+  catch(err){e.textContent=err.message;return false}
+  save('prefs',{sections:sec});return true;
+}
+function openOnb(){$('ob_n').value=/^Имя\s/.test(ME.name||'')?'':(ME.name||'');secBoxes('ob_s',[]);$('ob_e').textContent='';$('onb').hidden=false}
+$('ob_ok').onclick=async()=>{if(await saveProfile('ob_n','ob_s','ob_e')){$('onb').hidden=true;tab('home')}};
+$('pf_save').onclick=async()=>{if(await saveProfile('pf_n','pf_s','pf_e'))$('pf_e').textContent='Сохранено ✓'};
+function afterAuth(){render();if($('home').classList.contains('on'))tab('home');if(ME.id&&!(items.prefs&&items.prefs.sections)&&$('onb').hidden&&$('cfgm').hidden)openOnb()}
+/* ---------- Медиаплан ---------- */
+let mpMon=today().slice(0,7),mpId=null;
+function renderMp(){
+  const[y,m]=mpMon.split('-').map(Number),off=(new Date(y,m-1,1).getDay()+6)%7,dim=new Date(y,m,0).getDate(),by={};
+  $('mpname').textContent=monthName(mpMon);
+  list('mp_').filter(e=>e.date&&e.title).forEach(e=>(by[e.date]=by[e.date]||[]).push(e));
+  let h=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x=>'<div class="cw">'+x+'</div>').join('');
+  for(let i=0;i<Math.ceil((off+dim)/7)*7;i++){const d=new Date(y,m-1,1-off+i),k=iso(d);
+    h+='<div class="cd'+(d.getMonth()!==m-1?' oth':'')+(k===today()?' td':'')+'" data-day="'+k+'"><span>'+d.getDate()+'</span>'
+      +(by[k]||[]).sort((a,b)=>cmpId(a,b)).map(e=>'<button class="ce" data-mp="'+e.id+'" title="'+esc(e.title)+'">'+esc(e.title)+'</button>').join('')+'</div>'}
+  $('cal').innerHTML=h;
+}
+function shiftMp(n){const[y,m]=mpMon.split('-').map(Number),d=new Date(y,m-1+n,1);mpMon=d.getFullYear()+'-'+p2(d.getMonth()+1);renderMp()}
+$('mpp').onclick=()=>shiftMp(-1);$('mpn').onclick=()=>shiftMp(1);
+function openMp(id,day){
+  const e=id?items[id]:null;if(id&&!e)return;mpId=id||null;
+  $('mp_h2').textContent=e?'Рассылка':'Новая рассылка';$('mp_t').value=e?e.title:'';$('mp_d').value=e?e.date:(day||today());$('mp_c').value=e?e.comment||'':'';
+  $('mp_a').textContent=e&&e.owner?'Автор: '+uname(e.owner):'';$('mp_del').hidden=!e;$('mp_e').textContent='';$('mpmod').hidden=false;
+}
+$('cal').onclick=e=>{const b=e.target.closest('[data-mp]');if(b)return openMp(b.dataset.mp);const c=e.target.closest('[data-day]');if(c)openMp(null,c.dataset.day)};
+$('mpadd').onclick=()=>openMp(null,mpMon===today().slice(0,7)?today():mpMon+'-01');
+$('mp_cancel').onclick=()=>{$('mpmod').hidden=true};
+$('mp_del').onclick=()=>arm($('mp_del'),'Точно удалить?',()=>{remove(mpId);$('mpmod').hidden=true});
+$('mp_save').onclick=()=>{const t=$('mp_t').value.trim(),d=$('mp_d').value;
+  if(!t)return $('mp_e').textContent='Укажите название';if(!d)return $('mp_e').textContent='Укажите дату рассылки';
+  save(mpId||nid('mp_'),{title:t,date:d,comment:$('mp_c').value.trim()});mpMon=d.slice(0,7);$('mpmod').hidden=true;renderMp()};
 $('tiles').onclick=e=>{const b=e.target.closest('.tile');if(b&&+b.dataset.s)$('n'+b.dataset.s).click()};
-$('logo').onclick=()=>tab('home');$('n4').onclick=()=>tab(4);
+$('logo').onclick=()=>tab('home');$('n4').onclick=()=>tab(4);$('n5').onclick=()=>tab(5);
 $('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
 derive();render();fillSettings();setStatus();tab('home');
