@@ -190,14 +190,21 @@ details.glass>.in{margin-top:16px}
 .tkp{max-height:160px;overflow:auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--inp);color:var(--tx);font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
 .tkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.tkp:empty::before{content:"Комментария нет";color:var(--mu)}
 .tkacts{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:14px}.tkacts>div{display:flex;gap:10px;flex-wrap:wrap}
+.hello{font:600 20px Unbounded,Onest,sans-serif;margin:18px 0 20px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px}
+.tile{aspect-ratio:1.15;border-radius:22px;border:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--sh);color:var(--tx);font:600 16px Onest,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:transform .2s}
+.tile:hover{transform:translateY(-4px)}.tile span{font-size:34px}.tile small{font-weight:400;color:var(--mu);font-size:12px}
+.tile.soon{opacity:.55;cursor:default}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
-<header><div class="hl"><h1>Моя CRM</h1>
-  <nav><button id="n1" class="on">Задачи</button><button id="n2">Бюджет</button><button id="n3">Письма</button></nav></div>
+<header><div class="hl"><h1 id="logo" style="cursor:pointer">Моя CRM</h1>
+  <nav id="navbar" hidden><button id="n1" class="on">Задачи</button><button id="n2">Бюджет</button><button id="n3">Письма</button></nav></div>
   <div class="hr2"><button id="sync" title="Синхронизировать"><i></i><span>Загрузка…</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
 
-<section id="p1" class="panel on" data-tf="all">
+<section id="home" class="panel on"><div class="hello" id="hello"></div><div class="tiles" id="tiles"></div></section>
+
+<section id="p1" class="panel" data-tf="all">
   <div class="glass addbar" id="side">
     <button class="sm x" id="closeAdd" aria-label="Закрыть">✕</button>
     <div class="af t"><label class="f">Новая задача</label><input id="nt" placeholder="Что нужно сделать"></div>
@@ -359,6 +366,7 @@ const nextMon=s=>{const[y,m]=s.split('-').map(Number),d=new Date(y,m,1);return d
 /* ---------- Хранилище и офлайн-очередь ---------- */
 const LS={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const parse=(s,d)=>{try{return JSON.parse(s)||d}catch(e){return d}};
+let ME={id:'',name:''},USERS=[];
 let cfg=parse(LS.get('crm.cfg'),{});
 let st=parse(LS.get('crm.state'),{base:{},queue:[]});
 if(!st.base)st.base={};if(!st.queue)st.queue=[];
@@ -397,7 +405,7 @@ async function sync(){
     if(!j.ok){if(j.error==='auth'){res='auth';showCfg('Неверный код доступа')}else throw new Error(j.error)}
     else{
       const before=JSON.stringify(items);
-      st.queue.splice(0,n);st.base=j.items||{};derive();persist();
+      st.queue.splice(0,n);st.base=j.items||{};ME=j.me||ME;USERS=j.users||[];derive();persist();if($('home').classList.contains('on'))tab('home');
       if(JSON.stringify(items)!==before)render();
       if(!filled)fillSettings();
     }
@@ -419,6 +427,7 @@ $('cOk').onclick=()=>{
   const u=$('cu').value.trim(),k=$('ck').value.trim();
   if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)){$('cerr').textContent='Адрес должен начинаться с https://script.google.com и заканчиваться на /exec';return}
   if(!k){$('cerr').textContent='Введите код доступа';return}
+  if(cfg.key&&cfg.key!==k){st={base:{},queue:[]};persist();derive();render()}   // другой сотрудник на этом устройстве — чужой кэш не оставляем
   cfg={url:u,key:k};LS.set('crm.cfg',JSON.stringify(cfg));$('cfgm').hidden=true;sync();
 };
 (function(){ // ссылка вида ...#u=<адрес>&k=<код> настраивает устройство автоматически
@@ -483,7 +492,7 @@ function col(title,cls,arr,empty,k){
 }
 function renderTasks(){
   const byDl=(a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||(a.title||'').localeCompare(b.title||'','ru')||cmpId(a,b);
-  const T=list('t_').filter(t=>t.title),all=T.filter(t=>!!t.archived===showDone).sort(byDl);
+  const T=list('t_').filter(t=>t.title&&(!t.owner||t.owner===ME.id)),all=T.filter(t=>!!t.archived===showDone).sort(byDl);
   const act=T.filter(t=>!t.archived),late=act.filter(t=>t.deadline&&t.deadline<today()).length;
   $('doneBtn').textContent=showDone?'← К активным задачам':'✓ Выполнено ('+T.filter(t=>t.archived).length+')';
   $('tcount').textContent=showDone?'Выполненные задачи':'Активных: '+act.length+(late?' · просрочено: '+late:'');
@@ -1022,10 +1031,19 @@ $('mtDel').onclick=()=>{const t=curT();if(!t||t.id===FREE)return msg('Выбер
     o+='<option value="'+v+'"'+(v===cur?' selected':'')+'>'+monthName(v)+'</option>'}
   $('ss').innerHTML=o;
 })();
-function tab(n){[1,2,3].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''})}
+function tab(n){
+  $('home').className='panel'+(n==='home'?' on':'');
+  [1,2,3].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
+  $('navbar').hidden=n==='home';
+  if(n==='home')$('hello').textContent='Здравствуйте'+(ME.name?', '+ME.name.split(' ')[0]:'')+'! Выберите раздел';
+}
+const SECS=[[1,'✓','Личные задачи'],[0,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[0,'📅','Медиаплан']];
+$('tiles').innerHTML=SECS.map(x=>'<button class="tile'+(x[0]?'':' soon')+'" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+(x[0]?'':'<small>скоро</small>')+'</button>').join('');
+$('tiles').onclick=e=>{const b=e.target.closest('.tile');if(b&&+b.dataset.s)$('n'+b.dataset.s).click()};
+$('logo').onclick=()=>tab('home');
 $('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
-derive();render();fillSettings();setStatus();
+derive();render();fillSettings();setStatus();tab('home');
 if(!cfg.url)showCfg();else sync();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   const had=!!navigator.serviceWorker.controller;let rl=0;
