@@ -195,11 +195,14 @@ details.glass>.in{margin-top:16px}
 .tile{aspect-ratio:1.15;border-radius:22px;border:1px solid var(--gb);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:var(--sh);color:var(--tx);font:600 16px Onest,system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:transform .2s}
 .tile:hover{transform:translateY(-4px)}.tile span{font-size:34px}.tile small{font-weight:400;color:var(--mu);font-size:12px}
 .tile.soon{opacity:.55;cursor:default}
+.chrow{display:flex;flex-wrap:wrap;gap:4px;flex:0 0 auto}.chrow .chip{align-self:auto}
+.task.s0::before{background:var(--line)}.task.sc::before{background:linear-gradient(90deg,#ff9a56,#ffd166)}
+#dchips{display:flex;flex-wrap:wrap}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
 <header><div class="hl"><h1 id="logo" style="cursor:pointer">Моя CRM</h1>
-  <nav id="navbar" hidden><button id="n1" class="on">Задачи</button><button id="n2">Бюджет</button><button id="n3">Письма</button></nav></div>
+  <nav id="navbar" hidden><button id="n1" class="on">Личные</button><button id="n4">Отдел</button><button id="n2">Бюджет</button><button id="n3">Письма</button></nav></div>
   <div class="hr2"><button id="sync" title="Синхронизировать"><i></i><span>Загрузка…</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
 
 <section id="home" class="panel on"><div class="hello" id="hello"></div><div class="tiles" id="tiles"></div></section>
@@ -219,6 +222,12 @@ details.glass>.in{margin-top:16px}
     <button class="sm okb" id="doneBtn">Выполнено</button></div>
   <div id="board"></div>
   <button id="fab" aria-label="Новая задача">＋</button>
+</section>
+
+<section id="p4" class="panel">
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
+  <div id="dboard"></div>
+  <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn"></em></h2><div id="dshared"></div>
 </section>
 
 <section id="p2" class="panel">
@@ -317,10 +326,27 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="mmsg2"></div>
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
+<div class="modal" id="dmod" hidden><div class="glass wide">
+  <h2 id="dm_h2">Задача отдела</h2>
+  <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
+  <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
+  <div class="row"><div><label class="f">Фокус внимания (выберите или впишите свой)</label><input id="dm_f" list="dl_f" autocomplete="off"></div>
+    <div><label class="f">Тактика (выберите или впишите свою)</label><input id="dm_k" list="dl_k" autocomplete="off"></div></div>
+  <datalist id="dl_f"></datalist><datalist id="dl_k"></datalist>
+  <div class="row"><div><label class="f">Статус</label><select id="dm_s"></select></div><div><label class="f">Дедлайн</label><input id="dm_d" type="date"></div></div>
+  <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
+  <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
+  <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
+  <div class="fld" id="dm_rw" hidden><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
+  <details class="fld" id="dm_hd" hidden><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
+  <div class="err" id="dm_err"></div>
+  <div class="tkacts"><div><button class="btn sec" id="dm_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="dm_cancel">Отмена</button><button class="btn" id="dm_save">Сохранить</button></div></div>
+</div></div>
 <div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
   <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
+  <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
   <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
     <div class="tkp" id="tk_p"></div>
     <textarea id="tk_c" rows="6" hidden placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
@@ -455,7 +481,7 @@ function fillSettings(){
   if(s.start)$('ss').value=s.start;
   if(!num(s.salary??s.monthly))$('setBox').open=true;
 }
-function render(){renderTasks();renderBudget()}
+function render(){renderTasks();renderDept();renderBudget()}
 
 /* ---------- Задачи ---------- */
 function dueChip(t){
@@ -469,7 +495,7 @@ function dueChip(t){
 }
 function card(t){
   const id=t.id,cls=t.archived?'dn':(t.important?'hot':'');
-  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t);
+  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t)+(t.ref?'<span class="chip">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.shared?'<span class="chip">Видна отделу</span>':'');
   if(editC===id){
     h+='<textarea class="ced" id="ce" placeholder="Комментарий">'+esc(t.comment||'')+'</textarea>'
      +'<div class="ta"><div class="tb two"><button class="sm okb" data-a="csave" data-id="'+id+'">Сохранить</button><button class="sm" data-a="ccancel">Отмена</button></div></div>';
@@ -478,7 +504,7 @@ function card(t){
     if(t.archived){
       h+='<div class="ta"><div class="tb two"><button class="sm" data-a="restore" data-id="'+id+'">Вернуть</button><button class="sm bad" data-a="del" data-id="'+id+'">'+(delC===id?'Точно?':'Удалить')+'</button></div></div>';
     }else{
-      h+='<div class="ta"><input type="date" value="'+esc(t.deadline||'')+'" data-a="move" data-id="'+id+'" aria-label="Дедлайн">'
+      if(t.ref)h+='<div class="ta"><div class="tb"><button class="sm okb" style="grid-column:1/-1" data-a="odept" data-id="'+id+'">Задача отдела →</button></div></div>';else h+='<div class="ta"><input type="date" value="'+esc(t.deadline||'')+'" data-a="move" data-id="'+id+'" aria-label="Дедлайн">'
        +'<div class="tb"><button class="sm'+(t.comment?' has':'')+'" data-a="cedit" data-id="'+id+'" title="Комментарий" aria-label="Комментарий">💬</button>'
        +'<button class="sm" data-a="flag" data-id="'+id+'" title="'+(t.important?'Сделать неважной':'Сделать важной')+'" aria-label="Важность">'+(t.important?'★':'☆')+'</button>'
        +'<button class="sm okb ok" data-a="done" data-id="'+id+'"><i style="font-style:normal">✓ </i>Выполнено</button></div></div>';
@@ -509,6 +535,7 @@ $('board').addEventListener('click',e=>{
   if(a==='done')save(id,{archived:true});
   else if(a==='restore')save(id,{archived:false});
   else if(a==='flag')save(id,{important:!t.important});
+  else if(a==='odept')openDept(t.ref)
   else if(a==='cedit')openTask(id,true)
   else if(a==='ccancel'){editC=null;renderTasks()}
   else if(a==='csave'){const v=$('ce').value.trim();editC=null;save(id,{comment:v})}
@@ -533,19 +560,80 @@ function tkMode(edit){   // просмотр комментария со ссы�
   if(edit)$('tk_c').focus();else $('tk_p').innerHTML=linkify($('tk_c').value);
 }
 function openTask(id,focusC){
-  const t=items[id];if(!t)return;tkId=id;
+  const t=items[id];if(!t)return;if(t.ref&&items[t.ref])return openDept(t.ref);tkId=id;$('tk_s').checked=!!t.shared;
   $('tk_t').value=t.title||'';$('tk_d').value=t.deadline||'';$('tk_i').checked=!!t.important;$('tk_c').value=t.comment||'';$('tk_err').textContent='';
   $('tk_done').textContent=t.archived?'↩ Вернуть':'✓ Выполнено';$('tkmod').hidden=false;tkMode(!!focusC);
 }
 $('tk_edit').onclick=()=>tkMode($('tk_c').hidden);
 $('tk_cancel').onclick=tkClose;
 $('tk_save').onclick=()=>{const t=$('tk_t').value.trim();if(!t)return $('tk_err').textContent='Укажите название задачи';
-  save(tkId,{title:t,deadline:$('tk_d').value,important:$('tk_i').checked,comment:$('tk_c').value.trim()});tkClose()};
+  save(tkId,{title:t,deadline:$('tk_d').value,important:$('tk_i').checked,shared:$('tk_s').checked,comment:$('tk_c').value.trim()});tkClose()};
 $('tk_done').onclick=()=>{const t=items[tkId]||{};save(tkId,{archived:!t.archived});tkClose()};
 $('tk_del').onclick=()=>arm($('tk_del'),'Точно удалить?',()=>{remove(tkId);tkClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('tkmod').hidden)tkClose()});
 $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   $('p1').dataset.tf=b.dataset.f;[...$('chips').children].forEach(x=>x.className=x===b?'on':'')});
+
+/* ---------- Задачи отдела ---------- */
+const DST=['Не начато','В процессе','На проверке','Выполнено'],DCL=['s0','','sc','dn'];
+const DF=[['act','Активные'],['Не начато','Не начато'],['В процессе','В процессе'],['На проверке','На проверке'],['Выполнено','Выполнено'],['mine','Мои']];
+let dId=null,dFilter='act';
+const uname=id=>((USERS.find(u=>u.id===id)||{}).name||'—'),fst=n=>String(n).split(' ')[0];
+function dcard(d){
+  const i=DST.indexOf(d.status),dn=d.status==='Выполнено',as=(d.assignees||[]).map(x=>fst(uname(x))).join(', ');
+  const tags=[d.focus,d.tactic].filter(Boolean).join(' · ');
+  const txt=dn&&d.result?'Итог: '+d.result:(d.situation?(d.lastDate?fmt(d.lastDate)+': ':'')+d.situation:(d.comment||''));
+  return '<div class="task '+DCL[i<0?0:i]+'" data-did="'+d.id+'"><div class="tt" title="'+esc(d.title)+'">'+esc(d.title)+'</div>'
+    +'<div class="chrow"><span class="chip">'+esc(d.status||DST[0])+'</span>'+(d.deadline?dueChip({deadline:d.deadline,archived:dn}):'')+'</div>'
+    +'<div class="cm">'+(tags?'<b>'+esc(tags)+'</b>\n':'')+esc(txt)+'</div>'
+    +'<div class="hint" style="margin-top:auto">👤 '+esc(as||'не назначен')+'</div></div>';
+}
+function renderDept(){
+  const D=list('d_').filter(d=>d.title),act=D.filter(d=>d.status!=='Выполнено'),late=act.filter(d=>d.deadline&&d.deadline<today()).length;
+  const f=dFilter,mine=d=>(d.assignees||[]).includes(ME.id)||d.creator===ME.id;
+  const arr=D.filter(d=>f==='act'?d.status!=='Выполнено':f==='mine'?mine(d)&&d.status!=='Выполнено':d.status===f)
+    .sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||(a.title||'').localeCompare(b.title||'','ru')||cmpId(a,b));
+  $('dcount').textContent='Активных: '+act.length+(late?' · просрочено: '+late:'');
+  $('dchips').innerHTML=DF.map(x=>'<button data-f="'+x[0]+'"'+(x[0]===f?' class="on"':'')+'>'+x[1]+'</button>').join('');
+  $('dboard').innerHTML=arr.length?'<div class="grid">'+arr.map(dcard).join('')+'</div>':'<div class="empty">Задач нет</div>';
+  const sh=list('t_').filter(t=>t.shared&&t.owner&&t.owner!==ME.id&&!t.ref&&!t.archived&&t.title).sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999'));
+  $('dshn').textContent=sh.length;
+  $('dshared').innerHTML=sh.length?'<div class="grid">'+sh.map(t=>'<div class="task" style="cursor:default"><div class="tt">'+esc(t.title)+'</div>'+dueChip(t)+'<div class="cm">'+linkify(t.comment||'')+'</div><div class="hint" style="margin-top:auto">👤 '+esc(uname(t.owner))+'</div></div>').join('')+'</div>':'<div class="empty">Пока никто не открыл личные задачи отделу</div>';
+  const dc=items.dict||{};$('dl_f').innerHTML=(dc.focus||[]).map(x=>'<option value="'+esc(x)+'">').join('');$('dl_k').innerHTML=(dc.tactic||[]).map(x=>'<option value="'+esc(x)+'">').join('');
+}
+$('dchips').onclick=e=>{const b=e.target.closest('button');if(b){dFilter=b.dataset.f;renderDept()}};
+$('dboard').onclick=e=>{const c=e.target.closest('[data-did]');if(c)openDept(c.dataset.did)};
+$('dadd').onclick=()=>openDept();
+const dmRes=()=>{$('dm_rw').hidden=$('dm_s').value!=='Выполнено'};
+function openDept(id){
+  const d=id?items[id]:null;if(id&&!d)return;dId=id||null;const x=d||{};
+  $('dm_h2').textContent=d?'Задача отдела':'Новая задача отдела';
+  $('dm_t').value=x.title||'';$('dm_c').value=x.comment||'';$('dm_f').value=x.focus||'';$('dm_k').value=x.tactic||'';
+  $('dm_s').innerHTML=DST.map(s=>'<option'+((x.status||DST[0])===s?' selected':'')+'>'+s+'</option>').join('');
+  $('dm_d').value=x.deadline||'';$('dm_sit').value=x.situation||'';$('dm_ld').value=x.lastDate||today();$('dm_ld')._man=0;$('dm_r').value=x.result||'';
+  const as=x.assignees||[];$('dm_a').innerHTML=USERS.map(u=>'<label class="chk" style="padding-bottom:4px"><input type="checkbox" value="'+esc(u.id)+'"'+(as.includes(u.id)?' checked':'')+'> '+esc(u.name)+'</label>').join('')||'<span class="hint">Список сотрудников загрузится после синхронизации</span>';
+  const h=(x.history||[]).slice().reverse();$('dm_hd').hidden=!h.length;$('dm_hd').open=false;$('dm_hs').textContent='Архив действий ('+h.length+')';
+  $('dm_hl').innerHTML=h.map(q=>'<div class="li"><span class="n">'+esc(q.text)+'<small>'+fmt(q.date)+(q.by?' · '+esc(uname(q.by)):'')+'</small></span></div>').join('');
+  $('dm_del').hidden=!d;$('dm_err').textContent='';dmRes();$('dmod').hidden=false;
+}
+$('dm_s').onchange=dmRes;
+$('dm_sit').oninput=()=>{if(!$('dm_ld')._man)$('dm_ld').value=today()};$('dm_ld').onchange=()=>{$('dm_ld')._man=1};
+$('dm_cancel').onclick=()=>{$('dmod').hidden=true};
+$('dm_del').onclick=()=>arm($('dm_del'),'Точно удалить?',()=>{remove(dId);$('dmod').hidden=true});
+$('dm_save').onclick=()=>{
+  const t=$('dm_t').value.trim(),st=$('dm_s').value,res=$('dm_r').value.trim(),f=$('dm_f').value.trim(),k=$('dm_k').value.trim();
+  if(!t)return $('dm_err').textContent='Укажите название задачи';
+  if(st==='Выполнено'&&!res)return $('dm_err').textContent='Для статуса «Выполнено» укажите итоговый результат';
+  const d={title:t,comment:$('dm_c').value.trim(),focus:f,tactic:k,status:st,deadline:$('dm_d').value,
+    assignees:[...document.querySelectorAll('#dm_a input:checked')].map(i=>i.value),situation:$('dm_sit').value.trim(),lastDate:$('dm_ld').value||today(),result:res};
+  if(!dId){d.created=today();d.creator=ME.id}
+  save(dId||nid('d_'),d);
+  const dc=items.dict||{},fo=(dc.focus||[]).slice(),ta=(dc.tactic||[]).slice();let ch=0;
+  if(f&&!fo.includes(f)){fo.push(f);ch=1}if(k&&!ta.includes(k)){ta.push(k);ch=1}
+  if(ch)save('dict',{focus:fo,tactic:ta});
+  $('dmod').hidden=true;
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dmod').hidden)$('dmod').hidden=true});
 
 /* ---------- Бюджет ---------- */
 const BONUS={1:4,4:1,7:2,10:3}; // месяц выплаты -> квартал, за который премия
@@ -1033,14 +1121,14 @@ $('mtDel').onclick=()=>{const t=curT();if(!t||t.id===FREE)return msg('Выбер
 })();
 function tab(n){
   $('home').className='panel'+(n==='home'?' on':'');
-  [1,2,3].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
+  [1,2,3,4].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
   $('navbar').hidden=n==='home';
   if(n==='home')$('hello').textContent='Здравствуйте'+(ME.name?', '+ME.name.split(' ')[0]:'')+'! Выберите раздел';
 }
-const SECS=[[1,'✓','Личные задачи'],[0,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[0,'📅','Медиаплан']];
+const SECS=[[1,'✓','Личные задачи'],[4,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[0,'📅','Медиаплан']];
 $('tiles').innerHTML=SECS.map(x=>'<button class="tile'+(x[0]?'':' soon')+'" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+(x[0]?'':'<small>скоро</small>')+'</button>').join('');
 $('tiles').onclick=e=>{const b=e.target.closest('.tile');if(b&&+b.dataset.s)$('n'+b.dataset.s).click()};
-$('logo').onclick=()=>tab('home');
+$('logo').onclick=()=>tab('home');$('n4').onclick=()=>tab(4);
 $('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
 derive();render();fillSettings();setStatus();tab('home');
