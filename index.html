@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Моя CRM</title>
+<title>МУРР</title>
 <meta name="theme-color" content="#7c5cff">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="CRM">
+<meta name="apple-mobile-web-app-title" content="МУРР">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;600&amp;display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f1eeff;--glass:rgba(255,255,255,.66);--gb:rgba(255,255,255,.85);--inp:rgba(255,255,255,.72);--tx:#1b1740;--mu:#6c6a8e;--line:rgba(90,80,160,.15);
 --bad:#e0425a;--ok-bg:rgba(52,211,153,.2);--ok-bd:rgba(16,185,129,.4);--ok-tx:#0b8f61;--sh:0 8px 30px rgba(80,60,180,.12);--ab:.4;
@@ -220,14 +220,22 @@ details.glass>.in{margin-top:16px}
 .ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin:12px 0;max-height:44vh;overflow:auto}
 .th{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;background:var(--inp)}.th:hover{border-color:#7c5cff}
 .th img{width:100%;height:100%;object-fit:contain}.th button{position:absolute;top:4px;right:4px;padding:2px 7px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}.seg .sm.on{background:var(--g);background-size:250% 250%;color:#fff;border-color:transparent}
+.citem{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-bottom:10px}
+.cih{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12.5px;color:var(--mu);font-weight:600}
+.ctb.sticky{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0;margin:0 0 8px}
+.lrow{display:flex;gap:6px;align-items:flex-start;margin-bottom:6px}.lrow .ced2{min-height:40px}
+.subd summary{cursor:pointer;font-size:12px;color:var(--mu);margin-top:3px}.subd textarea{margin-top:6px;font-size:13.5px}
+.cadd{margin-top:4px}.th small{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-size:10.5px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(min-width:900px){#dboard .grid,#dshared .grid{grid-template-columns:repeat(auto-fill,minmax(200px,230px));justify-content:start}}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
-<header><div class="hl"><h1 id="logo" style="cursor:pointer">Моя CRM</h1>
-  <nav id="navbar" hidden><button id="n1" class="on">Личные</button><button id="n4">Отдел</button><button id="n2">Бюджет</button><button id="n3">Письма</button><button id="n5">Медиаплан</button></nav></div>
-  <div class="hr2"><button id="sync" title="Синхронизировать"><i></i><span>Загрузка…</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
+<header><div class="hl"><h1 id="logo" style="cursor:pointer">МУРР</h1>
+  <nav id="navbar" hidden=""><button id="n1" class="">Личные</button><button id="n4" class="">Отдел</button><button id="n2" class="">Бюджет</button><button id="n3" class="">Письма</button><button id="n5" class="">Медиаплан</button></nav></div>
+  <div class="hr2"><button id="sync" title="Синхронизировать" class="off"><i></i><span>Не подключено</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
 
-<section id="home" class="panel on"><div class="hello" id="hello"></div><div class="tiles" id="tiles"></div></section>
+<section id="home" class="panel on"><div class="hello" id="hello">Здравствуйте! Выберите раздел</div><div class="tiles" id="tiles"><button class="tile" data-s="1"><span>✓</span>Личные задачи</button><button class="tile" data-s="4"><span>👥</span>Задачи отдела</button><button class="tile" data-s="2"><span>₽</span>Бюджет</button><button class="tile" data-s="3"><span>✉</span>Письма</button><button class="tile" data-s="5"><span>📅</span>Медиаплан</button></div></section>
 
 <section id="p1" class="panel" data-tf="all">
   <div class="glass addbar" id="side">
@@ -239,53 +247,53 @@ details.glass>.in{margin-top:16px}
     <button class="btn" id="addT">Добавить</button>
   </div>
   <div class="hr"></div>
-  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint"></span>
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint">Активных: 0</span>
     <div class="chips" id="chips"><button data-f="all" class="on">Все</button><button data-f="hot">Важно</button><button data-f="cool">Не важно</button></div></div>
-    <button class="sm okb" id="doneBtn">Выполнено</button></div>
-  <div id="board"></div>
+    <button class="sm okb" id="doneBtn">✓ Выполнено (0)</button></div>
+  <div id="board"><div class="col hot"><h2 class="hot"><b></b>Важно <em>0</em></h2><div class="colbody"><div class="empty">Важных задач нет</div></div></div><div class="vr"></div><div class="col cool"><h2 class=""><b></b>Не важно <em>0</em></h2><div class="colbody"><div class="empty">Пусто — добавьте задачу</div></div></div></div>
   <button id="fab" aria-label="Новая задача">＋</button>
 </section>
 
 <section id="p4" class="panel">
-  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
-  <div id="dboard"></div>
-  <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn"></em></h2><div id="dshared"></div>
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint">Активных: 0</span><div class="chips" id="dchips"><button data-f="act" class="on">Активные</button><button data-f="Не начато">Не начато</button><button data-f="В процессе">В процессе</button><button data-f="На проверке">На проверке</button><button data-f="Выполнено">Выполнено</button><button data-f="mine">Мои</button></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
+  <div id="dboard"><div class="empty">Задач нет</div></div>
+  <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn">0</em></h2><div id="dshared"><div class="empty">Пока никто не открыл личные задачи отделу</div></div>
 </section>
 
 <section id="p5" class="panel">
-  <div class="mnav"><button class="sm" id="mpp" aria-label="Предыдущий месяц">←</button><b id="mpname"></b><button class="sm" id="mpn" aria-label="Следующий месяц">→</button><button class="btn" id="mpadd" style="margin-left:auto">＋ Рассылка</button></div>
-  <div class="cal" id="cal"></div>
+  <div class="mnav"><button class="sm" id="mpp" aria-label="Предыдущий месяц">←</button><b id="mpname">Ноябрь 2026</b><button class="sm" id="mpn" aria-label="Следующий месяц">→</button><button class="btn" id="mpadd" style="margin-left:auto">＋ Рассылка</button></div>
+  <div class="cal" id="cal"><div class="cw">Пн</div><div class="cw">Вт</div><div class="cw">Ср</div><div class="cw">Чт</div><div class="cw">Пт</div><div class="cw">Сб</div><div class="cw">Вс</div><div class="cd oth" data-day="2026-10-26"><span>26</span></div><div class="cd oth" data-day="2026-10-27"><span>27</span></div><div class="cd oth" data-day="2026-10-28"><span>28</span></div><div class="cd oth" data-day="2026-10-29"><span>29</span></div><div class="cd oth" data-day="2026-10-30"><span>30</span></div><div class="cd oth" data-day="2026-10-31"><span>31</span></div><div class="cd" data-day="2026-11-01"><span>1</span></div><div class="cd" data-day="2026-11-02"><span>2</span></div><div class="cd" data-day="2026-11-03"><span>3</span></div><div class="cd" data-day="2026-11-04"><span>4</span></div><div class="cd" data-day="2026-11-05"><span>5</span></div><div class="cd" data-day="2026-11-06"><span>6</span></div><div class="cd" data-day="2026-11-07"><span>7</span></div><div class="cd" data-day="2026-11-08"><span>8</span></div><div class="cd" data-day="2026-11-09"><span>9</span></div><div class="cd" data-day="2026-11-10"><span>10</span></div><div class="cd" data-day="2026-11-11"><span>11</span></div><div class="cd" data-day="2026-11-12"><span>12</span></div><div class="cd" data-day="2026-11-13"><span>13</span></div><div class="cd" data-day="2026-11-14"><span>14</span></div><div class="cd" data-day="2026-11-15"><span>15</span></div><div class="cd" data-day="2026-11-16"><span>16</span></div><div class="cd" data-day="2026-11-17"><span>17</span></div><div class="cd" data-day="2026-11-18"><span>18</span></div><div class="cd" data-day="2026-11-19"><span>19</span></div><div class="cd td" data-day="2026-11-20"><span>20</span></div><div class="cd" data-day="2026-11-21"><span>21</span></div><div class="cd" data-day="2026-11-22"><span>22</span></div><div class="cd" data-day="2026-11-23"><span>23</span></div><div class="cd" data-day="2026-11-24"><span>24</span></div><div class="cd" data-day="2026-11-25"><span>25</span></div><div class="cd" data-day="2026-11-26"><span>26</span></div><div class="cd" data-day="2026-11-27"><span>27</span></div><div class="cd" data-day="2026-11-28"><span>28</span></div><div class="cd" data-day="2026-11-29"><span>29</span></div><div class="cd" data-day="2026-11-30"><span>30</span></div><div class="cd oth" data-day="2026-12-01"><span>1</span></div><div class="cd oth" data-day="2026-12-02"><span>2</span></div><div class="cd oth" data-day="2026-12-03"><span>3</span></div><div class="cd oth" data-day="2026-12-04"><span>4</span></div><div class="cd oth" data-day="2026-12-05"><span>5</span></div><div class="cd oth" data-day="2026-12-06"><span>6</span></div></div>
   <div class="hint" style="margin-top:10px">Нажмите на день, чтобы запланировать рассылку. Она появится в ваших личных задачах.</div>
 </section>
 
 <section id="p2" class="panel">
-  <div class="mnav"><button class="sm" id="pm" aria-label="Предыдущий месяц">←</button><b id="mname"></b><button class="sm" id="nm" aria-label="Следующий месяц">→</button>
+  <div class="mnav"><button class="sm" id="pm" aria-label="Предыдущий месяц">←</button><b id="mname">Ноябрь 2026</b><button class="sm" id="nm" aria-label="Следующий месяц">→</button>
     <label class="sort">Сортировка списков <select id="sortSel"><option value="desc">Сумма: по убыванию</option><option value="asc">Сумма: по возрастанию</option><option value="name">По названию</option></select></label></div>
   <div class="bgrid">
     <div class="cA">
-      <div class="hero" id="hero"><small id="heroLbl">Доступно</small><span class="big" id="heroVal">0 ₽</span><div class="sub" id="heroSub"></div></div>
-      <div class="glass blk v4"><h3>Расчёт месяца</h3><div id="ledger"></div></div>
+      <div class="hero" id="hero"><small id="heroLbl">Доступно за ноябрь</small><span class="big" id="heroVal">0 ₽</span><div class="sub" id="heroSub">Что не потратите, перейдёт в декабрь 2026</div></div>
+      <div class="glass blk v4"><h3>Расчёт месяца</h3><div id="ledger"><div class="l "><span>Начальный остаток<small>переносится автоматически</small></span><span class="v pos">+ 0 ₽</span></div><div class="l "><span>Зарплата</span><span class="v pos">+ 0 ₽</span></div><div class="l "><span>Постоянные расходы</span><span class="v neg">− 0 ₽</span></div><div class="l net"><span>Чистая прибыль<small>зарплата минус постоянные расходы</small></span><span class="v ">0 ₽</span></div><div class="l "><span>Расходы на даты</span><span class="v neg">− 0 ₽</span></div><div class="l"><span><b>Итого доступно</b></span><span class="v " style="font-size:18px">0 ₽</span></div></div></div>
       <details class="glass blk" id="setBox"><summary>Зарплата и премия</summary><div class="in">
         <div class="row"><div><label class="f">Зарплата за месяц, ₽</label><input id="sm" type="number" inputmode="decimal"></div>
           <div><label class="f">Премия за квартал, ₽</label><input id="sq" type="number" inputmode="decimal"></div></div>
         <div class="row end"><div><label class="f">Остаток на старте, ₽</label><input id="so" type="number" inputmode="decimal"></div>
-          <div><label class="f">Считать с месяца</label><select id="ss"></select></div></div>
+          <div><label class="f">Считать с месяца</label><select id="ss"><option value="2024-11">Ноябрь 2024</option><option value="2024-12">Декабрь 2024</option><option value="2025-01">Январь 2025</option><option value="2025-02">Февраль 2025</option><option value="2025-03">Март 2025</option><option value="2025-04">Апрель 2025</option><option value="2025-05">Май 2025</option><option value="2025-06">Июнь 2025</option><option value="2025-07">Июль 2025</option><option value="2025-08">Август 2025</option><option value="2025-09">Сентябрь 2025</option><option value="2025-10">Октябрь 2025</option><option value="2025-11">Ноябрь 2025</option><option value="2025-12">Декабрь 2025</option><option value="2026-01">Январь 2026</option><option value="2026-02">Февраль 2026</option><option value="2026-03">Март 2026</option><option value="2026-04">Апрель 2026</option><option value="2026-05">Май 2026</option><option value="2026-06">Июнь 2026</option><option value="2026-07">Июль 2026</option><option value="2026-08">Август 2026</option><option value="2026-09">Сентябрь 2026</option><option value="2026-10">Октябрь 2026</option><option value="2026-11" selected="">Ноябрь 2026</option><option value="2026-12">Декабрь 2026</option><option value="2027-01">Январь 2027</option><option value="2027-02">Февраль 2027</option><option value="2027-03">Март 2027</option><option value="2027-04">Апрель 2027</option><option value="2027-05">Май 2027</option><option value="2027-06">Июнь 2027</option><option value="2027-07">Июль 2027</option><option value="2027-08">Август 2027</option><option value="2027-09">Сентябрь 2027</option><option value="2027-10">Октябрь 2027</option><option value="2027-11">Ноябрь 2027</option></select></div></div>
         <div class="row end" style="margin:0"><span class="hint" style="flex:2">Премия приходит в январе, апреле, июле и октябре.</span><button class="btn" id="saveS">Сохранить</button></div></div></details>
     </div>
     <div class="cB">
-      <div class="glass blk"><h3>Расходы месяца <em id="oneSum"></em></h3>
-        <div class="scroll" id="oneList"></div>
+      <div class="glass blk"><h3>Расходы месяца <em id="oneSum">0 ₽</em></h3>
+        <div class="scroll" id="oneList"><div class="empty">В этом месяце расходов нет</div></div>
         <div class="add"><div class="w2"><input id="on" placeholder="Статья расхода"></div><div><input id="oa" type="number" inputmode="decimal" placeholder="Сумма"></div>
           <div><input id="od" type="date" aria-label="Дата"></div><button class="btn" id="addO">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Дату можно очистить — расход попадёт в «Желаемые».</div></div>
-      <details class="glass blk v2" id="recBox"><summary>Постоянные расходы <span class="meta" id="recMeta"></span></summary><div class="in">
-        <div class="scroll" id="recList" style="max-height:300px"></div>
+      <details class="glass blk v2" id="recBox" open=""><summary>Постоянные расходы <span class="meta" id="recMeta">0 · 0 ₽/мес</span></summary><div class="in">
+        <div class="scroll" id="recList" style="max-height:300px"><div class="empty">Статей пока нет</div></div>
         <div class="add"><div class="w2"><input id="rn" placeholder="Статья (аренда, интернет…)"></div><div><input id="ra" type="number" inputmode="decimal" placeholder="В месяц"></div>
           <button class="btn" id="addR">Добавить</button></div></div></details>
     </div>
     <div class="cC">
-      <div class="glass blk v3"><h3>Желаемые расходы <em id="wSum"></em></h3>
-        <div class="scroll" id="wList" style="max-height:480px"></div>
+      <div class="glass blk v3"><h3>Желаемые расходы <em id="wSum">0 · 0 ₽</em></h3>
+        <div class="scroll" id="wList" style="max-height:480px"><div class="empty">Список пуст. Добавьте то, что хотите купить</div></div>
         <div class="add"><div class="w2"><input id="wn" placeholder="Что хочу купить"></div><div><input id="wa" type="number" inputmode="decimal" placeholder="Сумма"></div>
           <button class="btn" id="addW">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Нажмите «В месяц», когда решите потратить: расход перейдёт на нужную дату.</div></div>
@@ -293,37 +301,37 @@ details.glass>.in{margin-top:16px}
   </div>
 </section>
 <section id="p3" class="panel">
-  <div id="mban" class="ban" hidden></div>
+  <div id="mban" class="ban" hidden=""></div>
   <div class="mgrid">
     <div class="mcol">
       <div class="glass mb"><h3>Отправитель и письмо</h3>
-        <div class="fld"><label class="f">Отправитель</label><select id="mfrom"><option value="me"></option><option value="shared"></option></select></div>
-        <div class="fld"><label class="f">Письмо (шаблон)</label><select id="mt"></select>
-          <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
+        <div class="fld"><label class="f">Отправитель</label><select id="mfrom"><option value="me">моя почта: укажите в ⚙ → Профиль</option><option value="shared">общая почта (общая)</option></select></div>
+        <div class="fld"><label class="f" style="display:flex;justify-content:space-between;align-items:center;gap:8px">Письмо (шаблон)<select id="mtsort" style="width:auto;padding:4px 8px;font-size:12px" aria-label="Сортировка шаблонов"><option value="name">по названию</option><option value="new">сначала новые</option><option value="old">сначала старые</option></select></label><select id="mt"></select>
+          <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button><button class="sm" id="mtNewH" title="Вставить готовый HTML">＋ HTML</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
         <div class="fld"><label class="f">Режим</label><select id="mm"><option value="1">Одно письмо</option><option value="2">Рассылка</option></select></div>
-        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple><div id="mfl"></div></div>
+        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple=""><div id="mfl"></div></div>
       </div>
       <div class="glass mb" id="m1"><h3>Получатель</h3>
         <div class="fld"><label class="f">Почта получателя</label><input id="me" type="email" placeholder="partner@example.ru" autocapitalize="off" autocorrect="off"></div>
-        <div class="fld"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="mccx"> Добавить копию (CC)</label><div id="mcopyw" hidden style="margin-top:8px"><input id="mcopy" placeholder="a@example.ru, b@example.ru" autocapitalize="off" autocorrect="off"></div></div>
+        <div class="fld"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="mccx"> Добавить копию (CC)</label><div id="mcopyw" hidden="" style="margin-top:8px"><input id="mcopy" placeholder="a@example.ru, b@example.ru" autocapitalize="off" autocorrect="off"></div></div>
         <div class="fld"><label class="f">Тема</label><input id="ms"></div>
-        <div class="fld" id="mfree" hidden><label class="f">Письмо без шаблона</label><div class="btns" style="margin-top:0"><button class="sm okb" id="cOpen">🎨 Открыть конструктор</button></div><div class="hint" id="cinfo" style="margin-top:6px"></div><textarea id="mbody" hidden></textarea></div>
+        <div class="fld" id="mfree" hidden=""><label class="f">Письмо без шаблона</label><div class="btns" style="margin-top:0"><button class="sm okb" id="cOpen">🎨 Открыть конструктор</button></div><div class="hint" id="cinfo" style="margin-top:6px">Письмо ещё не собрано.</div><textarea id="mbody" hidden=""></textarea></div>
         <div id="mv"></div>
         <button class="btn" id="s1">В очередь на отправку</button>
       </div>
-      <div class="glass mb" id="m2" hidden><h3>Рассылка</h3>
-        <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px"></div>
+      <div class="glass mb" id="m2" hidden=""><h3>Рассылка</h3>
+        <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px">Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.</div>
         <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
-        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button><button class="sm" id="mmissbtn" hidden>Скачать СЦ без почты</button></div>
+        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden="">Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden="">Отправить всем (0)</button><button class="btn" id="mnewbtn" hidden="">Только новым (0)</button><button class="sm" id="mmissbtn" hidden="">Скачать СЦ без почты (0)</button></div>
       </div>
-      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div class="btns" id="mqact" hidden style="margin:0 0 10px"><button class="sm" id="mq_r">Обновить</button><button class="sm" id="mq_q">Вернуть зависшие в очередь</button><button class="sm" id="mq_c">Очистить очередь</button><button class="sm" id="mq_f">Починить очередь</button></div><div id="mlog"></div></div></details>
+      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div class="btns" id="mqact" hidden="" style="margin:0 0 10px"><button class="sm" id="mq_r">Обновить</button><button class="sm" id="mq_q">Вернуть зависшие в очередь</button><button class="sm" id="mq_c">Очистить очередь</button><button class="sm" id="mq_f">Починить очередь</button></div><div id="mlog"></div></div></details>
     </div>
-    <div class="glass mb mpv"><h3>Предпросмотр</h3><iframe id="pv" class="pv" sandbox></iframe></div>
+    <div class="glass mb mpv"><h3>Предпросмотр</h3><iframe id="pv" class="pv" sandbox=""></iframe></div>
   </div>
 </section>
 </div>
 
-<div class="modal" id="tmod" hidden><div class="glass wide">
+<div class="modal" id="tmod" hidden=""><div class="glass wide">
   <h2>Шаблон письма</h2>
   <input type="hidden" id="te_id">
   <div class="fld"><label class="f">Название</label><input id="te_n"></div>
@@ -332,48 +340,51 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="te_err"></div>
   <div class="acts"><button class="btn sec" id="te_cancel">Отмена</button><button class="btn" id="te_save">Сохранить</button></div>
 </div></div>
-<div class="modal" id="mmod" hidden><div class="glass wide">
+<div class="modal" id="mmod" hidden=""><div class="glass wide">
   <h2>Рассылка</h2>
   <div class="fld"><label class="f">Получатели</label><select id="msrc"><option value="list">Список адресов</option><option value="file">Excel-файл: каждому — только его строки</option></select></div>
   <div class="fld" id="msl"><label class="f">Адреса (через запятую, пробел или с новой строки) — каждому уйдёт отдельное письмо</label><textarea id="mlist" rows="6"></textarea></div>
-  <div id="msf" hidden>
+  <div id="msf" hidden="">
     <div class="fld"><label class="f">Excel-файл (.xlsx). Столбцы «код СЦ» и «почта» определяются сами, листов может быть несколько</label><input id="mf" type="file" accept=".xlsx"></div>
     <div class="hint" id="mfi" style="margin-bottom:10px;white-space:pre-wrap"></div>
     <div class="fld"><div class="tkh"><label class="f" style="margin:0">Реестр партнёров (код СЦ → почта)</label><button class="sm" id="regbtn">Загрузить / обновить</button></div>
-      <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden></div>
-    <div class="fld" id="mmissw" hidden><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div class="hint" id="mmissl" style="margin-bottom:8px;user-select:text"></div>
+      <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden=""></div>
+    <div class="fld" id="mmissw" hidden=""><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div class="hint" id="mmissl" style="margin-bottom:8px;user-select:text"></div>
       <div id="mmiss" class="scroll" style="max-height:200px;overflow:auto"></div>
-      <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked> Сохранить введённые адреса в реестр</label>
+      <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked=""> Сохранить введённые адреса в реестр</label>
       <div class="btns"><button class="sm" id="mmdl">Скачать список (xlsx)</button><button class="sm" id="mmskip">Продолжить без этих СЦ</button></div></div>
-    <div class="fld" id="mcdw" hidden><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
+    <div class="fld" id="mcdw" hidden=""><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
     <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
   </div>
   <div id="mmv"></div>
-  <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked> Сначала отправить тестовое письмо</label>
-  <div class="fld" id="mtw"><label class="f">Куда отправить тест</label><select id="mtsel"><option value="me"></option><option value="shared"></option><option value="other">Другая почта…</option></select><input id="mtt" type="email" hidden style="margin-top:8px" placeholder="адрес для теста" autocapitalize="off"></div>
+  <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked=""> Сначала отправить тестовое письмо</label>
+  <div class="fld" id="mtw"><label class="f">Куда отправить тест</label><select id="mtsel"><option value="me">моя почта: укажите в ⚙ → Профиль</option><option value="shared">общая почта (общая)</option><option value="other">Другая почта…</option></select><input id="mtt" type="email" hidden="" style="margin-top:8px" placeholder="адрес для теста" autocapitalize="off"></div>
   <div class="err" id="mmsg2"></div>
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
-<div class="modal" id="cmod" hidden><div class="glass cwide">
-  <div class="chd"><h2 style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><button class="sm" id="c_tpl">Сохранить как шаблон…</button><button class="sm" id="c_clr">Начать заново</button></div></div>
-  <div class="cgrid"><div class="cedit"><div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить раздел</button></div>
-  <div class="cprev"><iframe id="cpv" class="pv" sandbox></iframe></div></div>
-  <div class="err" id="c_err"></div><div class="acts"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn" id="c_ok">Готово</button></div>
+<div class="modal" id="cmod" hidden=""><div class="glass cwide">
+  <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"><option value="">Начать с готового письма…</option><option value="0">01 Предложение партнёрской программы</option><option value="1">02 Запускаем ваш сервисный центр</option><option value="2">03 Поздравляем, вы — официальный партнёр Контура!</option><option value="3">04 Прайс на продажу продуктов открыт!</option><option value="4">05 Давайте продолжим общение</option><option value="5">06 Предложение реферального партнёрства</option><option value="6">07 Согласование офиса</option><option value="7">08 Сотрудничество с Контуром</option><option value="8">09 Заявка на партнёрство закрыта</option><option value="9">10 Предложение партнёрской программы</option><option value="10">11 Универсальный</option><option value="11">12 Мы вас потеряли</option><option value="12">13 Необходимо проявить активность</option><option value="13">14 Необходимо возобновить продажи</option><option value="14">15 Аттестация по продукту «{{Название продукта}}»</option><option value="15">16 Счета без оплаты — напомните о них клиентам</option><option value="16">17 Инструменты для партнёра</option></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
+  <div class="row" style="margin-bottom:8px"><div><label class="f">Тема письма</label><input id="c_subj" placeholder="Тема, которую увидит получатель"></div><div><label class="f">Прехедер (текст рядом с темой в списке писем)</label><input id="c_pre"></div></div>
+  <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button></div>
+    <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button></div>
+  <div class="cprev"><iframe id="cpv" class="pv" sandbox=""></iframe></div></div>
+  <div class="err" id="c_err"></div><div class="acts"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok">Готово</button><button class="btn" id="c_save" hidden="">Сохранить шаблон</button></div>
 </div></div>
-<div class="modal" id="imod" hidden style="z-index:110"><div class="glass wide" style="max-width:640px">
+<div class="modal" id="imod" hidden="" style="z-index:110"><div class="glass wide" style="max-width:680px">
   <h2 id="im_h">Изображения</h2>
-  <div class="fld"><label class="f">Загрузить с компьютера (JPG, PNG — сожмутся сами)</label><input id="im_f" type="file" accept="image/png,image/jpeg" multiple></div>
+  <div class="fld"><label class="f">Загрузить с компьютера (JPG, PNG — сожмутся сами)</label><input id="im_f" type="file" accept="image/png,image/jpeg" multiple=""></div>
   <div class="row end"><div style="flex:3"><label class="f">…или вставьте ссылку на картинку</label><input id="im_u" placeholder="https://…" autocapitalize="off"></div><button class="sm" id="im_uok" style="flex:0 0 auto">Использовать</button></div>
   <div class="ig" id="im_g"></div><div class="err" id="im_e"></div><div class="acts"><button class="btn sec" id="im_x">Закрыть</button></div>
 </div></div>
-<div class="modal" id="onb" hidden><div class="glass" style="max-height:92vh;overflow:auto">
+<div class="modal" id="askmod" hidden="" style="z-index:130"><div class="glass" style="max-width:460px"><h2 id="ask_h"></h2><div id="ask_f"></div><div class="err" id="ask_e"></div><div class="acts" id="ask_b" style="flex-wrap:wrap"></div></div></div>
+<div class="modal" id="onb" hidden=""><div class="glass" style="max-height:92vh;overflow:auto">
   <h2>Добро пожаловать!</h2><p>Укажите имя и фамилию и отметьте разделы, которыми будете пользоваться. Остальные не будут вам мешать. Позже это можно изменить в ⚙.</p>
   <div class="fld"><label class="f">Имя Фамилия</label><input id="ob_n" autocomplete="name"></div>
   <div class="fld"><label class="f">Рабочая почта (с неё уходят письма; нужна для раздела «Письма»)</label><input id="ob_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru"></div>
   <div class="fld"><label class="f">Разделы</label><div id="ob_s"></div></div>
   <div class="err" id="ob_e"></div><div class="acts"><button class="btn" id="ob_ok">Продолжить</button></div>
 </div></div>
-<div class="modal" id="mpmod" hidden><div class="glass" style="max-width:480px">
+<div class="modal" id="mpmod" hidden=""><div class="glass" style="max-width:480px">
   <h2 id="mp_h2">Рассылка</h2>
   <div class="fld"><label class="f">Название</label><input id="mp_t"></div>
   <div class="fld"><label class="f">Дата рассылки</label><input id="mp_d" type="date"></div>
@@ -382,7 +393,7 @@ details.glass>.in{margin-top:16px}
   <div class="hint" id="mp_a" style="margin-bottom:8px"></div><div class="err" id="mp_e"></div>
   <div class="tkacts"><div><button class="btn sec" id="mp_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="mp_cancel">Отмена</button><button class="btn" id="mp_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="dmod" hidden><div class="glass wide">
+<div class="modal" id="dmod" hidden=""><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
   <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
   <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
@@ -393,29 +404,29 @@ details.glass>.in{margin-top:16px}
   <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
   <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
   <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
-  <div class="fld" id="dm_rw" hidden><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
-  <details class="fld" id="dm_hd" hidden><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
+  <div class="fld" id="dm_rw" hidden=""><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
+  <details class="fld" id="dm_hd" hidden=""><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
   <div class="err" id="dm_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="dm_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="dm_cancel">Отмена</button><button class="btn" id="dm_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
+<div class="modal" id="tkmod" hidden=""><div class="glass wide" style="max-width:560px">
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
   <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
   <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
   <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
     <div class="tkp" id="tk_p"></div>
-    <textarea id="tk_c" rows="6" hidden placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
+    <textarea id="tk_c" rows="6" hidden="" placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="cfgm" hidden><div class="glass" style="max-height:92vh;overflow:auto">
+<div class="modal" id="cfgm"><div class="glass" style="max-height:92vh;overflow:auto">
   <h2>Подключение к таблице</h2>
   <p>Адрес и код вы получаете при настройке Apps Script. Достаточно ввести их один раз на каждом устройстве.</p>
   <label class="f">Адрес веб-приложения (заканчивается на /exec)</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off">
   <label class="f" style="margin-top:10px">Код доступа</label><input id="ck" placeholder="Код из setup()" autocapitalize="off" autocorrect="off">
   <div class="err" id="cerr"></div>
-  <div id="prof" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+  <div id="prof" hidden="" style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
     <h2 style="font-size:16px">Профиль</h2>
     <label class="f">Имя Фамилия</label><input id="pf_n" autocomplete="name">
     <label class="f" style="margin-top:10px">Рабочая почта (адрес отправителя писем)</label><input id="pf_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru">
@@ -791,7 +802,7 @@ const clean=h=>h.replace(/<a[^>]*href="%%unsubscribe%%"[^>]*>[\s\S]*?<\/a>/gi,''
 const uniq=a=>[...new Set(a.map(x=>String(x==null?'':x).trim()).filter(Boolean))];
 const capC=(a,n)=>a.length<=n?a.join(', '):a.slice(0,n).join(', ')+' и ещё '+(a.length-n);
 const splitE=s=>{const p=String(s==null?'':s).split(/[;,\s]+/).filter(Boolean);return{good:[...new Set(p.map(x=>x.toLowerCase()).filter(x=>EM.test(x)))],bad:p.filter(x=>!EM.test(x))}};
-const toText=h=>h.replace(/<!--[\s\S]*?-->/g,'').replace(/<(style|head|script)[\s\S]*?<\/\1>/gi,'').replace(/<\/(p|div|tr|li|h\d)>|<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\n\s*\n+/g,'\n\n').trim();
+const toText=h=>h.replace(/<!--[\s\S]*?-->/g,'').replace(/<span class="preheader"[\s\S]*?<\/span>/,'').replace(/<(style|head|script)[\s\S]*?<\/\1>/gi,'').replace(/<\/(p|div|tr|li|h\d)>|<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\n\s*\n+/g,'\n\n').trim();
 const mk=id=>(t,bad)=>{$(id).textContent=t||'';$(id).style.color=bad?'var(--bad)':'var(--mu)'};
 const msgm=mk('mmsg2'),ADDR={me:'',shared:''};
 let bT=0;
@@ -819,7 +830,7 @@ function renderQ(j){
 }
 async function loadMail(){
   if(!navigator.onLine)return msg('Письма работают только при подключении к интернету',1);
-  try{const j=await mapi('init');M.tpl=j.tpl||[];buildReg(j.dir);M.ok=true;M.shared=j.shared||'';fillSenders();renderQ(j);fillTpl();msg('');
+  try{const j=await mapi('init');M.tpl=tplLoad(j.tpl);buildReg(j.dir);M.ok=true;M.shared=j.shared||'';fillSenders();renderQ(j);fillTpl();msg('');
     if(j.q.p+j.q.c>0&&!$('mban').offsetParent){M.q0=j.q;const n=j.q.p+j.q.c;prog(1,'',0,n);watchQ(n)}}
   catch(e){msg(e.message,1)}
 }
@@ -850,17 +861,17 @@ const Q=async jobs=>{   // пачками по размеру (до ~1,5 МБ з
 async function Qsend(jobs,cb){const N=jobs.length;let j;prog(0,'',0,N);try{j=await mapi('status');M.q0=j.q;await Q(jobs)}catch(e){prog(0,'err',0,N,e.message);return false}renderQ(j);prog(1,'',0,N);watchQ(N,cb);return true}
 const FREE='__free',t2h=x=>'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+esc(x).replace(/\n/g,'<br>')+'</div>';
 const curT=()=>$('mt').value===FREE?{id:FREE,name:'',subject:'',html:M.consHtml||t2h($('mbody').value)}:M.tpl.find(t=>t.id===$('mt').value);
-function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=M.tpl.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (без шаблона)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
+function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=sortedTpl().map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (без шаблона)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
 const gv=()=>{const v={};document.querySelectorAll('#mv [data-v]').forEach(i=>v[i.dataset.v]=i.value.trim());return v};
 function fillVars(){
-  const t=curT(),fr=t&&t.id===FREE,ns=t&&!fr?vnames(t.html+' '+t.subject):[],old=gv();
+  const t=curT(),fr=t&&t.id===FREE,ns=t?vnames((t.html||'')+' '+(fr?'':t.subject)):[],old=gv();
   $('mfree').hidden=!fr;
   $('mv').innerHTML=ns.length?'<div class="hint" style="margin-bottom:8px">В письме есть поля {{…}} — заполните вручную:</div>'+ns.map(n=>'<div class="fld"><label class="f">'+esc(n)+'</label><input data-v="'+esc(n)+'" value="'+esc(old[n]||'')+'"></div>').join(''):'';
   $('ms')._man=0;preview();if(PL.length){PL=[];renderM2()}fillMV();
 }
 function preview(){const t=curT();if(!t){$('pv').srcdoc='';return}const g=gv(),v={};for(const k in g)if(g[k])v[k]=g[k];
   if(t.id!==FREE&&!$('ms')._man)$('ms').value=fillT(t.subject,v);$('pv').srcdoc=fillT(clean(t.html),v,true)}
-$('mt').onchange=fillVars;$('ms').oninput=()=>{$('ms')._man=1};$('mv').addEventListener('input',preview);$('mbody').oninput=preview;
+$('mt').onchange=()=>{fillVars();if($('mt').value===FREE)openCons('free')};$('ms').oninput=()=>{$('ms')._man=1};$('mv').addEventListener('input',preview);$('mbody').oninput=preview;
 $('mfrom').value=LS.get('crm.from')==='shared'?'shared':'me';$('mfrom').onchange=()=>LS.set('crm.from',$('mfrom').value);
 const fsz=n=>n>1e6?(n/1e6).toFixed(1)+' МБ':Math.ceil(n/1e3)+' КБ';
 function renderFiles(){$('mfl').innerHTML=M.files.map((f,i)=>'<span class="chip">'+esc(f.name)+' · '+fsz(f.size)+'<button data-x="'+i+'" title="Убрать вложение">×</button></span>').join('')}
@@ -894,7 +905,7 @@ $('s1').onclick=()=>{
   arm(b,'Подтвердить: '+ADDR[fr]+' → '+to,async()=>{
     b.disabled=true;
     try{const html=fillT(clean(t.html),v,true),files=await Promise.all(M.files.map(b64f));
-      if(await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:$('ms').value,html,text:toText(html),files}]))resetSingle()}
+      if(await Qsend([{from:fr,to,cc:cc.good.join(', '),subject:fillT($('ms').value,v),html,text:toText(html),files}]))resetSingle()}
     catch(e){ban('err','Не удалось поставить в очередь: '+e.message)}finally{b.disabled=false}});
 };
 
@@ -1163,8 +1174,8 @@ toggleT();toggleS();renderM2();renderFiles();
 
 /* шаблоны (модалка) */
 function openT(t){$('te_id').value=t?t.id:'';$('te_n').value=t?t.name:'';$('te_s').value=t?t.subject:'';$('te_h').value=t?t.html:'';$('te_err').textContent='';$('tmod').hidden=false}
-$('mtNew').onclick=()=>openT();
-$('mtEdit').onclick=()=>{const t=curT();if(!t||t.id===FREE)return msg('Выберите шаблон для правки',1);openT(t)};
+$('mtNew').onclick=()=>openCons('tpl',null);$('mtNewH').onclick=()=>openT();
+$('mtEdit').onclick=()=>{const t=curT();if(!t)return msg('Выберите шаблон для правки',1);if(t.id===FREE)return openCons('free');if(t.model)return openCons('tpl',t.id);openT(t)};
 $('te_cancel').onclick=()=>{$('tmod').hidden=true};
 $('te_save').onclick=async()=>{
   const n=$('te_n').value.trim();let h=$('te_h').value,s=$('te_s').value.trim();
@@ -1173,129 +1184,232 @@ $('te_save').onclick=async()=>{
   if(!s)return $('te_err').textContent='Укажите тему письма';
   const id=$('te_id').value||'m'+Date.now().toString(36),o={id,name:n,subject:s,html:h},i=M.tpl.findIndex(x=>x.id===id),prev=M.tpl.slice();
   if(i<0)M.tpl.push(o);else M.tpl[i]=o;
-  try{await mapi('tpl',{list:M.tpl});$('tmod').hidden=true;fillTpl(id);msg('Шаблон сохранён ✓')}catch(e){M.tpl=prev;$('te_err').textContent=e.message}
+  try{await mapi('tpl',{list:tplSave()});$('tmod').hidden=true;fillTpl(id);msg('Шаблон сохранён ✓')}catch(e){M.tpl=prev;$('te_err').textContent=e.message}
 };
 $('mtDel').onclick=()=>{const t=curT();if(!t||t.id===FREE)return msg('Выберите шаблон для удаления',1);
-  arm($('mtDel'),'Точно удалить?',async()=>{const prev=M.tpl.slice();M.tpl=M.tpl.filter(x=>x.id!==t.id);try{await mapi('tpl',{list:M.tpl});fillTpl();msg('Шаблон удалён')}catch(e){M.tpl=prev;msg(e.message,1)}})};
+  arm($('mtDel'),'Точно удалить?',async()=>{const prev=M.tpl.slice();M.tpl=M.tpl.filter(x=>x.id!==t.id);try{await mapi('tpl',{list:tplSave()});fillTpl();msg('Шаблон удалён')}catch(e){M.tpl=prev;msg(e.message,1)}})};
 
-/* ---------- Конструктор писем ---------- */
-const FF="'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif";
-const blk0=()=>({img:'',icon:'',title:'',html:'',nb:0,b:[{t:'',u:''},{t:'',u:''}]});
-let C=parse(LS.get('crm.cons'),null);if(!C||!Array.isArray(C.blocks)||!C.blocks.length)C={blocks:[blk0()]};
-const saveC=()=>LS.set('crm.cons',JSON.stringify(C));
-const safeUrl=u=>{u=String(u||'').trim();if(/^(https?:\/\/|mailto:|tel:)/i.test(u))return u;if(/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(u))return 'https://'+u;return ''};
-const sp=n=>'<div style="font-size:'+n+'px;line-height:'+n+'px">&nbsp;</div>';
-function cleanRich(h){   // из редактора пропускаем только жирный/курсив/подчёркивание/списки/ссылки/переносы — остальное (в т.ч. скрипты и стили) отбрасывается
-  const d=new DOMParser().parseFromString('<body>'+(h||'')+'</body>','text/html').body,P0='color:#000;font-family:'+FF+';font-weight:400;font-size:16px;line-height:24px;',INL={B:'strong',STRONG:'strong',I:'em',EM:'em',U:'u',BR:'br',A:'a'};
-  let out='',buf='';
+const KIT={"head": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> <html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"ru\" xml:lang=\"ru\" style=\"color-scheme:light;supported-color-schemes:light\"> <head> <meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"> <meta name=\"viewport\" content=\"width=device-width\"> <meta name=\"format-detection\" content=\"telephone=no, address=no, email=no, date=no\"> <meta name=\"kontur-mail\" content=\"2.8.1\"> <meta name=\"color-scheme\" content=\"light\"> <meta name=\"supported-color-schemes\" content=\"light\"> <style>#outlook a{padding:0}.btn,.more{text-decoration:none}.ExternalClass{width:100%}.ExternalClass,.ExternalClass div,.ExternalClass font,.ExternalClass p,.ExternalClass span,.ExternalClass td{line-height:100%}#bodyTable{height:100%!important;margin:0;padding:0;width:100%!important}#backgroundTable{margin:0;Margin:0;padding:0;width:100%!important;line-height:100%!important}@media only screen{html{min-height:100%;background:#f5f5f5}}@media only screen and (max-width:630px){.small-float-center{margin:0 auto!important;float:none!important;text-align:center!important}.small-text-center{text-align:center!important}.small-text-left{text-align:left!important}.small-text-right{text-align:right!important}}@media only screen and (max-width:630px){table.body img{width:auto;height:auto}table.body center{min-width:0!important}table.body .container{width:95%!important}table.body .column,table.body .columns{height:auto!important;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;padding-left:30px!important;padding-right:30px!important}table.body .column .column,table.body .column .columns,table.body .columns .column,table.body .columns .columns{padding-left:0!important;padding-right:0!important}table.body .collapse .column,table.body .collapse .columns{padding-left:0!important;padding-right:0!important}td.small-1,th.small-1{display:inline-block!important;width:8.333333%!important}td.small-2,th.small-2{display:inline-block!important;width:16.666666%!important}td.small-3,th.small-3{display:inline-block!important;width:25%!important}td.small-4,th.small-4{display:inline-block!important;width:33.333333%!important}td.small-5,th.small-5{display:inline-block!important;width:41.666666%!important}td.small-6,th.small-6{display:inline-block!important;width:50%!important}td.small-7,th.small-7{display:inline-block!important;width:58.333333%!important}td.small-8,th.small-8{display:inline-block!important;width:66.666666%!important}td.small-9,th.small-9{display:inline-block!important;width:75%!important}td.small-10,th.small-10{display:inline-block!important;width:83.333333%!important}td.small-11,th.small-11{display:inline-block!important;width:91.666666%!important}td.small-12,th.small-12{display:inline-block!important;width:100%!important}.column td.small-12,.column th.small-12,.columns td.small-12,.columns th.small-12{display:block!important;width:100%!important}table.body td.small-offset-1,table.body th.small-offset-1{margin-left:8.333333%!important;Margin-left:8.333333%!important}table.body td.small-offset-2,table.body th.small-offset-2{margin-left:16.666666%!important;Margin-left:16.666666%!important}table.body td.small-offset-3,table.body th.small-offset-3{margin-left:25%!important;Margin-left:25%!important}table.body td.small-offset-4,table.body th.small-offset-4{margin-left:33.333333%!important;Margin-left:33.333333%!important}table.body td.small-offset-5,table.body th.small-offset-5{margin-left:41.666666%!important;Margin-left:41.666666%!important}table.body td.small-offset-6,table.body th.small-offset-6{margin-left:50%!important;Margin-left:50%!important}table.body td.small-offset-7,table.body th.small-offset-7{margin-left:58.333333%!important;Margin-left:58.333333%!important}table.body td.small-offset-8,table.body th.small-offset-8{margin-left:66.666666%!important;Margin-left:66.666666%!important}table.body td.small-offset-9,table.body th.small-offset-9{margin-left:75%!important;Margin-left:75%!important}table.body td.small-offset-10,table.body th.small-offset-10{margin-left:83.333333%!important;Margin-left:83.333333%!important}table.body td.small-offset-11,table.body th.small-offset-11{margin-left:91.666666%!important;Margin-left:91.666666%!important}table.body table.columns td.expander,table.body table.columns th.expander{display:none!important}table.body .right-text-pad,table.body .text-pad-right{padding-left:10px!important}table.body .left-text-pad,table.body .text-pad-left{padding-right:10px!important}table.menu{width:100%!important}table.menu td,table.menu th{width:auto!important;display:inline-block!important}table.menu.small-vertical td,table.menu.small-vertical th,table.menu.vertical td,table.menu.vertical th{display:block!important}table.menu[align=center]{width:auto!important}table.button.small-expand,table.button.small-expanded{width:100%!important}table.button.small-expand table,table.button.small-expanded table{width:100%}table.button.small-expand table a,table.button.small-expanded table a{text-align:center!important;width:100%!important;padding-left:0!important;padding-right:0!important}table.button.small-expand center,table.button.small-expanded center{min-width:0}}@media only screen and (max-width:630px){table.container{min-width:100%;border-radius:0!important}table.container [background]{background-size:cover}}@media only screen and (max-width:630px){.container-group .container-wrap>.spacer{display:none!important}}@media only screen and (max-width:630px){.h1,h1{font-size:28px!important;line-height:36px!important}.h2,h2{font-size:24px!important;line-height:32px!important}.h3,h3{font-size:22px!important;line-height:28px!important}.h4,h4{font-size:20px!important;line-height:28px!important}.h5,h5{font-size:16px!important;line-height:24px!important}.h6,h6{font-size:15px!important;line-height:21px!important}.lead{font-size:15px!important;line-height:23px!important}p{font-size:14px!important;line-height:22px!important}.medium{font-size:14px!important;line-height:22px!important}.small,small{font-size:13px!important;line-height:19px!important}.extra-small{font-size:12px!important;line-height:18px!important}img{max-width:100%}}@media only screen and (max-width:630px){.calendar-month{font-size:16px}}@media only screen and (max-width:630px){.calendar-title{font-size:16px;line-height:24px}}@media only screen and (max-width:630px){.mediablock-desc{font-size:14px;line-height:22px}}@media only screen and (max-width:630px){img.logo{width:auto!important;max-height:32px!important}}@media only screen and (max-width:630px){.list-large .list-item td{font-size:16px!important;line-height:24px!important}}@media only screen and (max-width:630px){.checklist .list-item td,.list-icon-large .list-item td,.list-icon-lead .list-item td,.list-icon-medium .list-item td{padding-bottom:16px!important}.checklist .list-item td.list-item__bullet-icon,.list-icon-large .list-item td.list-item__bullet-icon,.list-icon-lead .list-item td.list-item__bullet-icon,.list-icon-medium .list-item td.list-item__bullet-icon{padding-right:11px!important;mso-line-height-alt:25px!important}.checklist .list-item .list-item__bullet-text,.checklist .list-item td+td,.list-icon-large .list-item .list-item__bullet-text,.list-icon-large .list-item td+td,.list-icon-lead .list-item .list-item__bullet-text,.list-icon-lead .list-item td+td,.list-icon-medium .list-item .list-item__bullet-text,.list-icon-medium .list-item td+td{padding-top:3px!important;font-size:14px!important;line-height:22px!important}}@media only screen and (max-width:630px){.list.checklist td:first-child img{max-width:none!important}}@media only screen and (max-width:630px){.spacer_mobile>div{display:block!important;width:auto!important;overflow:visible!important;max-height:none!important;font-size:inherit!important;line-height:inherit!important}}@media only screen and (max-width:630px){.spacer_desktop{display:none!important;width:0;mso-hide:all;overflow:hidden}}@media only screen and (max-width:630px){.hide-for-large{display:block!important;width:auto!important;overflow:visible!important;max-height:none!important;font-size:inherit!important;line-height:inherit!important}}@media only screen and (max-width:630px){table.body table.container .hide-for-large,table.body table.container .row.hide-for-large{display:table!important;width:100%!important}}@media only screen and (max-width:630px){table.body table.container .callout-inner.hide-for-large{display:table-cell!important;width:100%!important}}@media only screen and (max-width:630px){table.body table.container .show-for-large{display:none!important;width:0;mso-hide:all;overflow:hidden}}@media only screen and (max-width:630px){table.body img{max-width:100%!important}table.row .column,table.row .columns{height:auto!important;padding-left:20px!important;padding-right:20px!important;padding-bottom:30px!important}table.row .column.last,table.row .columns.last{padding-bottom:0!important}.row.small-no-spacing .columns{padding-bottom:0!important}.compact-gutter{padding-left:0!important;padding-right:0!important}}</style> <!--[if mso]> <style>*{font-family:Arial,sans-serif!important}</style> <![endif]--> <!--[if !mso]><!--> <style>@font-face{font-family:\"Lab Grotesque K\";font-weight:300;src:url(https://s.kontur.ru/common-v2/fonts/LabGrotesque/LabGrotesque-Light.woff) format(\"woff\")}@font-face{font-family:\"Lab Grotesque K\";font-weight:400;src:url(https://s.kontur.ru/common-v2/fonts/LabGrotesque/LabGrotesque-Regular.woff) format(\"woff\")}@font-face{font-family:\"Lab Grotesque K\";font-weight:600;src:url(https://s.kontur.ru/common-v2/fonts/LabGrotesque/LabGrotesque-Medium.woff) format(\"woff\")}@font-face{font-family:\"Lab Grotesque K\";font-weight:700;src:url(https://s.kontur.ru/common-v2/fonts/LabGrotesque/LabGrotesque-Bold.woff) format(\"woff\")}</style> <!--<![endif]--> ", "body": "<body style=\"min-width:100%;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;-webkit-hyphens:none;-moz-hyphens:none;hyphens:none;font-size:16px;width:100%\"> <span class=\"preheader\" style=\"visibility:hidden;font-size:1px;color:#f5f5f5;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;display:none;mso-hide:all\">%%PRE%%</span> <!--[if !mso]><!--> <font face=\"'Lab Grotesque K', -apple-system, BlinkMacSystemFont, 'YS Text', Arial, sans-serif\"> <!--<![endif]--> <table class=\"body\" style=\"border-spacing:0;border-collapse:collapse;height:100%;width:100%;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;background:#f5f5f5;background-image:url(https://s.kontur.ru/common-v2/emails/backgrounds/f5f5f5.png);background-repeat:repeat;-webkit-font-smoothing:antialiased\"> <tr> <td style=\"word-wrap:break-word;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;line-height:24px;font-size:16px;text-align:center;vertical-align:top;background-color:#f5f5f5;background-image:url(https://s.kontur.ru/common-v2/emails/backgrounds/f5f5f5.png);border-collapse:collapse\" background=\"https://s.kontur.ru/common-v2/emails/backgrounds/f5f5f5.png\" bgcolor=\"#F5F5F5\" class=\"center\"> <center style=\"width:100%;min-width:0\"> <table align=\"center\" class=\"container\" style=\"border-spacing:0;border-collapse:collapse;width:600px;margin:0 auto;Margin:0 auto;text-align:inherit;border-radius:10px;overflow:hidden;background:0 0\"> <tr> <td style=\"word-wrap:break-word;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;vertical-align:top;border-collapse:collapse\"> <div class=\"spacer spacer_desktop\" style=\"font-size:28px;line-height:28px\"> <div>&nbsp;</div> </div> <div class=\"spacer spacer_mobile\" style=\"font-size:16px;line-height:16px\"> <div style=\"display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px\">&nbsp;</div> </div> <a href=\"https://kontur.ru/partnership\" target=\"_blank\" style=\"text-decoration:none;color:#015ccb\"> <center style=\"width:100%;min-width:0\"> <img src=\"https://s.kontur.ru/common-v2/logos/logo-kontur-32@2x.png\" width=\"94\" height=\"32\" alt=\"Контур\" class=\"logo\" style=\"width:auto;clear:both;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:100%;border:none;display:block;color:#222;font-weight:400;font-size:23px;line-height:32px;mso-line-height-rule:exactly\"> </center> </a> <div class=\"spacer spacer_desktop\" style=\"font-size:28px;line-height:28px\"> <div>&nbsp;</div> </div> <div class=\"spacer spacer_mobile\" style=\"font-size:16px;line-height:16px\"> <div style=\"display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px\">&nbsp;</div> </div> </td> </tr> </table> <div class=\"container-group\">", "open": "<div class=\"container-wrap\"><table align=\"center\" class=\"container\" style=\"border-spacing:0;border-collapse:collapse;width:600px;margin:0 auto;Margin:0 auto;text-align:inherit;overflow:hidden;background:0 0;border-radius:10px\"><tr><td bgcolor=\"#FFFFFF\" style=\"word-wrap:break-word;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;vertical-align:top;border-collapse:collapse\"><div class=\"spacer spacer_desktop\" style=\"font-size:50px;line-height:50px\"><div>&nbsp;</div></div><div class=\"spacer spacer_mobile\" style=\"font-size:40px;line-height:40px\"><div style=\"display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px\">&nbsp;</div></div><table class=\"row\" style=\"border-spacing:0;border-collapse:collapse;text-align:left;padding:0;width:100%;position:relative;display:table\"><tbody><tr><th class=\"small-12 large-12 columns first last\" style=\"padding:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;margin:0 auto;Margin:0 auto;width:570px;vertical-align:top;padding-top:0;padding-bottom:0;-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box;padding-left:50px;padding-right:50px\"><table style=\"border-spacing:0;border-collapse:collapse;text-align:left;width:100%\"><tbody><tr><th style=\"padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px\">", "close": "</th><th class=\"expander\" style=\"margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;visibility:hidden;width:0;padding:0\"> </th></tr></tbody></table></th></tr></tbody></table><div class=\"spacer spacer_desktop\" style=\"font-size:50px;line-height:50px\"><div>&nbsp;</div></div><div class=\"spacer spacer_mobile\" style=\"font-size:40px;line-height:40px\"><div style=\"display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px\">&nbsp;</div></div></td></tr></table></div><div class=\"spacer spacer_desktop\" style=\"font-size:20px;line-height:20px\"><div>&nbsp;</div></div><div class=\"spacer spacer_mobile\" style=\"font-size:15px;line-height:15px\"><div style=\"display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px\">&nbsp;</div></div>", "foot": "</div><table align=\"center\" class=\"container\" style=\"border-spacing:0;border-collapse:collapse;width:600px;margin:0 auto;Margin:0 auto;text-align:inherit;border-radius:10px;overflow:hidden;background:0 0\"> <tr> <td style=\"word-wrap:break-word;padding:0;margin:0;Margin:0;color:#000;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-weight:400;text-align:left;line-height:24px;font-size:16px;vertical-align:top;border-collapse:collapse\"> <div class=\"spacer\" style=\"font-size:10px;line-height:10px\"> <div>&nbsp;</div> </div> <center style=\"width:100%;min-width:0\"><p class=\"h6\" style=\"margin:0 0 15px;Margin:0 0 15px;word-wrap:normal;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-size:15px;font-weight:400;text-align:center;line-height:1.4;color:#666;padding:0 20px\">Данное письмо направлено вам в рамках партнёрской рассылки, сформировано автоматически и не подразумевает ответа.</p></center><center style=\"width:100%;min-width:0\"> &nbsp; <a href=\"tel:8 800 500-50-80\" class=\"link gray\" style=\"font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;text-decoration:none;color:#858585;white-space:nowrap\" target=\"_blank\"> <b style=\"font-weight:700\">8 800 500-50-80</b> </a> &nbsp;<span class=\"show-for-large\">&middot;</span>&nbsp; <a href=\"mailto:help@kontur.ru\" class=\"link gray\" style=\"font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;text-decoration:none;color:#858585;white-space:nowrap\" target=\"_blank\"> <b style=\"font-weight:700\">help@kontur.ru</b> </a> &nbsp;<span class=\"show-for-large\">&middot;</span>&nbsp; <a href=\"https://kontur.ru\" class=\"link gray\" style=\"font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;text-decoration:none;color:#858585;white-space:nowrap\" target=\"_blank\"> <b style=\"font-weight:700\">kontur.ru</b> </a> &nbsp; <div class=\"spacer\" style=\"font-size:20px;line-height:20px\"> <div>&nbsp;</div> </div> </center> <center style=\"width:100%;min-width:0\"> <p class=\"h6\" style=\"margin:0 0 15px;Margin:0 0 15px;word-wrap:normal;font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;font-size:15px;Margin-bottom:15px;font-weight:400;margin-bottom:0;text-align:center;line-height:1.4;color:#666;margin-top:0;Margin-top:0\"> АО «ПФ «СКБ Контур». Россия, Екатеринбург, Народной Воли&nbsp;19а.<br> </p>  </center> <div class=\"spacer spacer-xl\" style=\"line-height:50px;font-size:50px\"> <div>&nbsp;</div> </div> </td> </tr> </table> </center> </td> </tr> </table> <!--[if !mso]><!--> </font> <!--<![endif]--> <div style=\"display:none;white-space:nowrap;font:15px courier;line-height:0\"> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; </div> </body> </html> "};
+const BI0=[{"k": "img", "n": "Предложение партнёрской программы", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/30777i/42147028-ac37-492d-9e53-9e7c67a157db.png?t=1784204477"}, {"k": "img", "n": "Запуск сервисного центра", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/29740i/4f1284c1-d84a-413b-9d9a-f18badf57105.png?t=1777414856"}, {"k": "img", "n": "Поздравляем / инструменты", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/30779i/d40dd8cf-5758-4d06-8ca9-ca0fd044bec1.png?t=1784205455"}, {"k": "img", "n": "Прайс открыт", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/29337i/112b1f4f-91b9-4d8d-b0dc-78c0619ec4cf.png?t=1775226743"}, {"k": "img", "n": "Общий: общение, счета", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/29339i/0bc5a744-cfcd-41d5-a738-96310cf870b7.png?t=1775228403"}, {"k": "img", "n": "Реферальное партнёрство", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/29336i/19142236-e370-4f95-8a99-db4fe49368a3.png?t=1775226312"}, {"k": "img", "n": "Согласование офиса / аттестация", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/30780i/45323d23-b577-47a5-b780-e0a4274cdcdb.png?t=1784206644"}, {"k": "img", "n": "Заявка закрыта / активность", "u": "https://services.kontur.ru/Files/Modules/MailTemplate/30778i/72b64eb4-c723-45cc-98f7-d28bbc7a35ec.png?t=1784204910"}];
+const PRESETS=[{"n":"01 Предложение партнёрской программы","m":{"subj":"Предложение партнёрской программы","pre":"Мы подготовили для вас коммерческое предложение с условиями сотрудничества.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30777i/42147028-ac37-492d-9e53-9e7c67a157db.png?t=1784204477","title":"Предложение партнёрской программы","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Благодарим вас за&nbsp;интерес к&nbsp;партнёрской программе Контура. Мы подготовили для вас коммерческое предложение с&nbsp;условиями и&nbsp;особенностями сотрудничества."},{"t":"p","h":"Пожалуйста, ознакомьтесь с&nbsp;ним и&nbsp;дайте ответ до&nbsp;{{Дата}}."},{"t":"b","al":"l","b":[{"t":"Ознакомиться","u":"{{Ссылка}}","s":"fill"}]}]}]}},{"n":"02 Запускаем ваш сервисный центр","m":{"subj":"Запускаем ваш сервисный центр","pre":"Подпишите два заявления через Диадок и получите код сервисного центра.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29740i/4f1284c1-d84a-413b-9d9a-f18badf57105.png?t=1777414856","title":"Запускаем ваш сервисный центр","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Мы рады, что вы приняли наше предложение о&nbsp;сотрудничестве."},{"t":"p","h":"Для запуска сервисного центра необходимо подписать два заявления в&nbsp;электронном виде через Диадок. Заявления приложены к&nbsp;этому письму. Документооборот с&nbsp;Контуром бесплатный."},{"t":"p","h":"<b>Отправьте заявления до&nbsp;{{Дата}}.</b>"}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/kontur-partners/kontur-partners-64-regular@2x.png","title":"Как это сделать","it":[{"t":"l","ic":"num","li":[{"h":"Авторизуйтесь в&nbsp;Диадоке с&nbsp;помощью сертификата.","s":[]},{"h":"Прикрепите два заявления из&nbsp;этого письма и&nbsp;отправьте их, выбрав Контур в&nbsp;качестве контрагента:","s":["ИНН: **6663003127**","КПП: **997750001**","Подразделение: **«Управление регионального развития»**"]}]},{"t":"b","al":"c","b":[{"t":"Отправить через Диадок","u":"https://diadoc.kontur.ru/","s":"fill"}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/star/star-64-regular@2x.png","title":"Код вашего сервисного центра","it":[{"t":"c","h":"z{{00000}}"},{"t":"p","h":"Запомните его: код нужно указывать во&nbsp;всех документах, письмах и&nbsp;обращениях в&nbsp;партнёрскую поддержку."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Возникли сложности?","it":[{"t":"p","h":"Если при отправке возникнут проблемы, воспользуйтесь <a href=\"https://support.kontur.ru/partner/38980-etap_3_prisoedinenie_k_agentskomu_dogovoru\">инструкцией</a>."}]}]}},{"n":"03 Поздравляем, вы — официальный партнёр Контура!","m":{"subj":"Поздравляем, вы — официальный партнёр Контура!","pre":"Чтобы начать продавать продукты Контура, пройдите обучение.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30779i/d40dd8cf-5758-4d06-8ca9-ca0fd044bec1.png?t=1784205455","title":"Поздравляем, вы — официальный партнёр Контура!","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Рады сообщить, что теперь вы официальный партнёр Контура. Чтобы начать продавать наши продукты, сначала нужно пройти обучение."},{"t":"p","h":"<b>Пройдите обучение до&nbsp;{{Дата}}.</b>"},{"t":"b","al":"l","b":[{"t":"Пройти обучение","u":"https://edu.skbkontur.ru/edu/user-panel/educations/","s":"fill"}]}]}]}},{"n":"04 Прайс на продажу продуктов открыт!","m":{"subj":"Прайс на продажу продуктов открыт!","pre":"Обучение пройдено, сервисный центр запущен — можно продавать.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29337i/112b1f4f-91b9-4d8d-b0dc-78c0619ec4cf.png?t=1775226743","title":"Прайс на продажу продуктов открыт!","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Вы прошли обучение и&nbsp;завершили запуск сервисного центра. Теперь вы можете полноценно работать и&nbsp;продавать продукты Контура."},{"t":"p","h":"Если возникнут вопросы, воспользуйтесь:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://in.kontur.ru/partners\">Контур.Гайды</a>&nbsp;— все материалы и&nbsp;инструменты для работы;","s":[]},{"h":"<a href=\"https://in.kontur.ru/cabinet\">Кабинет СЦ</a>&nbsp;— как войти, как работать с&nbsp;сотрудниками, как назначить новое обучение и&nbsp;многое другое;","s":[]},{"h":"<a href=\"https://in.kontur.ru/partners/86438-podderzhka_partnerov\">Контур.WIC</a>&nbsp;— если нужна консультация.","s":[]}]}]}]}},{"n":"05 Давайте продолжим общение","m":{"subj":"Давайте продолжим общение","pre":"Мы не смогли дозвониться — давайте договоримся о времени звонка.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29339i/0bc5a744-cfcd-41d5-a738-96310cf870b7.png?t=1775228403","title":"Давайте продолжим общение","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Вы оставляли заявку на&nbsp;партнёрство с&nbsp;Контуром, но&nbsp;нам не&nbsp;удалось до&nbsp;вас дозвониться."},{"t":"p","h":"Давайте договоримся о&nbsp;повторном звонке. Напишите в&nbsp;ответном письме удобное для вас время или просто ожидайте звонка. Мы на&nbsp;связи с&nbsp;07:00 до&nbsp;16:00 по&nbsp;московскому времени."}]}]}},{"n":"06 Предложение реферального партнёрства","m":{"subj":"Предложение реферального партнёрства","pre":"Вознаграждение до 50% от первой оплаты привлечённых клиентов.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29336i/19142236-e370-4f95-8a99-db4fe49368a3.png?t=1775226312","title":"Предложение реферального партнёрства","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Начните зарабатывать вместе с&nbsp;Контуром уже сегодня: станьте участником реферальной программы. Привлекайте клиентов и&nbsp;получайте вознаграждение до&nbsp;50% от&nbsp;их первой оплаты."},{"t":"p","h":"Подробнее о&nbsp;программе:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://kontur.ru/partnership/online\">Регистрация в&nbsp;реферальной программе</a>","s":[]},{"h":"<a href=\"https://support.kontur.ru/referral/38993-usloviya_referalnoj_programmy\">Гайд по&nbsp;реферальной программе</a>","s":[]}]}]}]}},{"n":"07 Согласование офиса","m":{"subj":"Согласование офиса","pre":"Создайте инцидент в WIC, чтобы мы проверили ваш офис.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30780i/45323d23-b577-47a5-b780-e0a4274cdcdb.png?t=1784206644","title":"Согласование офиса","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Поскольку вы открываете сервисный центр с&nbsp;офисом, нам нужно проверить, что офис существует и&nbsp;соответствует требованиям. Для этого:"},{"t":"l","ic":"num","li":[{"h":"Создайте инцидент в&nbsp;WIC.","s":[]},{"h":"Выберите категорию «Вопросы по&nbsp;продажам и&nbsp;подключению».","s":[]},{"h":"Выберите тип вопроса «Стандарт офиса».","s":[]},{"h":"Укажите адрес офиса и&nbsp;прикрепите фотографии. Какие именно фото нужны, описано на&nbsp;5-й странице приложенного файла «Стандарт офиса СЦ».","s":[]}]},{"t":"b","al":"l","b":[{"t":"Создать инцидент","u":"https://wic.kontur.ru/incidents","s":"fill"}]}]}]}},{"n":"08 Сотрудничество с Контуром","m":{"subj":"Сотрудничество с Контуром","pre":"Предлагаем другой формат — реферальную программу.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29336i/19142236-e370-4f95-8a99-db4fe49368a3.png?t=1775226312","title":"Сотрудничество с Контуром","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Вы оставляли заявку на&nbsp;сотрудничество с&nbsp;Контуром в&nbsp;формате официального представителя. К&nbsp;сожалению, по&nbsp;итогам внутренней проверки мы не&nbsp;можем предложить вам этот формат."},{"t":"p","h":"Взамен приглашаем вас стать участником реферальной программы: привлекайте клиентов и&nbsp;получайте вознаграждение до&nbsp;50% от&nbsp;их первой оплаты."},{"t":"p","h":"Подробнее о&nbsp;программе:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://kontur.ru/partnership/online\">Регистрация в&nbsp;реферальной программе</a>","s":[]},{"h":"<a href=\"https://support.kontur.ru/referral/38993-usloviya_referalnoj_programmy\">Гайд по&nbsp;реферальной программе</a>","s":[]}]}]}]}},{"n":"09 Заявка на партнёрство закрыта","m":{"subj":"Заявка на партнёрство закрыта","pre":"Мы долго не получали ответа, поэтому закрыли вашу заявку.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30778i/72b64eb4-c723-45cc-98f7-d28bbc7a35ec.png?t=1784204910","title":"Заявка на партнёрство закрыта","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Ранее вы выразили намерение стать партнёром Контура, и&nbsp;мы остановились на&nbsp;этапе «{{Название этапа}}»."},{"t":"p","h":"Для открытия сервисного центра установлены определённые сроки. Мы долго не&nbsp;получали от&nbsp;вас ответа, поэтому были вынуждены закрыть вашу заявку."},{"t":"p","h":"Если ваши планы не&nbsp;изменились, вы можете подать новую заявку на&nbsp;<a href=\"https://kontur.ru/partnership\">странице партнёрской программы</a>."}]}]}},{"n":"10 Предложение партнёрской программы","m":{"subj":"Предложение партнёрской программы","pre":"Условия сотрудничества, план первого года и вознаграждение.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30777i/42147028-ac37-492d-9e53-9e7c67a157db.png?t=1784204477","title":"Предложение партнёрской программы","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Спасибо за&nbsp;интерес к&nbsp;партнёрской программе Контура. Мы подготовили для вас условия сотрудничества."},{"t":"p","h":"Все партнёры работают по&nbsp;договору-оферте. Ознакомиться с&nbsp;ней можно по&nbsp;кнопке ниже."},{"t":"b","al":"l","b":[{"t":"Ознакомиться с офертой","u":"https://disk.skbkontur.ru/index.php/s/rcErPfLNe87Db5m","s":"fill"}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Основные условия","it":[{"t":"l","ic":"arrow","li":[{"h":"<b>Формат работы.</b> Партнёры работают самостоятельно, без закреплённого менеджера.","s":[]},{"h":"<b>Вознаграждение.</b> Выплачивается за&nbsp;новых клиентов и&nbsp;их первичное подключение к&nbsp;продуктам. Продлениями занимается Контур, с&nbsp;них вознаграждение не&nbsp;начисляется.","s":[]},{"h":"<b>Обучение.</b> Чтобы продавать продукт, сначала нужно пройти обучение по&nbsp;нему. После этого откроется прайс для выставления счетов.","s":[]},{"h":"<b>Работа с&nbsp;офисом.</b> Через год вы сможете принимать клиентов лично и&nbsp;будете указаны в&nbsp;контактах на&nbsp;нашем сайте.","s":[]},{"h":"<b>НПД и&nbsp;АУСН.</b> К&nbsp;сожалению, организации и&nbsp;ИП на&nbsp;этих режимах не&nbsp;могут работать в&nbsp;статусе агента (пп.&nbsp;21 п.&nbsp;2 ст.&nbsp;3 Федерального закона от&nbsp;25.02.2022 №&nbsp;17-ФЗ), поэтому партнёрство для них недоступно.","s":[]},{"h":"<b>ОКВЭД.</b> Если вы планируете работать с&nbsp;нами, рекомендуем заранее добавить ОКВЭД 82.99&nbsp;— «Деятельность по&nbsp;предоставлению прочих вспомогательных услуг для бизнеса, не&nbsp;включенная в&nbsp;другие группировки». Так у&nbsp;вас не&nbsp;возникнет вопросов со&nbsp;стороны ФНС.","s":[]}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/money-type-coins/money-type-coins-64-regular@2x.png","title":"План первого года","it":[{"t":"l","ic":"arrow","li":[{"h":"<b>Первый месяц после обучения:</b> первая сделка, сумма не&nbsp;ограничена.","s":[]},{"h":"<b>Через 6 месяцев:</b> выручка от&nbsp;200&nbsp;000&nbsp;₽.","s":[]},{"h":"<b>Через 12 месяцев:</b> выручка от&nbsp;500&nbsp;000&nbsp;₽ и&nbsp;не&nbsp;менее трёх проданных продуктов.","s":[]}]},{"t":"p","h":"Эти цифры&nbsp;— ориентир. Если выполнить план не&nbsp;получится, вместе подберём альтернативный формат сотрудничества."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/star/star-64-regular@2x.png","title":"Что вы получаете","it":[{"t":"l","ic":"arrow","li":[{"h":"Агентское вознаграждение за&nbsp;каждый проданный продукт. Процент, средний чек и&nbsp;список продуктов&nbsp;— по&nbsp;кнопке ниже.","s":[]},{"h":"Техподдержку 24/7 для клиентов и&nbsp;партнёров.","s":[]},{"h":"Маркетинговую поддержку и&nbsp;инструменты продвижения.","s":[]},{"h":"Базу знаний для привлечения клиентов и&nbsp;роста продаж.","s":[]},{"h":"Льготный доступ к&nbsp;сервисам Контура.","s":[]}]},{"t":"b","al":"l","b":[{"t":"Смотреть вознаграждение","u":"https://disk.skbkontur.ru/index.php/s/P44CwAyS9SmxS7x?openfile=true","s":"fill"}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/kontur-partners/kontur-partners-64-regular@2x.png","title":"Что дальше","it":[{"t":"l","ic":"arrow","li":[{"h":"<b>Анкета партнёра.</b> Если условия вам подходят, <b>заполните анкету из&nbsp;отдельного письма до&nbsp;{{Дата}}.</b> Если письма нет, проверьте папку «Спам» или напишите нам&nbsp;— мы отправим анкету повторно.","s":[]},{"h":"<b>Обратная связь.</b> Если какие-то условия вас не&nbsp;устроили, расскажите, что нам стоит улучшить. Для этого есть отдельная анкета обратной связи. Мы стараемся быть лучше и&nbsp;доступнее для партнёров.","s":[]}]},{"t":"b","al":"l","b":[{"t":"Оставить обратную связь","u":"https://disk.skbkontur.ru/index.php/s/P44CwAyS9SmxS7x?openfile=true","s":"line"}]}]}]}},{"n":"11 Универсальный","m":{"subj":"{{Название заголовка}}","pre":"{{Текст}}","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29339i/0bc5a744-cfcd-41d5-a738-96310cf870b7.png?t=1775228403","title":"{{Название заголовка}}","it":[{"t":"p","h":"{{Текст}}"}]}]}},{"n":"12 Мы вас потеряли","m":{"subj":"Мы вас потеряли","pre":"За месяц не было активности в привлечении клиентов.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30778i/72b64eb4-c723-45cc-98f7-d28bbc7a35ec.png?t=1784204910","title":"Мы вас потеряли","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Вы являетесь нашим официальным партнёром, но&nbsp;за&nbsp;прошедший месяц вы не&nbsp;проявили активности в&nbsp;привлечении клиентов."},{"t":"p","h":"Пора действовать! При длительном отсутствии результатов нам придётся пересмотреть формат партнёрства."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/money-type-coins/money-type-coins-64-regular@2x.png","title":"Плановые показатели","it":[{"t":"p","h":"Напоминаем, что для всех партнёрских СЦ установлены плановые показатели:"},{"t":"l","ic":"arrow","li":[{"h":"Запустить продажи в&nbsp;первый месяц, то есть совершить первую продажу.","s":[]},{"h":"Достичь финансовой цели в&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;первые 6 месяцев.","s":[]},{"h":"Достичь финансовой цели в&nbsp;500&nbsp;000&nbsp;₽ в&nbsp;первые 12 месяцев.","s":[]},{"h":"Для СЦ, работающих больше года,&nbsp;— цель 1&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;год.","s":[]}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Где найти помощь","it":[{"t":"p","h":"Если возникнут вопросы, воспользуйтесь:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://in.kontur.ru/partners\">Контур.Гайды</a>&nbsp;— все материалы и&nbsp;инструменты для работы;","s":[]},{"h":"<a href=\"https://in.kontur.ru/cabinet\">Кабинет СЦ</a>&nbsp;— как войти, как работать с&nbsp;сотрудниками, как назначить новое обучение и&nbsp;многое другое;","s":[]},{"h":"<a href=\"https://in.kontur.ru/partners/86438-podderzhka_partnerov\">Контур.WIC</a>&nbsp;— если нужна консультация.","s":[]}]}]}]}},{"n":"13 Необходимо проявить активность","m":{"subj":"Необходимо проявить активность","pre":"За 3 месяца у вашего СЦ не было продаж.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30778i/72b64eb4-c723-45cc-98f7-d28bbc7a35ec.png?t=1784204910","title":"Необходимо проявить активность","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"По&nbsp;итогам последних 3 месяцев у&nbsp;вашего СЦ зафиксировано отсутствие продаж. Отсутствие результатов&nbsp;— основание для пересмотра формата партнёрства."},{"t":"p","h":"Мы заинтересованы в&nbsp;продолжении работы, но&nbsp;для этого вам необходимо в&nbsp;ближайшее время возобновить продажи."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/money-type-coins/money-type-coins-64-regular@2x.png","title":"Плановые показатели","it":[{"t":"p","h":"Напоминаем, что для всех партнёрских СЦ установлены плановые показатели:"},{"t":"l","ic":"arrow","li":[{"h":"Запустить продажи в&nbsp;первый месяц, то есть совершить первую продажу.","s":[]},{"h":"Достичь финансовой цели в&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;первые 6 месяцев.","s":[]},{"h":"Достичь финансовой цели в&nbsp;500&nbsp;000&nbsp;₽ в&nbsp;первые 12 месяцев.","s":[]},{"h":"Для СЦ, работающих больше года,&nbsp;— цель 1&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;год.","s":[]}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Где найти помощь","it":[{"t":"p","h":"Если возникнут вопросы, воспользуйтесь:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://in.kontur.ru/partners\">Контур.Гайды</a>&nbsp;— все материалы и&nbsp;инструменты для работы;","s":[]},{"h":"<a href=\"https://in.kontur.ru/cabinet\">Кабинет СЦ</a>&nbsp;— как войти, как работать с&nbsp;сотрудниками, как назначить новое обучение и&nbsp;многое другое;","s":[]},{"h":"<a href=\"https://in.kontur.ru/partners/86438-podderzhka_partnerov\">Контур.WIC</a>&nbsp;— если нужна консультация.","s":[]}]}]}]}},{"n":"14 Необходимо возобновить продажи","m":{"subj":"Необходимо возобновить продажи","pre":"За 6 месяцев у вашего СЦ не было продаж.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30778i/72b64eb4-c723-45cc-98f7-d28bbc7a35ec.png?t=1784204910","title":"Необходимо возобновить продажи","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"По&nbsp;итогам последних 6 месяцев у&nbsp;вашего СЦ зафиксировано отсутствие продаж. Отсутствие результатов&nbsp;— основание для пересмотра формата партнёрства."},{"t":"p","h":"Если в&nbsp;течение ближайшего месяца продажи не&nbsp;будут запущены, мы будем вынуждены инициировать закрытие СЦ."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/money-type-coins/money-type-coins-64-regular@2x.png","title":"Плановые показатели","it":[{"t":"p","h":"Напоминаем, что для всех партнёрских СЦ установлены плановые показатели:"},{"t":"l","ic":"arrow","li":[{"h":"Запустить продажи в&nbsp;первый месяц, то есть совершить первую продажу.","s":[]},{"h":"Достичь финансовой цели в&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;первые 6 месяцев.","s":[]},{"h":"Достичь финансовой цели в&nbsp;500&nbsp;000&nbsp;₽ в&nbsp;первые 12 месяцев.","s":[]},{"h":"Для СЦ, работающих больше года,&nbsp;— цель 1&nbsp;200&nbsp;000&nbsp;₽ в&nbsp;год.","s":[]}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Где найти помощь","it":[{"t":"p","h":"Если возникнут вопросы, воспользуйтесь:"},{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://in.kontur.ru/partners\">Контур.Гайды</a>&nbsp;— все материалы и&nbsp;инструменты для работы;","s":[]},{"h":"<a href=\"https://in.kontur.ru/cabinet\">Кабинет СЦ</a>&nbsp;— как войти, как работать с&nbsp;сотрудниками, как назначить новое обучение и&nbsp;многое другое;","s":[]},{"h":"<a href=\"https://in.kontur.ru/partners/86438-podderzhka_partnerov\">Контур.WIC</a>&nbsp;— если нужна консультация.","s":[]}]}]}]}},{"n":"15 Аттестация по продукту «{{Название продукта}}»","m":{"subj":"Аттестация по продукту «{{Название продукта}}»","pre":"Стартовала обязательная аттестация по продукту.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30780i/45323d23-b577-47a5-b780-e0a4274cdcdb.png?t=1784206644","title":"Аттестация по продукту «{{Название продукта}}»","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"{{Дата}} стартовала обязательная аттестация по&nbsp;продукту «{{Название продукта}}»."},{"t":"p","h":"Вы получили это письмо, потому что у&nbsp;вас открыт прайс по&nbsp;этому продукту. В&nbsp;новости описано, как проходит аттестация, как к&nbsp;ней подготовиться и&nbsp;какие последствия наступают при непрохождении."},{"t":"b","al":"l","b":[{"t":"Ознакомиться с новостью","u":"{{Ссылка}}","s":"fill"}]}]}]}},{"n":"16 Счета без оплаты — напомните о них клиентам","m":{"subj":"Счета без оплаты — напомните о них клиентам","pre":"Список неоплаченных счетов приложен к письму.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/29339i/0bc5a744-cfcd-41d5-a738-96310cf870b7.png?t=1775228403","title":"Счета без оплаты — напомните о них клиентам","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Началась последняя неделя месяца&nbsp;— самое время вернуться к&nbsp;выставленным счетам. Мы выгрузили те, что пока не&nbsp;оплачены, и&nbsp;приложили список к&nbsp;этому письму."},{"t":"p","h":"Свяжитесь с&nbsp;клиентами: возможно, им просто нужно напомнить о&nbsp;счёте, а&nbsp;вам это может принести вознаграждение."}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/star/star-64-regular@2x.png","title":"Что поможет довести сделку до оплаты","it":[{"t":"l","ic":"arrow","li":[{"h":"Методология на&nbsp;Инфо подскажет, как вести разговор по&nbsp;продукту.","s":[]},{"h":"<a href=\"https://info.kontur.ru/sales-trainer\">ИИ-тренажёр</a> позволит отработать разговор с&nbsp;клиентом до&nbsp;звонка.","s":[]},{"h":"<a href=\"https://bi.kontur.ru/Reports/powerbi/%D0%9E%D1%82%D1%87%D1%91%D1%82%D1%8B%20%D0%BF%D0%BE%20%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D0%B6%D0%B0%D0%BC/%D0%A3%D0%BF%D1%80%D0%B0%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BF%D1%80%D0%BE%D0%B4%D0%B0%D0%B6%D0%B0%D0%BC%D0%B8/%D0%A1%D1%82%D0%B0%D1%82%D0%B8%D1%81%D1%82%D0%B8%D0%BA%D0%B0\">Отчёт «Статистика»</a> поможет в&nbsp;будущем самостоятельно отбирать неоплаченные счета.","s":[]}]},{"t":"p","h":"Желаем вам успешных продаж!"}]}]}},{"n":"17 Инструменты для партнёра","m":{"subj":"Инструменты для партнёра","pre":"Видео и гайды для работы с сервисами Контура.","cards":[{"k":"banner","img":"https://services.kontur.ru/Files/Modules/MailTemplate/30779i/d40dd8cf-5758-4d06-8ca9-ca0fd044bec1.png?t=1784205455","title":"Инструменты для партнёра","it":[{"t":"p","h":"Добрый день!"},{"t":"p","h":"Хотим поделиться с&nbsp;вами инструментами для работы с&nbsp;клиентами."},{"t":"p","h":"Это видео поможет сориентироваться в&nbsp;основных сервисах Контура&nbsp;— оно создано специально для новых партнёров."},{"t":"b","al":"l","b":[{"t":"Посмотреть видео","u":"https://disk.skbkontur.ru/index.php/s/FHxdBBDM5zmcbxF","s":"fill"}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/kontur-partners/kontur-partners-64-regular@2x.png","title":"Полезные инструкции","it":[{"t":"l","ic":"arrow","li":[{"h":"<a href=\"https://in.kontur.ru/partners/start\">Гайд по&nbsp;старту и&nbsp;работе партнёра</a>","s":[]},{"h":"<a href=\"https://in.kontur.ru/cabinet\">Гайд по&nbsp;кабинету СЦ</a>","s":[]},{"h":"<a href=\"https://in.kontur.ru/wic/52298-tip_voprosa\">Гайд WIC по&nbsp;созданию инцидентов и&nbsp;решению вопросов</a>","s":[]},{"h":"<a href=\"https://in.kontur.ru/wic/82901-nastrojka_uvedomlenij\">Гайд WIC по&nbsp;настройке уведомлений</a>","s":[]},{"h":"<a href=\"https://in.kontur.ru/sales\">Гайд по&nbsp;работе в&nbsp;Контур.Продажах</a>","s":[]},{"h":"<a href=\"https://in.kontur.ru/manuals\">Гайд с&nbsp;технологическими инструкциями</a>","s":[]},{"h":"<a href=\"https://info.kontur.ru/articles/f391923c-6f36-4923-89a8-5fbe9aa695d5?p=1210&amp;utm_source=in.kontur.ru&amp;utm_medium=referral&amp;utm_startpage=in.kontur.ru%2Fpartners%2F84036-resursy_i_reglamenty&amp;utm_orderpage=in.kontur.ru%2Fpartners%2F84036-resursy_i_reglamenty\">Стандарт подписи в&nbsp;письмах клиентам Контура</a>","s":[]}]}]},{"k":"icon","img":"https://s.kontur.ru/common-v2/icons-ui/black-bg/info-circle/info-circle-64-regular@2x.png","title":"Помогите сделать материалы полезнее","it":[{"t":"p","h":"Поделитесь обратной связью и&nbsp;расскажите, какой информации вам не&nbsp;хватает для работы с&nbsp;сервисами."},{"t":"b","al":"l","b":[{"t":"Анкета обратной связи","u":"https://forms.kontur.ru/form/CRN3r3FkMu","s":"line"}]}]}]}}];
+
+/* ---------- Конструктор писем: разметка ваших шаблонов Контура ---------- */
+const FF="font-family:'Lab Grotesque K',-apple-system,BlinkMacSystemFont,'YS Text',Arial,sans-serif;";
+const IMGB='https://s.kontur.ru/common-v2/icons-ui/black-bg/';
+const LI_ARROW=IMGB+'arrow-a-right/arrow-a-right-32-regular@2x.png';
+const liNum=n=>{const k=String(Math.max(1,Math.min(n,99))).padStart(2,'0');return IMGB+'number-circle-'+k+'/number-circle-'+k+'-32-regular@2x.png'};
+const BI=BI0.concat([
+  {k:'icon',n:'Контур.Партнёры',u:IMGB+'kontur-partners/kontur-partners-64-regular@2x.png'},{k:'icon',n:'Звезда',u:IMGB+'star/star-64-regular@2x.png'},
+  {k:'icon',n:'Информация',u:IMGB+'info-circle/info-circle-64-regular@2x.png'},{k:'icon',n:'Деньги',u:IMGB+'money-type-coins/money-type-coins-64-regular@2x.png'},
+  {k:'bullet',n:'Стрелка',u:LI_ARROW}].concat([1,2,3,4,5,6,7,8,9].map(n=>({k:'bullet',n:'Цифра '+n,u:liNum(n)}))));
+const cl=o=>JSON.parse(JSON.stringify(o));
+const newCard=k=>({k:k||'icon',img:'',title:'',it:[{t:'p',h:''}]});
+const newLetter=()=>({subj:'',pre:'',cards:[newCard('banner')]});
+const safeUrl=u=>{u=String(u||'').trim();if(/^\{\{[^{}]+\}\}$/.test(u))return u;if(/^(https?:\/\/|mailto:|tel:)/i.test(u))return u;if(/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(u))return 'https://'+u;return ''};
+const escT=s=>esc(s).replace(/\u00a0/g,'&nbsp;');
+const spc=(d,m)=>'<div class="spacer spacer_desktop" style="font-size:'+d+'px;line-height:'+d+'px"><div>&nbsp;</div></div><div class="spacer spacer_mobile" style="font-size:'+m+'px;line-height:'+m+'px"><div style="display:none;mso-hide:all;overflow:hidden;max-height:0;font-size:0;width:0;line-height:1px">&nbsp;</div></div>';
+function richParts(h){   // из редактора пропускаем только жирный/курсив/подчёркивание/ссылки/переносы; результат — абзацы
+  const d=new DOMParser().parseFromString('<body>'+(h||'')+'</body>','text/html').body,out=[];let buf='';
   const inl=n=>{let o='';n.childNodes.forEach(c=>{
-    if(c.nodeType===3)o+=esc(c.nodeValue);
-    else if(c.nodeType===1){const t=INL[c.tagName],i=c.tagName==='SCRIPT'||c.tagName==='STYLE'?'':inl(c);
-      if(t==='br')o+='<br>';
-      else if(t==='a'){const u=safeUrl(c.getAttribute('href'));o+=u?'<a href="'+esc(u)+'" target="_blank" style="color:#015ccb;text-decoration:underline">'+i+'</a>':i}
-      else if(t)o+='<'+t+'>'+i+'</'+t+'>';else o+=i}});return o};
-  const para=i=>i.replace(/(<br>)+$/,'').trim()?'<p style="margin:0 0 15px;'+P0+'">'+i.replace(/(<br>)+$/,'')+'</p>':'';
-  const flush=()=>{out+=para(buf);buf=''};
-  const list=n=>{let li='';n.childNodes.forEach(c=>{if(c.tagName==='LI'){const x=inl(c).replace(/(<br>)+$/,'');if(x.trim())li+='<li style="margin:0 0 6px;'+P0+'">'+x+'</li>'}});
-    if(li){const t=n.tagName.toLowerCase();out+='<'+t+' style="margin:0 0 15px;padding:0 0 0 22px;'+P0+'">'+li+'</'+t+'>'}};
-  const top=nodes=>{nodes.forEach(c=>{
-    if(c.nodeType===1&&/^(UL|OL)$/.test(c.tagName)){flush();list(c)}
-    else if(c.nodeType===1&&/^(P|DIV|H1|H2|H3|BLOCKQUOTE)$/.test(c.tagName)){flush();if(c.querySelector('ul,ol,p,div'))top([...c.childNodes]);else out+=para(inl(c))}
-    else buf+=inl({childNodes:[c]})});flush()};
-  top([...d.childNodes]);return out;
+    if(c.nodeType===3)o+=escT(c.nodeValue);
+    else if(c.nodeType===1){const T=c.tagName;if(T==='SCRIPT'||T==='STYLE')return;const i=inl(c);
+      if(T==='BR')o+='<br>';
+      else if(T==='B'||T==='STRONG')o+='<b style="font-weight:700">'+i+'</b>';
+      else if(T==='I'||T==='EM')o+='<i>'+i+'</i>';
+      else if(T==='U')o+='<u>'+i+'</u>';
+      else if(T==='A'){const u=safeUrl(c.getAttribute('href'));o+=u?'<a href="'+esc(u)+'" target="_blank" style="text-decoration:none;color:#000"><u>'+i.replace(/<\/?u>/g,'')+'</u></a>':i}
+      else o+=i}});return o};
+  const flush=()=>{const x=buf.replace(/^(<br>)+|(<br>)+$/g,'');if(x.replace(/<[^>]+>|&nbsp;/g,'').trim())out.push(x);buf=''};
+  const top=ns=>ns.forEach(c=>{
+    if(c.nodeType===1&&/^(P|DIV|H1|H2|H3|BLOCKQUOTE|UL|OL|LI)$/.test(c.tagName)){flush();if(c.querySelector('p,div,ul,ol'))top([...c.childNodes]);else{buf=inl(c);flush()}}
+    else buf+=inl({childNodes:[c]})});
+  top([...d.childNodes]);flush();return out;
 }
-function ebtn(t,u,filled){   // «пуленепробиваемая» кнопка: VML для классического Outlook + обычная ссылка для остальных
-  const et=esc(t),eu=esc(u),w=Math.min(440,Math.max(170,t.length*11+60)),bg=filled?'#333333':'#ffffff',fg=filled?'#ffffff':'#333333';
-  return '<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="'+eu+'" style="height:48px;v-text-anchor:middle;width:'+w+'px" arcsize="50%" strokecolor="#333333" strokeweight="2px" fillcolor="'+bg+'"><w:anchorlock/><center style="color:'+fg+';font-family:Arial,sans-serif;font-size:18px;font-weight:bold">'+et+'</center></v:roundrect><![endif]-->'
-   +'<!--[if !mso]><!--><a href="'+eu+'" target="_blank" style="display:inline-block;padding:10px 22px;border:2px solid #333333;border-radius:40px;background:'+bg+';color:'+fg+';font-family:'+FF+';font-size:18px;line-height:24px;font-weight:700;text-decoration:none;text-align:center;max-width:100%;box-sizing:border-box">'+et+'</a><!--<![endif]-->';
+const richInline=h=>richParts(h).join('<br>');
+const subHtml=s=>escT(s).replace(/\*\*(.+?)\*\*/g,'<b style="font-weight:700">$1</b>');
+const pHtml=x=>'<p style="color:#000;'+FF+'font-weight:400;text-align:left;line-height:24px;font-size:16px;margin:0 0 15px;Margin:0 0 15px">'+x+'</p>';
+const hHtml=(t,one,top)=>one?'<h1 style="padding:0;margin:0;Margin:0;color:inherit;word-wrap:normal;'+FF+'font-size:36px;line-height:40px;margin-top:0px;Margin-top:0px;margin-bottom:20px;Margin-bottom:20px;font-weight:700">'+esc(t)+'</h1>':'<h2 style="padding:0;margin:0;Margin:0;color:inherit;word-wrap:normal;'+FF+'font-size:30px;line-height:38px;margin-top:'+top+'px;Margin-top:'+top+'px;margin-bottom:15px;Margin-bottom:15px;font-weight:700">'+esc(t)+'</h2>';
+function listHtml(it){
+  const rows=(it.li||[]).filter(r=>richInline(r.h)||(r.s||[]).length);if(!rows.length)return '';
+  const T0='word-wrap:break-word;vertical-align:top;margin:0;Margin:0;color:#000;'+FF+'font-weight:400;text-align:left;line-height:24px;';
+  const ic=it.ic||'arrow',custom=/^https?:/.test(ic);
+  const body=rows.map((r,i)=>{
+    const src=ic==='arrow'?LI_ARROW:ic==='num'?liNum(i+1):custom?ic:'';
+    const bul=src?'<td class="list-item__bullet-icon" width="32" height="32" style="'+T0+'padding:4px;padding-top:3px;padding-right:10px;font-size:1px;mso-line-height-alt:27px;border-collapse:collapse;width:24px;height:24px"><img src="'+esc(src)+'" width="32" height="32" style="clear:both;display:block;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:100%;width:24px;height:24px" alt></td>'
+      :'<td class="list-item__bullet-icon" width="24" style="'+T0+'padding:0;padding-top:3px;padding-right:10px;padding-left:4px;font-size:16px;border-collapse:collapse;width:14px">&bull;</td>';
+    const S='vertical-align:top;padding:0 0 4px;'+FF+'font-size:16px;line-height:24px;color:#000';
+    const subs=(r.s||[]).length?'<table cellspacing="0" cellpadding="0" style="border-spacing:0;border-collapse:collapse;margin-top:8px"><tbody>'+r.s.map(x=>'<tr><td style="'+S+';width:18px">&bull;</td><td style="'+S+'">'+subHtml(x)+'</td></tr>').join('')+'</tbody></table>':'';
+    return '<tr class="list-item">'+bul+'<td style="word-wrap:break-word;vertical-align:top;padding:0;margin:0;Margin:0;color:#000;'+FF+'font-weight:400;text-align:left;padding-bottom:14px;padding-top:3px;font-size:16px;line-height:24px;border-collapse:collapse">'+richInline(r.h)+subs+'</td></tr>'}).join('');
+  return '<table class="list list_ul list-icon-medium" cellspacing="0" cellpadding="0" style="border-spacing:0;border-collapse:collapse;text-align:left;width:100%">'+body+'</table>'+spc(10,5);
 }
-const activeBtns=b=>(b.b||[]).slice(0,b.nb);
-function buildLetter(C){
-  const sec=C.blocks.map((b,i)=>{let h='';
-    if(i===0&&b.img)h+='<img src="'+esc(b.img)+'" width="500" alt="" style="display:block;width:100%;max-width:500px;height:auto;border:0;outline:0">'+sp(30);
-    if(i>0&&b.icon)h+='<img src="'+esc(b.icon)+'" width="56" height="56" alt="" style="display:block;width:56px;height:56px;border:0;margin:0 0 15px">';
-    const t=(b.title||'').trim();
-    if(t)h+=i===0?'<h1 style="margin:0 0 20px;font-family:'+FF+';font-size:36px;line-height:40px;font-weight:700;color:#000">'+esc(t)+'</h1>':'<h2 style="margin:0 0 15px;font-family:'+FF+';font-size:30px;line-height:38px;font-weight:700;color:#000">'+esc(t)+'</h2>';
-    h+=cleanRich(b.html);
-    const bs=activeBtns(b).filter(x=>x.t.trim()&&safeUrl(x.u));
-    if(bs.length)h+=sp(10)+'<table role="presentation" align="center" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;margin:0 auto"><tr>'+bs.map((x,k)=>(k?'<td class="bs" width="12" style="width:12px;font-size:0">&nbsp;</td>':'')+'<td class="bt" align="center" style="padding:0">'+ebtn(x.t.trim(),safeUrl(x.u),k===0)+'</td>').join('')+'</tr></table>';
-    return (t||cleanRich(b.html)||bs.length)?h:''}).filter(Boolean);
-  if(!sec.length)return '';
-  const G='font-family:'+FF+';font-size:15px;line-height:1.4;color:#666;text-align:center;',L='font-family:'+FF+';text-decoration:none;color:#858585;white-space:nowrap';
-  return '<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"><title>Письмо</title>'
-   +'<!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->'
-   +'<style>img{-ms-interpolation-mode:bicubic}@media only screen and (max-width:630px){.container{width:100%!important}.pad{padding-left:30px!important;padding-right:30px!important}.bt{display:block!important;width:100%!important;padding:0 0 12px!important}.bs{display:none!important}h1{font-size:28px!important;line-height:36px!important}h2{font-size:24px!important;line-height:32px!important}}</style></head>'
-   +'<body style="margin:0;padding:0;background:#f5f5f5;font-family:'+FF+';font-size:16px;line-height:24px;color:#000">'
-   +'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f5f5f5" style="background:#f5f5f5;width:100%"><tr><td align="center" style="padding:0 10px">'
-   +'<table role="presentation" class="container" width="600" cellspacing="0" cellpadding="0" border="0" style="width:600px;max-width:100%">'
-   +'<tr><td align="center" style="padding:28px 0"><a href="https://kontur.ru/partnership" target="_blank" style="text-decoration:none"><img src="https://s.kontur.ru/common-v2/logos/logo-kontur-32@2x.png" width="94" height="32" alt="Контур" style="display:block;border:0;width:94px;height:32px"></a></td></tr>'
-   +'<tr><td class="pad" bgcolor="#ffffff" style="background:#ffffff;border-radius:10px;padding:50px;text-align:left">'+sec.join(sp(40))+'</td></tr>'
-   +'<tr><td style="padding:30px 20px 50px;text-align:center">'
-   +'<p style="margin:0 0 15px;'+G+'">Данное письмо направлено вам в рамках партнёрской рассылки, сформировано автоматически и не подразумевает ответа.</p>'
-   +'<p style="margin:0 0 20px;'+G+'"><a href="tel:8 800 500-50-80" style="'+L+'"><b>8 800 500-50-80</b></a> &nbsp;&middot;&nbsp; <a href="mailto:help@kontur.ru" style="'+L+'"><b>help@kontur.ru</b></a> &nbsp;&middot;&nbsp; <a href="https://kontur.ru" style="'+L+'"><b>kontur.ru</b></a></p>'
-   +'<p style="margin:0;'+G+'">АО «ПФ «СКБ Контур». Россия, Екатеринбург, Народной Воли&nbsp;19а.</p></td></tr>'
-   +'</table></td></tr></table></body></html>';
+function btnGroup(it){   // кнопки как в ваших шаблонах: для классического Outlook — таблица btn-l_mso, для остальных — ссылка btn btn-l
+  const bs=(it.b||[]).filter(x=>x.t.trim()&&safeUrl(x.u));if(!bs.length)return '';
+  const two=bs.length>1,ctr=two||it.al==='c',line=b=>b.s==='line';
+  const cell=b=>'<td class="btn-l_mso" style="word-wrap:break-word;vertical-align:top;margin:0;Margin:0;'+FF+'font-weight:400;font-size:16px;border:2px solid #333;padding:10px 0;line-height:100%;text-align:center;background:'+(line(b)?'0 0':'#333')+';border-color:#333;border-collapse:collapse"><a href="'+esc(safeUrl(b.u))+'" target="_blank" style="text-decoration:none"><span style="color:'+(line(b)?'#333':'#fff')+';display:inline-block;text-decoration:none;font-size:18px;font-weight:700" class="btn__title">&nbsp;&nbsp;&nbsp;'+escT(b.t.trim())+'&nbsp;&nbsp;&nbsp;</span></a></td>';
+  const mso='<!--[if mso]> <table'+(ctr?' align="center"':'')+' border="0" cellspacing="0" cellpadding="0" width="auto" style="border-spacing:0;border-collapse:collapse;text-align:left;width:auto"><tr>'+bs.map((b,i)=>(i?'<td width="12" style="width:12px">&nbsp;</td>':'')+cell(b)).join('')+'</tr></table><![endif]-->';
+  const a=b=>'<a href="'+esc(safeUrl(b.u))+'" target="_blank" class="btn btn-l" style="color:'+(line(b)?'#333':'#fff')+';border:2px solid #333;display:inline-block;padding:10px 22px;border-radius:40px;text-decoration:none;max-width:100%;box-sizing:border-box;text-align:center;font-size:18px;line-height:24px;font-weight:700;mso-hide:all;background:'+(line(b)?'0 0':'#333')+';border-color:#333'+(two?';margin:0 4px 8px':'')+'"><span class="btn__title" style="color:inherit">'+escT(b.t.trim())+'</span></a>';
+  return spc(5,5)+'<div style="'+(ctr?'text-align:center':'')+'">'+mso+bs.map(a).join('')+'</div>';
+}
+const codeHtml=it=>'<table style="border-spacing:0;border-collapse:collapse;width:100%"><tr><td bgcolor="#F5F5F5" align="center" style="padding:20px 24px;border-radius:10px;'+FF+'font-size:32px;line-height:40px;font-weight:700;color:#000;text-align:center;letter-spacing:1px">'+escT((it.h||'').trim())+'</td></tr></table>'+spc(25,20);
+function cardEmpty(c){return !c.img&&!(c.title||'').trim()&&!(c.it||[]).some(it=>it.t==='c'?(it.h||'').trim():it.t==='p'?richParts(it.h).length:it.t==='l'?(it.li||[]).some(r=>richParts(r.h).length):(it.b||[]).some(b=>b.t.trim()))}
+const hasContent=L=>L.cards.some(c=>!cardEmpty(c));
+function cardHtml(c){
+  let h=KIT.open,ico=false;
+  if(c.k==='banner'&&c.img)h+='<a href="https://kontur.ru/partnership" target="_blank" style="text-decoration:none;color:#015ccb"><img src="'+esc(c.img)+'" alt="Контур" width="500" style="clear:both;display:block;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;border:none;max-width:500px;width:100%"></a>'+spc(30,25);
+  else if(c.k==='icon'&&c.img){ico=true;h+='<img width="64" height="64" style="clear:both;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:100%;display:inline-block;width:64px;height:auto" class="icon" src="'+esc(c.img)+'" alt>'}
+  const t=(c.title||'').trim();if(t)h+=hHtml(t,c.k==='banner',ico?25:0);
+  (c.it||[]).forEach(it=>{if(it.t==='p')richParts(it.h).forEach(x=>{h+=pHtml(x)});else if(it.t==='l')h+=listHtml(it);else if(it.t==='b')h+=btnGroup(it);else if(it.t==='c')h+=codeHtml(it)});
+  return h+KIT.close;
+}
+function buildLetter(L){
+  const cs=L.cards.filter(c=>!cardEmpty(c));if(!cs.length)return '';
+  return KIT.head+'<title>'+esc(L.subj||'')+'</title></head> '+KIT.body.replace('%%PRE%%',()=>escT(L.pre||''))+cs.map(cardHtml).join('')+KIT.foot;
+}
+/* ---------- состояние ---------- */
+let C=parse(LS.get('crm.cons2'),null);if(!C||!Array.isArray(C.cards)||!C.cards.length)C=newLetter();
+let CM={mode:'free',id:null},BAK=null,LAST=null;
+const saveC=()=>{if(!BAK)LS.set('crm.cons2',JSON.stringify(C))};
+const tplHtml=t=>t.model?buildLetter(t.model):t.html;
+const tplLoad=l=>(l||[]).map(t=>{if(t.model){t.html=buildLetter(t.model);t.subject=t.model.subj||t.subject}return t});
+const tplSave=()=>M.tpl.map(t=>t.model?{id:t.id,name:t.name,subject:t.subject,model:t.model,ts:t.ts}:t);
+const tsOf=t=>t.ts||parseInt(String(t.id).slice(1),36)||0;
+function sortedTpl(){const m=LS.get('crm.tsort')||'name',a=M.tpl.slice();
+  if(m==='new')a.sort((x,y)=>tsOf(y)-tsOf(x));else if(m==='old')a.sort((x,y)=>tsOf(x)-tsOf(y));
+  else a.sort((x,y)=>String(x.name).localeCompare(String(y.name),'ru',{numeric:true,sensitivity:'base'}));return a}
+/* окно-вопрос вместо prompt() (в приложении на телефоне prompt часто не работает) */
+function ask(title,fields,btns,validate){return new Promise(res=>{
+  const m=$('askmod');$('ask_h').textContent=title;$('ask_e').textContent='';
+  $('ask_f').innerHTML=fields.map(f=>'<div class="fld"><label class="f">'+esc(f.l)+'</label><input data-k="'+f.k+'" value="'+esc(f.v||'')+'" autocapitalize="off"></div>').join('');
+  $('ask_b').innerHTML=btns.map((b,i)=>'<button class="btn'+(b.sec?' sec':'')+'" data-i="'+i+'">'+esc(b.t)+'</button>').join('');
+  const done=r=>{m.hidden=true;m.onclick=null;m.onkeydown=null;res(r)};
+  m.onclick=e=>{const b=e.target.closest('[data-i]');if(!b)return;const bt=btns[+b.dataset.i];if(bt.v===null)return done({btn:null});
+    const v={};m.querySelectorAll('[data-k]').forEach(i=>v[i.dataset.k]=i.value.trim());const er=validate?validate(v,bt.v):'';if(er){$('ask_e').textContent=er;return}done({btn:bt.v,vals:v})};
+  m.onkeydown=e=>{if(e.key==='Escape')done({btn:null});else if(e.key==='Enter'&&e.target.tagName==='INPUT'){const p=m.querySelector('[data-i]:last-child');if(p)p.click()}};
+  m.hidden=false;const f=m.querySelector('input');if(f)f.focus()})}
+/* ---------- редактор ---------- */
+const seg=(key,val,opts)=>'<div class="seg">'+opts.map(o=>'<button class="sm'+(o[0]===val?' on':'')+'" data-seg="'+key+'" data-v="'+o[0]+'">'+o[1]+'</button>').join('')+'</div>';
+function itemHtml(it,ii,n){
+  const ctl='<span class="btns" style="margin:0">'+(ii>0?'<button class="sm" data-a="iup" title="Выше">↑</button>':'')+(ii<n-1?'<button class="sm" data-a="idn" title="Ниже">↓</button>':'')+'<button class="sm bad" data-a="idel" title="Удалить">✕</button></span>';
+  const head=t=>'<div class="cih"><span>'+t+'</span>'+ctl+'</div>';
+  if(it.t==='p')return '<div class="citem" data-ii="'+ii+'">'+head('Текст')+'<div class="ced2" contenteditable="true" data-f="p">'+richParts(it.h).map(x=>'<div>'+x+'</div>').join('')+'</div></div>';
+  if(it.t==='l'){const custom=/^https?:/.test(it.ic),sel=custom?'custom':(it.ic||'arrow');
+    return '<div class="citem" data-ii="'+ii+'">'+head('Список')+'<div class="cth"><select data-f="ic" style="width:auto">'+[['arrow','Стрелки'],['num','Цифры по порядку'],['dot','Точки'],['custom','Своя иконка…']].map(o=>'<option value="'+o[0]+'"'+(sel===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>'
+      +(custom?'<img src="'+esc(it.ic)+'" alt="" style="max-height:32px"><button class="sm" data-a="pickli">Другая…</button>':'')+'</div>'
+      +it.li.map((r,li)=>'<div class="lrow" data-li="'+li+'"><div style="flex:1;min-width:0"><div class="ced2 one" contenteditable="true" data-f="li">'+richInline(r.h)+'</div>'
+        +'<details class="subd"'+((r.s||[]).length?' open':'')+'><summary>Подпункты (по одному на строку, **жирный**)</summary><textarea data-f="subs" rows="2">'+esc((r.s||[]).join('\n'))+'</textarea></details></div><button class="sm bad" data-a="dli" title="Удалить пункт">✕</button></div>').join('')
+      +'<button class="sm" data-a="ali">＋ Пункт</button></div>'}
+  if(it.t==='c')return '<div class="citem" data-ii="'+ii+'">'+head('Выделенный блок (например, код)')+'<input data-f="code" placeholder="Например: z{{Код}}" value="'+esc(it.h||'')+'"></div>';
+  const two=it.b.length===2,lay=two?'two':(it.al==='c'?'c':'l');
+  return '<div class="citem" data-ii="'+ii+'">'+head('Кнопки')+seg('lay',lay,[['l','Одна слева'],['c','Одна по центру'],['two','Две в ряд']])
+    +it.b.map((b,j)=>'<div class="row" data-bj="'+j+'" style="margin-bottom:6px"><div><input data-f="bt" placeholder="Текст кнопки" value="'+esc(b.t)+'"></div><div><input data-f="bu" placeholder="Ссылка https://… или {{Ссылка}}" value="'+esc(b.u)+'" autocapitalize="off"></div><div style="flex:0 0 130px;min-width:110px"><select data-f="bs"><option value="fill"'+(b.s!=='line'?' selected':'')+'>Тёмная</option><option value="line"'+(b.s==='line'?' selected':'')+'>Контурная</option></select></div></div>').join('')+'</div>';
 }
 function renderC(){
-  $('cb').innerHTML=C.blocks.map((b,i)=>{const first=i===0,k=first?'img':'icon',cur=first?b.img:b.icon,n=C.blocks.length;
-    return '<div class="cblk" data-i="'+i+'"><div class="cbh"><b>'+(first?'Основной блок':'Раздел '+(i+1))+'</b><span class="btns" style="margin:0">'
-     +(i>1?'<button class="sm" data-a="up" title="Выше">↑</button>':'')+(i>0&&i<n-1?'<button class="sm" data-a="dn" title="Ниже">↓</button>':'')+(first?'':'<button class="sm bad" data-a="del" title="Удалить раздел">✕</button>')+'</span></div>'
-     +'<div class="fld"><label class="f">'+(first?'Изображение (баннер)':'Иконка раздела (необязательно)')+'</label><div class="cth">'+(cur?'<img src="'+esc(cur)+'" alt="">':'<span class="hint">не выбрано</span>')
-     +'<button class="sm" data-a="pick" data-k="'+k+'">Выбрать…</button>'+(cur?'<button class="sm bad" data-a="unpick" data-k="'+k+'">Убрать</button>':'')+'</div></div>'
-     +'<div class="fld"><label class="f">Заголовок</label><input data-f="title" value="'+esc(b.title)+'"></div>'
-     +'<div class="fld"><label class="f">Текст</label><div class="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="insertUnorderedList">• Список</button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить</button></div>'
-     +'<div class="ced2" contenteditable="true" data-f="html">'+cleanRich(b.html)+'</div></div>'
-     +'<div class="fld"><label class="f">Кнопки</label><select data-f="nb">'+['Без кнопки','Одна по центру','Две в ряд'].map((x,j)=>'<option value="'+j+'"'+(b.nb===j?' selected':'')+'>'+x+'</option>').join('')+'</select>'
-     +[0,1].map(j=>j<b.nb?'<div class="row" style="margin:8px 0 0"><div><input data-b="'+j+'" data-bf="t" placeholder="Текст кнопки '+(j+1)+'" value="'+esc(b.b[j].t)+'"></div><div><input data-b="'+j+'" data-bf="u" placeholder="Ссылка https://…" value="'+esc(b.b[j].u)+'" autocapitalize="off"></div></div>':'').join('')+'</div></div>';
-  }).join('');
+  $('c_subj').value=C.subj||'';$('c_pre').value=C.pre||'';const n=C.cards.length;
+  $('cb').innerHTML=C.cards.map((c,ci)=>{
+    const ctl='<span class="btns" style="margin:0">'+(ci>0?'<button class="sm" data-a="cup" title="Выше">↑</button>':'')+(ci<n-1?'<button class="sm" data-a="cdn" title="Ниже">↓</button>':'')+(n>1?'<button class="sm bad" data-a="cdel" title="Удалить карточку">✕</button>':'')+'</span>';
+    const top=seg('k',c.k,[['banner','Баннер'],['icon','Иконка'],['none','Без картинки']])+(c.k!=='none'?'<div class="cth">'+(c.img?'<img src="'+esc(c.img)+'" alt="">':'<span class="hint">не выбрано</span>')+'<button class="sm" data-a="pick">Выбрать из библиотеки…</button>'+(c.img?'<button class="sm bad" data-a="unpick">Убрать</button>':'')+'</div>':'');
+    return '<div class="cblk" data-ci="'+ci+'"><div class="cbh"><b>Карточка '+(ci+1)+'</b>'+ctl+'</div><div class="fld"><label class="f">Верх карточки</label>'+top+'</div><div class="fld"><label class="f">Заголовок</label><input data-f="title" value="'+esc(c.title)+'"></div>'
+      +c.it.map((it,ii)=>itemHtml(it,ii,c.it.length)).join('')
+      +'<div class="btns cadd"><button class="sm" data-a="addp">＋ Текст</button><button class="sm" data-a="addl">＋ Список</button><button class="sm" data-a="addc">＋ Выделенный блок</button><button class="sm" data-a="addb">＋ Кнопка</button></div></div>'}).join('');
 }
 let cpT=0;const cprev=()=>{$('cpv').srcdoc=buildLetter(C)||'<body style="font-family:sans-serif;color:#888;padding:30px">Добавьте заголовок или текст: здесь появится письмо</body>'};
 const cprevD=()=>{clearTimeout(cpT);cpT=setTimeout(cprev,150)};
-M.consHtml=buildLetter(C);
-function consInfo(){$('cinfo').textContent=M.consHtml?'Письмо собрано ✓ (см. «Предпросмотр»). Нажмите «Открыть конструктор», чтобы изменить.':'Письмо ещё не собрано.'}
-function consReset(){C={blocks:[blk0()]};M.consHtml='';saveC();consInfo()}
-$('cOpen').onclick=()=>{renderC();cprev();$('c_err').textContent='';$('cmod').hidden=false};
-$('c_cancel').onclick=()=>{$('cmod').hidden=true};
-$('c_add').onclick=()=>{C.blocks.push(blk0());renderC();saveC();cprev();const l=$('cb').lastElementChild;if(l&&l.scrollIntoView)l.scrollIntoView({block:'nearest'})};
-$('c_clr').onclick=()=>arm($('c_clr'),'Точно очистить?',()=>{consReset();renderC();cprev();preview()});
-function cCheck(){
-  for(let i=0;i<C.blocks.length;i++)for(const x of activeBtns(C.blocks[i])){
-    if(x.t.trim()&&!safeUrl(x.u))return 'Блок '+(i+1)+': у кнопки «'+x.t.trim()+'» нет корректной ссылки';
-    if(!x.t.trim()&&x.u.trim())return 'Блок '+(i+1)+': у кнопки со ссылкой нет текста'}
-  return buildLetter(C)?'':'Добавьте заголовок или текст';
-}
-$('c_ok').onclick=()=>{const e=cCheck();$('c_err').textContent=e;if(e)return;M.consHtml=buildLetter(C);saveC();$('cmod').hidden=true;consInfo();preview()};
-$('c_tpl').onclick=async()=>{const e=cCheck();$('c_err').textContent=e;if(e)return;
-  const n=(prompt('Название шаблона:')||'').trim();if(!n)return;const sj=($('ms').value.trim()||(prompt('Тема письма:')||'').trim());if(!sj)return;
-  const o={id:'m'+Date.now().toString(36),name:n,subject:sj,html:buildLetter(C)},prev=M.tpl.slice();M.tpl.push(o);
-  try{await mapi('tpl',{list:M.tpl});fillTpl(o.id);$('cmod').hidden=true;msg('Шаблон «'+n+'» сохранён ✓ — теперь его можно использовать и в рассылке')}catch(er){M.tpl=prev;$('c_err').textContent=er.message}};
-$('cb').addEventListener('mousedown',e=>{if(e.target.closest('[data-cmd]'))e.preventDefault()});
-$('cb').addEventListener('paste',e=>{if(e.target.closest('.ced2')){e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))}});
-$('cb').addEventListener('input',e=>{const el=e.target,bk=el.closest('[data-i]');if(!bk)return;const b=C.blocks[+bk.dataset.i];
-  if(el.dataset.f==='title')b.title=el.value;else if(el.dataset.f==='html')b.html=el.innerHTML;else if(el.dataset.bf)b.b[+el.dataset.b][el.dataset.bf]=el.value;else return;saveC();cprevD()});
-$('cb').addEventListener('change',e=>{const el=e.target,bk=el.closest('[data-i]');if(bk&&el.dataset.f==='nb'){C.blocks[+bk.dataset.i].nb=+el.value;renderC();saveC();cprev()}});
+function ctx(el){const cb=el.closest('[data-ci]');if(!cb)return null;const ci=+cb.dataset.ci,c=C.cards[ci],ib=el.closest('[data-ii]'),ii=ib?+ib.dataset.ii:-1,lb=el.closest('[data-li]'),bb=el.closest('[data-bj]');
+  return{c,ci,it:ii>=0?c.it[ii]:null,ii,li:lb?+lb.dataset.li:-1,bj:bb?+bb.dataset.bj:-1}}
 $('cb').addEventListener('click',e=>{
-  const bk=e.target.closest('[data-i]');if(!bk)return;const i=+bk.dataset.i,b=C.blocks[i],cm=e.target.closest('[data-cmd]'),ac=e.target.closest('[data-a]');
-  if(cm){const ed=bk.querySelector('.ced2'),sel=getSelection();
-    if(!sel.rangeCount||!ed.contains(sel.anchorNode)){ed.focus();return}
-    if(cm.dataset.cmd==='createLink'){const r=sel.getRangeAt(0).cloneRange(),u=safeUrl(prompt('Адрес ссылки (https://…)','https://'));if(u){sel.removeAllRanges();sel.addRange(r);document.execCommand('createLink',false,u)}}
-    else document.execCommand(cm.dataset.cmd,false,null);
-    b.html=ed.innerHTML;saveC();cprevD();return}
-  if(!ac)return;const a=ac.dataset.a,k=ac.dataset.k;
-  if(a==='del'){C.blocks.splice(i,1)}else if(a==='up'||a==='dn'){const j=a==='up'?i-1:i+1;[C.blocks[i],C.blocks[j]]=[C.blocks[j],C.blocks[i]]}
-  else if(a==='unpick'){b[k]=''}
-  else if(a==='pick'){pickImg(k,u=>{b[k]=u;renderC();saveC();cprev()});return}
-  renderC();saveC();cprev();
-});
-/* библиотека картинок (Google Диск через Apps Script) */
-const IM={list:null,kind:'img',cb:null};
+  const b=e.target.closest('[data-a],[data-seg]');if(!b)return;const x=ctx(b);if(!x)return;
+  const mv=(arr,i,d)=>{const j=i+d;if(j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]]};
+  if(b.dataset.seg){const v=b.dataset.v;
+    if(b.dataset.seg==='k'){x.c.k=v;if(v==='none')x.c.img=''}
+    else if(b.dataset.seg==='lay'){if(v==='two'){x.it.al='c';if(x.it.b.length<2)x.it.b.push({t:'',u:'',s:'line'})}else{x.it.b=x.it.b.slice(0,1);x.it.al=v}}
+  }else{const a=b.dataset.a;
+    if(a==='cup')mv(C.cards,x.ci,-1);else if(a==='cdn')mv(C.cards,x.ci,1);else if(a==='cdel')C.cards.splice(x.ci,1);
+    else if(a==='iup')mv(x.c.it,x.ii,-1);else if(a==='idn')mv(x.c.it,x.ii,1);else if(a==='idel')x.c.it.splice(x.ii,1);
+    else if(a==='addp')x.c.it.push({t:'p',h:''});
+    else if(a==='addl')x.c.it.push({t:'l',ic:'arrow',li:[{h:'',s:[]},{h:'',s:[]}]});
+    else if(a==='addb')x.c.it.push({t:'b',al:'c',b:[{t:'',u:'',s:'fill'}]});
+    else if(a==='addc')x.c.it.push({t:'c',h:''});
+    else if(a==='dli'){x.it.li.splice(x.li,1);if(!x.it.li.length)x.it.li.push({h:'',s:[]})}
+    else if(a==='ali')x.it.li.push({h:'',s:[]});
+    else if(a==='unpick')x.c.img='';
+    else if(a==='pick'){pickImg(x.c.k==='banner'?'img':'icon',u=>{x.c.img=u;renderC();saveC();cprev()});return}
+    else if(a==='pickli'){pickImg('bullet',u=>{x.it.ic=u;renderC();saveC();cprev()});return}
+    else return}
+  renderC();saveC();cprev()});
+$('cb').addEventListener('change',e=>{const el=e.target,x=ctx(el);if(!x)return;
+  if(el.dataset.f==='ic'){if(el.value==='custom'){const keep=/^https?:/.test(x.it.ic);if(!keep){x.it.ic='arrow';renderC();pickImg('bullet',u=>{x.it.ic=u;renderC();saveC();cprev()});return}}else x.it.ic=el.value;renderC();saveC();cprev()}
+  else if(el.dataset.f==='bs'){x.it.b[x.bj].s=el.value;saveC();cprev()}});
+$('cb').addEventListener('input',e=>{const el=e.target,x=ctx(el);if(!x)return;const f=el.dataset.f;
+  if(f==='title')x.c.title=el.value;else if(f==='p')x.it.h=el.innerHTML;else if(f==='li')x.it.li[x.li].h=el.innerHTML;
+  else if(f==='subs')x.it.li[x.li].s=el.value.split('\n').map(s=>s.trim()).filter(Boolean);
+  else if(f==='code')x.it.h=el.value;else if(f==='bt')x.it.b[x.bj].t=el.value;else if(f==='bu')x.it.b[x.bj].u=el.value;else return;
+  saveC();cprevD()});
+$('cb').addEventListener('keydown',e=>{const el=e.target;if(e.key==='Enter'&&el.classList&&el.classList.contains('one')){e.preventDefault();const x=ctx(el);
+  x.it.li.splice(x.li+1,0,{h:'',s:[]});renderC();saveC();cprev();const nb=$('cb').querySelector('[data-ci="'+x.ci+'"] [data-ii="'+x.ii+'"] [data-li="'+(x.li+1)+'"] .ced2');if(nb)nb.focus()}});
+$('cb').addEventListener('paste',e=>{if(e.target.closest&&e.target.closest('.ced2')){e.preventDefault();document.execCommand('insertText',false,(e.clipboardData||window.clipboardData).getData('text/plain'))}});
+/* панель форматирования: помнит выделение, поэтому работает и на телефоне */
+document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s.rangeCount)return;const n=s.anchorNode,el=n&&(n.nodeType===1?n:n.parentElement),ed=el&&el.closest&&el.closest('.ced2');if(ed&&$('cb').contains(ed))LAST={ed,r:s.getRangeAt(0).cloneRange()}});
+$('ctb').addEventListener('mousedown',e=>{if(e.target.closest('[data-cmd]'))e.preventDefault()});
+$('ctb').addEventListener('click',async e=>{const b=e.target.closest('[data-cmd]');if(!b)return;
+  const L0=LAST;if(!L0||!L0.ed.isConnected){$('c_err').textContent='Сначала поставьте курсор в текст и выделите нужные слова';return}
+  $('c_err').textContent='';const sel=getSelection(),restore=()=>{L0.ed.focus();sel.removeAllRanges();sel.addRange(L0.r)};
+  if(b.dataset.cmd==='createLink'){
+    if(L0.r.collapsed){$('c_err').textContent='Выделите слово или фразу, которые станут ссылкой';return}
+    const r=await ask('Ссылка',[{k:'u',l:'Адрес (https://…)',v:'https://'}],[{t:'Отмена',v:null,sec:1},{t:'Вставить',v:'ok'}],v=>safeUrl(v.u)?'':'Введите корректный адрес');
+    if(!r.btn)return;restore();document.execCommand('createLink',false,safeUrl(r.vals.u))}
+  else{restore();document.execCommand(b.dataset.cmd,false,null)}
+  L0.ed.dispatchEvent(new Event('input',{bubbles:true}))});
+$('c_subj').oninput=()=>{C.subj=$('c_subj').value;saveC();cprevD()};$('c_pre').oninput=()=>{C.pre=$('c_pre').value;saveC();cprevD()};
+$('c_add').onclick=()=>{C.cards.push(newCard('icon'));renderC();saveC();cprev();const l=$('cb').lastElementChild;if(l&&l.scrollIntoView)l.scrollIntoView({block:'nearest'})};
+$('c_ps').innerHTML='<option value="">Начать с готового письма…</option>'+PRESETS.map((p,i)=>'<option value="'+i+'">'+esc(p.n)+'</option>').join('');
+$('c_ps').onchange=()=>{const i=$('c_ps').value;if(i==='')return;if(hasContent(C)&&!confirm('Заменить текущее письмо выбранным готовым? Несохранённые правки пропадут.')){$('c_ps').value='';return}C=cl(PRESETS[+i].m);renderC();saveC();cprev()};
+$('c_imp').onclick=async()=>{const have=new Set(M.tpl.map(t=>t.name)),prev=M.tpl.slice();let n=0;
+  PRESETS.forEach((p,i)=>{if(have.has(p.n))return;const m=cl(p.m),ts=Date.now()+i;M.tpl.push({id:'m'+ts.toString(36),name:p.n,subject:m.subj,model:m,ts,html:buildLetter(m)});n++});
+  if(!n){$('c_err').textContent='Все готовые письма уже есть в ваших шаблонах';return}
+  try{await mapi('tpl',{list:tplSave()});fillTpl();$('c_err').textContent='';ban('ok','В шаблоны добавлено писем: '+n+' (с темой, баннерами и иконками). Они отсортированы по номеру.');closeCons()}catch(er){M.tpl=prev;$('c_err').textContent=er.message}};
+$('c_clr').onclick=()=>arm($('c_clr'),'Точно очистить?',()=>{C=newLetter();renderC();saveC();cprev()});
+function cCheck(){
+  for(let i=0;i<C.cards.length;i++)for(const it of C.cards[i].it)if(it.t==='b')for(const x of it.b){
+    if(x.t.trim()&&!safeUrl(x.u))return 'Карточка '+(i+1)+': у кнопки «'+x.t.trim()+'» нет корректной ссылки';
+    if(!x.t.trim()&&x.u.trim())return 'Карточка '+(i+1)+': у кнопки со ссылкой нет текста'}
+  return hasContent(C)?'':'Добавьте заголовок или текст'}
+function consInfo(){$('cinfo').textContent=M.consHtml?'Письмо собрано ✓ (см. «Предпросмотр»). Нажмите «Открыть конструктор», чтобы изменить.':'Письмо ещё не собрано.'}
+function consReset(){C=newLetter();M.consHtml='';saveC();consInfo()}
+function openCons(mode,id){
+  if(BAK){C=BAK;BAK=null}
+  CM={mode,id:id||null};let t=null;
+  if(mode==='tpl'){BAK=C;t=id&&M.tpl.find(x=>x.id===id);C=t&&t.model?cl(t.model):newLetter()}
+  $('c_h2').textContent=mode==='tpl'?(t?'Шаблон: '+t.name:'Новый шаблон'):'Конструктор письма';
+  $('c_ok').hidden=mode==='tpl';$('c_tpl').hidden=mode==='tpl';$('c_save').hidden=mode!=='tpl';$('c_ps').value='';
+  $('c_err').textContent='';renderC();cprev();$('cmod').hidden=false}
+function closeCons(){if(BAK){C=BAK;BAK=null}CM={mode:'free',id:null};$('cmod').hidden=true}
+$('cOpen').onclick=()=>openCons('free');
+$('c_cancel').onclick=closeCons;
+$('c_ok').onclick=()=>{const e=cCheck();$('c_err').textContent=e;if(e)return;M.consHtml=buildLetter(C);saveC();closeCons();consInfo();fillVars();if(C.subj){$('ms').value=C.subj;$('ms')._man=1}};
+async function saveTpl(){
+  const e=cCheck();$('c_err').textContent=e;if(e)return;
+  const cur=CM.mode==='tpl'&&CM.id?M.tpl.find(t=>t.id===CM.id):null;
+  const btns=cur?[{t:'Отмена',v:null,sec:1},{t:'Сохранить как новый',v:'new',sec:1},{t:'Обновить',v:'upd'}]:[{t:'Отмена',v:null,sec:1},{t:'Сохранить',v:'new'}];
+  const r=await ask(cur?'Сохранить шаблон':'Сохранить как шаблон',[{k:'n',l:'Название шаблона',v:cur?cur.name:''},{k:'s',l:'Тема письма (обязательно)',v:C.subj||(cur?cur.subject:'')||$('ms').value.trim()}],btns,v=>!v.n?'Укажите название шаблона':!v.s?'Укажите тему письма':'');
+  if(!r.btn)return;
+  C.subj=r.vals.s;const model=cl(C);if(JSON.stringify(model).length>45000){$('c_err').textContent='Письмо слишком большое для шаблона';return}
+  const prev=M.tpl.slice(),upd=r.btn==='upd'&&cur,id=upd?cur.id:'m'+Date.now().toString(36);
+  const o={id,name:r.vals.n,subject:r.vals.s,model,ts:upd?(cur.ts||Date.now()):Date.now(),html:buildLetter(model)};
+  if(upd)M.tpl[M.tpl.findIndex(t=>t.id===id)]=o;else M.tpl.push(o);
+  try{await mapi('tpl',{list:tplSave()})}catch(er){M.tpl=prev;$('c_err').textContent=er.message;return}
+  closeCons();fillTpl(id);msg('Шаблон «'+o.name+'» сохранён ✓ (тема, баннеры, иконки, все карточки)')}
+$('c_tpl').onclick=saveTpl;$('c_save').onclick=saveTpl;
+$('mtsort').value=LS.get('crm.tsort')||'name';$('mtsort').onchange=()=>{LS.set('crm.tsort',$('mtsort').value);fillTpl()};
+/* ---------- библиотека картинок: каталог из ваших писем + загрузки сотрудников (Google Диск) ---------- */
+const IM={list:null,kind:'img',cb:null},IMT={img:'Баннеры',icon:'Иконки карточек',bullet:'Иконки списков'};
 async function imLoad(){if(IM.list)return;try{IM.list=(await mapi('img_list')).list||[]}catch(e){IM.list=[];$('im_e').textContent=e.message}}
-function imRender(){const l=(IM.list||[]).filter(x=>x.kind===IM.kind);
-  $('im_g').innerHTML=l.length?l.map(x=>'<div class="th" data-u="'+esc(x.url)+'" title="'+esc(x.name)+'"><img src="'+esc(x.url)+'" alt=""><button class="sm bad" data-del="'+esc(x.id)+'" aria-label="Удалить">✕</button></div>').join(''):'<div class="empty" style="grid-column:1/-1">Пока ничего нет. Загрузите первое изображение выше.</div>'}
-async function pickImg(kind,cb){IM.kind=kind;IM.cb=cb;$('im_h').textContent=kind==='icon'?'Иконки':'Изображения (баннеры)';$('im_e').textContent='';$('im_u').value='';$('imod').hidden=false;imRender();await imLoad();imRender()}
+function imRender(){
+  const all=BI.filter(x=>x.k===IM.kind).map(x=>({u:x.u,n:x.n,b:1})).concat((IM.list||[]).filter(x=>x.kind===IM.kind).map(x=>({u:x.url,n:x.name,id:x.id})));
+  $('im_g').innerHTML=all.map(x=>'<div class="th" data-u="'+esc(x.u)+'" title="'+esc(x.n)+'"><img src="'+esc(x.u)+'" alt="" loading="lazy"><small>'+esc(x.n)+'</small>'+(x.b?'':'<button class="sm bad" data-del="'+esc(x.id)+'" aria-label="Удалить">✕</button>')+'</div>').join('')||'<div class="empty" style="grid-column:1/-1">Пока ничего нет</div>'}
+async function pickImg(kind,cb){IM.kind=kind;IM.cb=cb;$('im_h').textContent=IMT[kind]||'Изображения';$('im_e').textContent='';$('im_u').value='';$('imod').hidden=false;imRender();await imLoad();imRender()}
 function prepImg(file,kind){return new Promise((ok,no)=>{const im=new Image(),u=URL.createObjectURL(file);
   im.onerror=()=>{URL.revokeObjectURL(u);no(new Error('Не удалось прочитать файл '+file.name))};
-  im.onload=()=>{URL.revokeObjectURL(u);const png=kind==='icon';let mx=png?192:1200,q=.86;
+  im.onload=()=>{URL.revokeObjectURL(u);const png=kind!=='img';let mx=kind==='icon'?192:kind==='bullet'?96:1200,q=.86;
     for(let t=0;t<5;t++){const k=Math.min(1,mx/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));
       const x=c.getContext('2d');if(!png){x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height)}x.drawImage(im,0,0,c.width,c.height);
       const b64=c.toDataURL(png?'image/png':'image/jpeg',q).split(',')[1];
@@ -1309,6 +1423,7 @@ $('im_g').onclick=async e=>{const d=e.target.closest('[data-del]');
   const t=e.target.closest('[data-u]');if(t){IM.cb(t.dataset.u);$('imod').hidden=true}};
 $('im_uok').onclick=()=>{const u=safeUrl($('im_u').value);if(!/^https?:\/\//i.test(u))return $('im_e').textContent='Нужна ссылка вида https://…';IM.cb(u);$('imod').hidden=true};
 $('im_x').onclick=()=>{$('imod').hidden=true};
+M.consHtml=hasContent(C)?buildLetter(C):'';
 consInfo();
 
 /* ---------- Старт ---------- */
@@ -1385,4 +1500,5 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=1;location.reload()}});   // новая версия подхватывается сразу, без чистки кэша
   navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
 }
-</script></body></html>
+</script>
+</body></html>
