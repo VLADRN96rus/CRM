@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="МУРР">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&amp;family=Unbounded:wght@500;600&amp;display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f1eeff;--glass:rgba(255,255,255,.66);--gb:rgba(255,255,255,.85);--inp:rgba(255,255,255,.72);--tx:#1b1740;--mu:#6c6a8e;--line:rgba(90,80,160,.15);
 --bad:#e0425a;--ok-bg:rgba(52,211,153,.2);--ok-bd:rgba(16,185,129,.4);--ok-tx:#0b8f61;--sh:0 8px 30px rgba(80,60,180,.12);--ab:.4;
@@ -228,14 +228,16 @@ details.glass>.in{margin-top:16px}
 .subd summary{cursor:pointer;font-size:12px;color:var(--mu);margin-top:3px}.subd textarea{margin-top:6px;font-size:13.5px}
 .cadd{margin-top:4px}.th small{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-size:10.5px;padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(min-width:900px){#dboard .grid,#dshared .grid{grid-template-columns:repeat(auto-fill,minmax(200px,230px));justify-content:start}}
+.stp{margin:8px 0 12px;padding-left:20px;font-size:13.5px}.stp li{margin-bottom:6px}
+#setmod code{background:var(--inp);padding:1px 6px;border-radius:6px;font-size:12.5px}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
 <header><div class="hl"><h1 id="logo" style="cursor:pointer">МУРР</h1>
-  <nav id="navbar" hidden=""><button id="n1" class="">Личные</button><button id="n4" class="">Отдел</button><button id="n2" class="">Бюджет</button><button id="n3" class="">Письма</button><button id="n5" class="">Медиаплан</button></nav></div>
-  <div class="hr2"><button id="sync" title="Синхронизировать" class="off"><i></i><span>Не подключено</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
+  <nav id="navbar" hidden><button id="n1" class="on">Личные</button><button id="n4">Отдел</button><button id="n2">Бюджет</button><button id="n3">Письма</button><button id="n5">Медиаплан</button></nav></div>
+  <div class="hr2"><button id="sync" title="Синхронизировать"><i></i><span>Загрузка…</span></button><button id="gear" aria-label="Подключение">⚙</button></div></header>
 
-<section id="home" class="panel on"><div class="hello" id="hello">Здравствуйте! Выберите раздел</div><div class="tiles" id="tiles"><button class="tile" data-s="1"><span>✓</span>Личные задачи</button><button class="tile" data-s="4"><span>👥</span>Задачи отдела</button><button class="tile" data-s="2"><span>₽</span>Бюджет</button><button class="tile" data-s="3"><span>✉</span>Письма</button><button class="tile" data-s="5"><span>📅</span>Медиаплан</button></div></section>
+<section id="home" class="panel on"><div class="hello" id="hello"></div><div class="tiles" id="tiles"></div></section>
 
 <section id="p1" class="panel" data-tf="all">
   <div class="glass addbar" id="side">
@@ -247,53 +249,53 @@ details.glass>.in{margin-top:16px}
     <button class="btn" id="addT">Добавить</button>
   </div>
   <div class="hr"></div>
-  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint">Активных: 0</span>
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint"></span>
     <div class="chips" id="chips"><button data-f="all" class="on">Все</button><button data-f="hot">Важно</button><button data-f="cool">Не важно</button></div></div>
-    <button class="sm okb" id="doneBtn">✓ Выполнено (0)</button></div>
-  <div id="board"><div class="col hot"><h2 class="hot"><b></b>Важно <em>0</em></h2><div class="colbody"><div class="empty">Важных задач нет</div></div></div><div class="vr"></div><div class="col cool"><h2 class=""><b></b>Не важно <em>0</em></h2><div class="colbody"><div class="empty">Пусто — добавьте задачу</div></div></div></div>
+    <button class="sm okb" id="doneBtn">Выполнено</button></div>
+  <div id="board"></div>
   <button id="fab" aria-label="Новая задача">＋</button>
 </section>
 
 <section id="p4" class="panel">
-  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint">Активных: 0</span><div class="chips" id="dchips"><button data-f="act" class="on">Активные</button><button data-f="Не начато">Не начато</button><button data-f="В процессе">В процессе</button><button data-f="На проверке">На проверке</button><button data-f="Выполнено">Выполнено</button><button data-f="mine">Мои</button></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
-  <div id="dboard"><div class="empty">Задач нет</div></div>
-  <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn">0</em></h2><div id="dshared"><div class="empty">Пока никто не открыл личные задачи отделу</div></div>
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
+  <div id="dboard"></div>
+  <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn"></em></h2><div id="dshared"></div>
 </section>
 
 <section id="p5" class="panel">
-  <div class="mnav"><button class="sm" id="mpp" aria-label="Предыдущий месяц">←</button><b id="mpname">Ноябрь 2026</b><button class="sm" id="mpn" aria-label="Следующий месяц">→</button><button class="btn" id="mpadd" style="margin-left:auto">＋ Рассылка</button></div>
-  <div class="cal" id="cal"><div class="cw">Пн</div><div class="cw">Вт</div><div class="cw">Ср</div><div class="cw">Чт</div><div class="cw">Пт</div><div class="cw">Сб</div><div class="cw">Вс</div><div class="cd oth" data-day="2026-10-26"><span>26</span></div><div class="cd oth" data-day="2026-10-27"><span>27</span></div><div class="cd oth" data-day="2026-10-28"><span>28</span></div><div class="cd oth" data-day="2026-10-29"><span>29</span></div><div class="cd oth" data-day="2026-10-30"><span>30</span></div><div class="cd oth" data-day="2026-10-31"><span>31</span></div><div class="cd" data-day="2026-11-01"><span>1</span></div><div class="cd" data-day="2026-11-02"><span>2</span></div><div class="cd" data-day="2026-11-03"><span>3</span></div><div class="cd" data-day="2026-11-04"><span>4</span></div><div class="cd" data-day="2026-11-05"><span>5</span></div><div class="cd" data-day="2026-11-06"><span>6</span></div><div class="cd" data-day="2026-11-07"><span>7</span></div><div class="cd" data-day="2026-11-08"><span>8</span></div><div class="cd" data-day="2026-11-09"><span>9</span></div><div class="cd" data-day="2026-11-10"><span>10</span></div><div class="cd" data-day="2026-11-11"><span>11</span></div><div class="cd" data-day="2026-11-12"><span>12</span></div><div class="cd" data-day="2026-11-13"><span>13</span></div><div class="cd" data-day="2026-11-14"><span>14</span></div><div class="cd" data-day="2026-11-15"><span>15</span></div><div class="cd" data-day="2026-11-16"><span>16</span></div><div class="cd" data-day="2026-11-17"><span>17</span></div><div class="cd" data-day="2026-11-18"><span>18</span></div><div class="cd" data-day="2026-11-19"><span>19</span></div><div class="cd td" data-day="2026-11-20"><span>20</span></div><div class="cd" data-day="2026-11-21"><span>21</span></div><div class="cd" data-day="2026-11-22"><span>22</span></div><div class="cd" data-day="2026-11-23"><span>23</span></div><div class="cd" data-day="2026-11-24"><span>24</span></div><div class="cd" data-day="2026-11-25"><span>25</span></div><div class="cd" data-day="2026-11-26"><span>26</span></div><div class="cd" data-day="2026-11-27"><span>27</span></div><div class="cd" data-day="2026-11-28"><span>28</span></div><div class="cd" data-day="2026-11-29"><span>29</span></div><div class="cd" data-day="2026-11-30"><span>30</span></div><div class="cd oth" data-day="2026-12-01"><span>1</span></div><div class="cd oth" data-day="2026-12-02"><span>2</span></div><div class="cd oth" data-day="2026-12-03"><span>3</span></div><div class="cd oth" data-day="2026-12-04"><span>4</span></div><div class="cd oth" data-day="2026-12-05"><span>5</span></div><div class="cd oth" data-day="2026-12-06"><span>6</span></div></div>
+  <div class="mnav"><button class="sm" id="mpp" aria-label="Предыдущий месяц">←</button><b id="mpname"></b><button class="sm" id="mpn" aria-label="Следующий месяц">→</button><button class="btn" id="mpadd" style="margin-left:auto">＋ Рассылка</button></div>
+  <div class="cal" id="cal"></div>
   <div class="hint" style="margin-top:10px">Нажмите на день, чтобы запланировать рассылку. Она появится в ваших личных задачах.</div>
 </section>
 
 <section id="p2" class="panel">
-  <div class="mnav"><button class="sm" id="pm" aria-label="Предыдущий месяц">←</button><b id="mname">Ноябрь 2026</b><button class="sm" id="nm" aria-label="Следующий месяц">→</button>
+  <div class="mnav"><button class="sm" id="pm" aria-label="Предыдущий месяц">←</button><b id="mname"></b><button class="sm" id="nm" aria-label="Следующий месяц">→</button>
     <label class="sort">Сортировка списков <select id="sortSel"><option value="desc">Сумма: по убыванию</option><option value="asc">Сумма: по возрастанию</option><option value="name">По названию</option></select></label></div>
   <div class="bgrid">
     <div class="cA">
-      <div class="hero" id="hero"><small id="heroLbl">Доступно за ноябрь</small><span class="big" id="heroVal">0 ₽</span><div class="sub" id="heroSub">Что не потратите, перейдёт в декабрь 2026</div></div>
-      <div class="glass blk v4"><h3>Расчёт месяца</h3><div id="ledger"><div class="l "><span>Начальный остаток<small>переносится автоматически</small></span><span class="v pos">+ 0 ₽</span></div><div class="l "><span>Зарплата</span><span class="v pos">+ 0 ₽</span></div><div class="l "><span>Постоянные расходы</span><span class="v neg">− 0 ₽</span></div><div class="l net"><span>Чистая прибыль<small>зарплата минус постоянные расходы</small></span><span class="v ">0 ₽</span></div><div class="l "><span>Расходы на даты</span><span class="v neg">− 0 ₽</span></div><div class="l"><span><b>Итого доступно</b></span><span class="v " style="font-size:18px">0 ₽</span></div></div></div>
+      <div class="hero" id="hero"><small id="heroLbl">Доступно</small><span class="big" id="heroVal">0 ₽</span><div class="sub" id="heroSub"></div></div>
+      <div class="glass blk v4"><h3>Расчёт месяца</h3><div id="ledger"></div></div>
       <details class="glass blk" id="setBox"><summary>Зарплата и премия</summary><div class="in">
         <div class="row"><div><label class="f">Зарплата за месяц, ₽</label><input id="sm" type="number" inputmode="decimal"></div>
           <div><label class="f">Премия за квартал, ₽</label><input id="sq" type="number" inputmode="decimal"></div></div>
         <div class="row end"><div><label class="f">Остаток на старте, ₽</label><input id="so" type="number" inputmode="decimal"></div>
-          <div><label class="f">Считать с месяца</label><select id="ss"><option value="2024-11">Ноябрь 2024</option><option value="2024-12">Декабрь 2024</option><option value="2025-01">Январь 2025</option><option value="2025-02">Февраль 2025</option><option value="2025-03">Март 2025</option><option value="2025-04">Апрель 2025</option><option value="2025-05">Май 2025</option><option value="2025-06">Июнь 2025</option><option value="2025-07">Июль 2025</option><option value="2025-08">Август 2025</option><option value="2025-09">Сентябрь 2025</option><option value="2025-10">Октябрь 2025</option><option value="2025-11">Ноябрь 2025</option><option value="2025-12">Декабрь 2025</option><option value="2026-01">Январь 2026</option><option value="2026-02">Февраль 2026</option><option value="2026-03">Март 2026</option><option value="2026-04">Апрель 2026</option><option value="2026-05">Май 2026</option><option value="2026-06">Июнь 2026</option><option value="2026-07">Июль 2026</option><option value="2026-08">Август 2026</option><option value="2026-09">Сентябрь 2026</option><option value="2026-10">Октябрь 2026</option><option value="2026-11" selected="">Ноябрь 2026</option><option value="2026-12">Декабрь 2026</option><option value="2027-01">Январь 2027</option><option value="2027-02">Февраль 2027</option><option value="2027-03">Март 2027</option><option value="2027-04">Апрель 2027</option><option value="2027-05">Май 2027</option><option value="2027-06">Июнь 2027</option><option value="2027-07">Июль 2027</option><option value="2027-08">Август 2027</option><option value="2027-09">Сентябрь 2027</option><option value="2027-10">Октябрь 2027</option><option value="2027-11">Ноябрь 2027</option></select></div></div>
+          <div><label class="f">Считать с месяца</label><select id="ss"></select></div></div>
         <div class="row end" style="margin:0"><span class="hint" style="flex:2">Премия приходит в январе, апреле, июле и октябре.</span><button class="btn" id="saveS">Сохранить</button></div></div></details>
     </div>
     <div class="cB">
-      <div class="glass blk"><h3>Расходы месяца <em id="oneSum">0 ₽</em></h3>
-        <div class="scroll" id="oneList"><div class="empty">В этом месяце расходов нет</div></div>
+      <div class="glass blk"><h3>Расходы месяца <em id="oneSum"></em></h3>
+        <div class="scroll" id="oneList"></div>
         <div class="add"><div class="w2"><input id="on" placeholder="Статья расхода"></div><div><input id="oa" type="number" inputmode="decimal" placeholder="Сумма"></div>
           <div><input id="od" type="date" aria-label="Дата"></div><button class="btn" id="addO">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Дату можно очистить — расход попадёт в «Желаемые».</div></div>
-      <details class="glass blk v2" id="recBox" open=""><summary>Постоянные расходы <span class="meta" id="recMeta">0 · 0 ₽/мес</span></summary><div class="in">
-        <div class="scroll" id="recList" style="max-height:300px"><div class="empty">Статей пока нет</div></div>
+      <details class="glass blk v2" id="recBox"><summary>Постоянные расходы <span class="meta" id="recMeta"></span></summary><div class="in">
+        <div class="scroll" id="recList" style="max-height:300px"></div>
         <div class="add"><div class="w2"><input id="rn" placeholder="Статья (аренда, интернет…)"></div><div><input id="ra" type="number" inputmode="decimal" placeholder="В месяц"></div>
           <button class="btn" id="addR">Добавить</button></div></div></details>
     </div>
     <div class="cC">
-      <div class="glass blk v3"><h3>Желаемые расходы <em id="wSum">0 · 0 ₽</em></h3>
-        <div class="scroll" id="wList" style="max-height:480px"><div class="empty">Список пуст. Добавьте то, что хотите купить</div></div>
+      <div class="glass blk v3"><h3>Желаемые расходы <em id="wSum"></em></h3>
+        <div class="scroll" id="wList" style="max-height:480px"></div>
         <div class="add"><div class="w2"><input id="wn" placeholder="Что хочу купить"></div><div><input id="wa" type="number" inputmode="decimal" placeholder="Сумма"></div>
           <button class="btn" id="addW">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Нажмите «В месяц», когда решите потратить: расход перейдёт на нужную дату.</div></div>
@@ -301,37 +303,37 @@ details.glass>.in{margin-top:16px}
   </div>
 </section>
 <section id="p3" class="panel">
-  <div id="mban" class="ban" hidden=""></div>
+  <div id="mban" class="ban" hidden></div>
   <div class="mgrid">
     <div class="mcol">
       <div class="glass mb"><h3>Отправитель и письмо</h3>
-        <div class="fld"><label class="f">Отправитель</label><select id="mfrom"><option value="me">моя почта: укажите в ⚙ → Профиль</option><option value="shared">общая почта (общая)</option></select></div>
+        <div class="fld"><label class="f">Отправитель</label><select id="mfrom"><option value="me"></option><option value="shared"></option></select><div class="hint" id="msnd" style="margin-top:6px"></div><div class="btns"><button class="sm" id="msetup">⚙ Настроить отправку</button></div></div>
         <div class="fld"><label class="f" style="display:flex;justify-content:space-between;align-items:center;gap:8px">Письмо (шаблон)<select id="mtsort" style="width:auto;padding:4px 8px;font-size:12px" aria-label="Сортировка шаблонов"><option value="name">по названию</option><option value="new">сначала новые</option><option value="old">сначала старые</option></select></label><select id="mt"></select>
           <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button><button class="sm" id="mtNewH" title="Вставить готовый HTML">＋ HTML</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
         <div class="fld"><label class="f">Режим</label><select id="mm"><option value="1">Одно письмо</option><option value="2">Рассылка</option></select></div>
-        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple=""><div id="mfl"></div></div>
+        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple><div id="mfl"></div></div>
       </div>
       <div class="glass mb" id="m1"><h3>Получатель</h3>
         <div class="fld"><label class="f">Почта получателя</label><input id="me" type="email" placeholder="partner@example.ru" autocapitalize="off" autocorrect="off"></div>
-        <div class="fld"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="mccx"> Добавить копию (CC)</label><div id="mcopyw" hidden="" style="margin-top:8px"><input id="mcopy" placeholder="a@example.ru, b@example.ru" autocapitalize="off" autocorrect="off"></div></div>
+        <div class="fld"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="mccx"> Добавить копию (CC)</label><div id="mcopyw" hidden style="margin-top:8px"><input id="mcopy" placeholder="a@example.ru, b@example.ru" autocapitalize="off" autocorrect="off"></div></div>
         <div class="fld"><label class="f">Тема</label><input id="ms"></div>
-        <div class="fld" id="mfree" hidden=""><label class="f">Письмо без шаблона</label><div class="btns" style="margin-top:0"><button class="sm okb" id="cOpen">🎨 Открыть конструктор</button></div><div class="hint" id="cinfo" style="margin-top:6px">Письмо ещё не собрано.</div><textarea id="mbody" hidden=""></textarea></div>
+        <div class="fld" id="mfree" hidden><label class="f">Письмо без шаблона</label><div class="btns" style="margin-top:0"><button class="sm okb" id="cOpen">🎨 Открыть конструктор</button></div><div class="hint" id="cinfo" style="margin-top:6px"></div><textarea id="mbody" hidden></textarea></div>
         <div id="mv"></div>
         <button class="btn" id="s1">В очередь на отправку</button>
       </div>
-      <div class="glass mb" id="m2" hidden=""><h3>Рассылка</h3>
-        <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px">Каждому получателю уходит отдельное письмо. Нажмите «Настроить рассылку…», чтобы указать получателей.</div>
+      <div class="glass mb" id="m2" hidden><h3>Рассылка</h3>
+        <div class="hint" id="mlsum" style="white-space:pre-wrap;margin-bottom:14px"></div>
         <div id="mpl" class="scroll" style="max-height:220px;margin-bottom:14px"></div>
-        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden="">Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden="">Отправить всем (0)</button><button class="btn" id="mnewbtn" hidden="">Только новым (0)</button><button class="sm" id="mmissbtn" hidden="">Скачать СЦ без почты (0)</button></div>
+        <div class="btns" style="margin-top:0"><button class="sm" id="mOpen">Настроить рассылку…</button><button class="btn" id="mtestbtn" hidden>Отправить тестовое письмо</button><button class="btn" id="mallbtn" hidden>Отправить всем</button><button class="btn" id="mnewbtn" hidden>Только новым</button><button class="sm" id="mmissbtn" hidden>Скачать СЦ без почты</button></div>
       </div>
-      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div class="btns" id="mqact" hidden="" style="margin:0 0 10px"><button class="sm" id="mq_r">Обновить</button><button class="sm" id="mq_q">Вернуть зависшие в очередь</button><button class="sm" id="mq_c">Очистить очередь</button><button class="sm" id="mq_f">Починить очередь</button></div><div id="mlog"></div></div></details>
+      <details class="glass mb" id="mlogd"><summary>История отправки</summary><div class="in"><div class="hint" id="mq" style="margin-bottom:8px"></div><div class="btns" id="mqact" hidden style="margin:0 0 10px"><button class="sm" id="mq_r">Обновить</button><button class="sm" id="mq_q">Вернуть зависшие в очередь</button><button class="sm" id="mq_c">Очистить очередь</button><button class="sm" id="mq_f">Починить очередь</button></div><div id="mlog"></div></div></details>
     </div>
-    <div class="glass mb mpv"><h3>Предпросмотр</h3><iframe id="pv" class="pv" sandbox=""></iframe></div>
+    <div class="glass mb mpv"><h3>Предпросмотр</h3><iframe id="pv" class="pv" sandbox></iframe></div>
   </div>
 </section>
 </div>
 
-<div class="modal" id="tmod" hidden=""><div class="glass wide">
+<div class="modal" id="tmod" hidden><div class="glass wide">
   <h2>Шаблон письма</h2>
   <input type="hidden" id="te_id">
   <div class="fld"><label class="f">Название</label><input id="te_n"></div>
@@ -340,51 +342,81 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="te_err"></div>
   <div class="acts"><button class="btn sec" id="te_cancel">Отмена</button><button class="btn" id="te_save">Сохранить</button></div>
 </div></div>
-<div class="modal" id="mmod" hidden=""><div class="glass wide">
+<div class="modal" id="mmod" hidden><div class="glass wide">
   <h2>Рассылка</h2>
   <div class="fld"><label class="f">Получатели</label><select id="msrc"><option value="list">Список адресов</option><option value="file">Excel-файл: каждому — только его строки</option></select></div>
   <div class="fld" id="msl"><label class="f">Адреса (через запятую, пробел или с новой строки) — каждому уйдёт отдельное письмо</label><textarea id="mlist" rows="6"></textarea></div>
-  <div id="msf" hidden="">
+  <div id="msf" hidden>
     <div class="fld"><label class="f">Excel-файл (.xlsx). Столбцы «код СЦ» и «почта» определяются сами, листов может быть несколько</label><input id="mf" type="file" accept=".xlsx"></div>
     <div class="hint" id="mfi" style="margin-bottom:10px;white-space:pre-wrap"></div>
     <div class="fld"><div class="tkh"><label class="f" style="margin:0">Реестр партнёров (код СЦ → почта)</label><button class="sm" id="regbtn">Загрузить / обновить</button></div>
-      <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden=""></div>
-    <div class="fld" id="mmissw" hidden=""><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div class="hint" id="mmissl" style="margin-bottom:8px;user-select:text"></div>
+      <div class="hint" id="reginfo"></div><input id="regf" type="file" accept=".xlsx" hidden></div>
+    <div class="fld" id="mmissw" hidden><div class="hint" id="mmissh" style="margin-bottom:8px;color:var(--bad)"></div><div class="hint" id="mmissl" style="margin-bottom:8px;user-select:text"></div>
       <div id="mmiss" class="scroll" style="max-height:200px;overflow:auto"></div>
-      <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked=""> Сохранить введённые адреса в реестр</label>
+      <label class="chk" style="padding-bottom:0"><input type="checkbox" id="mmsave" checked> Сохранить введённые адреса в реестр</label>
       <div class="btns"><button class="sm" id="mmdl">Скачать список (xlsx)</button><button class="sm" id="mmskip">Продолжить без этих СЦ</button></div></div>
-    <div class="fld" id="mcdw" hidden=""><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
+    <div class="fld" id="mcdw" hidden><label class="f">Выберите столбцы, которые надо убрать из файла получателя (отметьте галочкой)</label><div id="mcd" class="scroll" style="max-height:170px;border:1px solid var(--line);border-radius:12px;padding:6px 12px"></div></div>
     <div class="fld"><label class="f">Название файла у получателя ({код} заменится кодами СЦ)</label><input id="mfn" value="Партнер {код}"></div>
   </div>
   <div id="mmv"></div>
-  <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked=""> Сначала отправить тестовое письмо</label>
-  <div class="fld" id="mtw"><label class="f">Куда отправить тест</label><select id="mtsel"><option value="me">моя почта: укажите в ⚙ → Профиль</option><option value="shared">общая почта (общая)</option><option value="other">Другая почта…</option></select><input id="mtt" type="email" hidden="" style="margin-top:8px" placeholder="адрес для теста" autocapitalize="off"></div>
+  <label class="chk" style="padding-bottom:0;margin-bottom:12px"><input id="mtest" type="checkbox" checked> Сначала отправить тестовое письмо</label>
+  <div class="fld" id="mtw"><label class="f">Куда отправить тест</label><select id="mtsel"><option value="me"></option><option value="shared"></option><option value="other">Другая почта…</option></select><input id="mtt" type="email" hidden style="margin-top:8px" placeholder="адрес для теста" autocapitalize="off"></div>
   <div class="err" id="mmsg2"></div>
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
-<div class="modal" id="cmod" hidden=""><div class="glass cwide">
-  <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"><option value="">Начать с готового письма…</option><option value="0">01 Предложение партнёрской программы</option><option value="1">02 Запускаем ваш сервисный центр</option><option value="2">03 Поздравляем, вы — официальный партнёр Контура!</option><option value="3">04 Прайс на продажу продуктов открыт!</option><option value="4">05 Давайте продолжим общение</option><option value="5">06 Предложение реферального партнёрства</option><option value="6">07 Согласование офиса</option><option value="7">08 Сотрудничество с Контуром</option><option value="8">09 Заявка на партнёрство закрыта</option><option value="9">10 Предложение партнёрской программы</option><option value="10">11 Универсальный</option><option value="11">12 Мы вас потеряли</option><option value="12">13 Необходимо проявить активность</option><option value="13">14 Необходимо возобновить продажи</option><option value="14">15 Аттестация по продукту «{{Название продукта}}»</option><option value="15">16 Счета без оплаты — напомните о них клиентам</option><option value="16">17 Инструменты для партнёра</option></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
+<div class="modal" id="cmod" hidden><div class="glass cwide">
+  <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
   <div class="row" style="margin-bottom:8px"><div><label class="f">Тема письма</label><input id="c_subj" placeholder="Тема, которую увидит получатель"></div><div><label class="f">Прехедер (текст рядом с темой в списке писем)</label><input id="c_pre"></div></div>
   <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button></div>
     <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button></div>
-  <div class="cprev"><iframe id="cpv" class="pv" sandbox=""></iframe></div></div>
-  <div class="err" id="c_err"></div><div class="acts"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok">Готово</button><button class="btn" id="c_save" hidden="">Сохранить шаблон</button></div>
+  <div class="cprev"><iframe id="cpv" class="pv" sandbox></iframe></div></div>
+  <div class="err" id="c_err"></div><div class="acts"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok">Готово</button><button class="btn" id="c_save" hidden>Сохранить шаблон</button></div>
 </div></div>
-<div class="modal" id="imod" hidden="" style="z-index:110"><div class="glass wide" style="max-width:680px">
+<div class="modal" id="imod" hidden style="z-index:110"><div class="glass wide" style="max-width:680px">
   <h2 id="im_h">Изображения</h2>
-  <div class="fld"><label class="f">Загрузить с компьютера (JPG, PNG — сожмутся сами)</label><input id="im_f" type="file" accept="image/png,image/jpeg" multiple=""></div>
+  <div class="fld"><label class="f">Загрузить с компьютера (JPG, PNG — сожмутся сами)</label><input id="im_f" type="file" accept="image/png,image/jpeg" multiple></div>
   <div class="row end"><div style="flex:3"><label class="f">…или вставьте ссылку на картинку</label><input id="im_u" placeholder="https://…" autocapitalize="off"></div><button class="sm" id="im_uok" style="flex:0 0 auto">Использовать</button></div>
   <div class="ig" id="im_g"></div><div class="err" id="im_e"></div><div class="acts"><button class="btn sec" id="im_x">Закрыть</button></div>
 </div></div>
-<div class="modal" id="askmod" hidden="" style="z-index:130"><div class="glass" style="max-width:460px"><h2 id="ask_h"></h2><div id="ask_f"></div><div class="err" id="ask_e"></div><div class="acts" id="ask_b" style="flex-wrap:wrap"></div></div></div>
-<div class="modal" id="onb" hidden=""><div class="glass" style="max-height:92vh;overflow:auto">
+<div class="modal" id="setmod" hidden><div class="glass wide" style="max-width:760px">
+  <h2>Настройка отправки писем</h2>
+  <div class="hint" id="set_st" style="margin-bottom:6px"></div><div class="hint" id="set_from" style="margin-bottom:12px"></div>
+  <div class="seg" id="set_os"><button class="sm on" data-os="win">Windows · Outlook</button><button class="sm" data-os="mac">macOS</button></div>
+  <div id="set_win">
+    <p class="hint">Нужен <b>классический Outlook</b> (не «Новый Outlook»), вход в него уже выполнен. Права администратора и пароль не нужны: письма уходят через ваш Outlook, копия остаётся в «Отправленных».</p>
+    <ol class="stp"><li>Нажмите «Пуск», введите <b>PowerShell</b> и откройте обычный (не «от имени администратора»).</li>
+      <li>Нажмите «Скопировать команду», вставьте её в окно PowerShell (правая кнопка мыши) и нажмите Enter.</li>
+      <li>Скрипт проверит Outlook и связь, настроит автозапуск при входе в Windows и запустит отправщик. Дождитесь слова «ГОТОВО» — индикатор выше станет зелёным.</li></ol>
+    <div class="btns"><button class="btn" id="set_cw">Скопировать команду</button><button class="sm" id="set_dw">Скачать файл-установщик (.cmd)</button></div>
+    <details class="subd"><summary>Показать команду · если не получилось · удаление</summary>
+      <textarea id="set_cmd_w" rows="4" readonly style="font-size:12px"></textarea>
+      <ul class="stp"><li><b>«Классический Outlook не найден»</b> — в Outlook выключите переключатель «Новый Outlook» (справа вверху), дождитесь перезапуска и повторите.</li>
+        <li><b>«Корпоративная политика ограничивает PowerShell»</b> — скрипт сообщит об этом сам; напишите администратору МУРР.</li>
+        <li><b>Файл .cmd блокируется</b> браузером или SmartScreen — используйте команду (она надёжнее). Файл только от вас и только ваш: не пересылайте его, в нём ваш код доступа.</li>
+        <li>Журнал отправщика: <code>%LOCALAPPDATA%\MURR-mailer\mailer.log</code></li></ul>
+      <div class="btns"><button class="sm bad" id="set_cwx">Скопировать команду удаления</button></div>
+    </details>
+  </div>
+  <div id="set_mac" hidden>
+    <p class="hint">Пароль от почты хранится в Связке ключей Mac. Отправщик запускается сам при входе в Mac; чтобы письма уходили, Mac не должен спать.</p>
+    <ol class="stp"><li>Откройте «Терминал» (Spotlight → «Терминал»).</li><li>Нажмите «Скопировать команду», вставьте в Терминал и нажмите Enter.</li>
+      <li>Ответьте на вопросы: логин от почты (например, <code>kontur/ivanov</code>), пароль (при вводе не отображается), имя для подписи и рабочая почта.</li>
+      <li>Дождитесь слова «Готово» — индикатор выше станет зелёным.</li></ol>
+    <div class="btns"><button class="btn" id="set_cm">Скопировать команду</button></div>
+    <details class="subd"><summary>Показать команду · удаление</summary><textarea id="set_cmd_m" rows="3" readonly style="font-size:12px"></textarea>
+      <div class="btns"><button class="sm bad" id="set_cmx">Скопировать команду удаления</button></div></details>
+  </div>
+  <div class="err" id="set_e"></div><div class="acts"><button class="btn sec" id="set_x">Закрыть</button></div>
+</div></div>
+<div class="modal" id="askmod" hidden style="z-index:130"><div class="glass" style="max-width:460px"><h2 id="ask_h"></h2><div id="ask_f"></div><div class="err" id="ask_e"></div><div class="acts" id="ask_b" style="flex-wrap:wrap"></div></div></div>
+<div class="modal" id="onb" hidden><div class="glass" style="max-height:92vh;overflow:auto">
   <h2>Добро пожаловать!</h2><p>Укажите имя и фамилию и отметьте разделы, которыми будете пользоваться. Остальные не будут вам мешать. Позже это можно изменить в ⚙.</p>
   <div class="fld"><label class="f">Имя Фамилия</label><input id="ob_n" autocomplete="name"></div>
   <div class="fld"><label class="f">Рабочая почта (с неё уходят письма; нужна для раздела «Письма»)</label><input id="ob_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru"></div>
   <div class="fld"><label class="f">Разделы</label><div id="ob_s"></div></div>
   <div class="err" id="ob_e"></div><div class="acts"><button class="btn" id="ob_ok">Продолжить</button></div>
 </div></div>
-<div class="modal" id="mpmod" hidden=""><div class="glass" style="max-width:480px">
+<div class="modal" id="mpmod" hidden><div class="glass" style="max-width:480px">
   <h2 id="mp_h2">Рассылка</h2>
   <div class="fld"><label class="f">Название</label><input id="mp_t"></div>
   <div class="fld"><label class="f">Дата рассылки</label><input id="mp_d" type="date"></div>
@@ -393,7 +425,7 @@ details.glass>.in{margin-top:16px}
   <div class="hint" id="mp_a" style="margin-bottom:8px"></div><div class="err" id="mp_e"></div>
   <div class="tkacts"><div><button class="btn sec" id="mp_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="mp_cancel">Отмена</button><button class="btn" id="mp_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="dmod" hidden=""><div class="glass wide">
+<div class="modal" id="dmod" hidden><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
   <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
   <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
@@ -404,29 +436,29 @@ details.glass>.in{margin-top:16px}
   <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
   <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
   <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
-  <div class="fld" id="dm_rw" hidden=""><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
-  <details class="fld" id="dm_hd" hidden=""><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
+  <div class="fld" id="dm_rw" hidden><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
+  <details class="fld" id="dm_hd" hidden><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
   <div class="err" id="dm_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="dm_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="dm_cancel">Отмена</button><button class="btn" id="dm_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="tkmod" hidden=""><div class="glass wide" style="max-width:560px">
+<div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
   <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
   <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
   <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
     <div class="tkp" id="tk_p"></div>
-    <textarea id="tk_c" rows="6" hidden="" placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
+    <textarea id="tk_c" rows="6" hidden placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
-<div class="modal" id="cfgm"><div class="glass" style="max-height:92vh;overflow:auto">
+<div class="modal" id="cfgm" hidden><div class="glass" style="max-height:92vh;overflow:auto">
   <h2>Подключение к таблице</h2>
   <p>Адрес и код вы получаете при настройке Apps Script. Достаточно ввести их один раз на каждом устройстве.</p>
   <label class="f">Адрес веб-приложения (заканчивается на /exec)</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off">
   <label class="f" style="margin-top:10px">Код доступа</label><input id="ck" placeholder="Код из setup()" autocapitalize="off" autocorrect="off">
   <div class="err" id="cerr"></div>
-  <div id="prof" hidden="" style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+  <div id="prof" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
     <h2 style="font-size:16px">Профиль</h2>
     <label class="f">Имя Фамилия</label><input id="pf_n" autocomplete="name">
     <label class="f" style="margin-top:10px">Рабочая почта (адрес отправителя писем)</label><input id="pf_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru">
@@ -823,8 +855,8 @@ async function mapi(act,d){
   const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||j.error||'Ошибка сервера');return j;
 }
 function renderQ(j){
-  const q=j.q,live=j.hb&&Date.now()-j.hb<9e4;M.q=q;
-  $('mq').textContent='Очередь: ждут '+q.p+' · отправлено сегодня '+q.s+' · ошибок '+q.e+(q.c?' · в работе '+q.c:'')+' · '+(live?'● отправщик на Mac работает':'○ отправщик на Mac не отвечает'+(j.hb?' (был на связи '+new Date(j.hb).toLocaleString('ru')+')':'')+' — письма уйдут, когда он запустится')+(live&&j.hbm?' · отправщик: '+j.hbm:'');
+  const q=j.q,live=j.hb&&Date.now()-j.hb<9e4;M.q=q;M.live=!!live;M.hb=j.hb||0;sndStatus();
+  $('mq').textContent='Очередь: ждут '+q.p+' · отправлено сегодня '+q.s+' · ошибок '+q.e+(q.c?' · в работе '+q.c:'')+' · '+(live?'● отправщик работает':'○ отправщик не подключён или не отвечает'+(j.hb?' (был на связи '+new Date(j.hb).toLocaleString('ru')+')':'')+' — письма уйдут, когда он запустится')+(live&&j.hbm?' · отправщик: '+j.hbm:'');
   $('mqact').hidden=!(q.p+q.c);
   $('mlog').innerHTML=(j.log||[]).map(x=>'<div class="li"><span class="n">'+esc(x.to)+'<small>'+esc(x.t+' · '+x.s+(x.from?' · '+x.from:'')+(x.ok?'':' · '+x.err))+'</small></span><span class="r" style="color:'+(x.ok?'inherit':'var(--bad)')+'">'+(x.ok?'✓':'ошибка')+'</span></div>').join('')||'<div class="hint">Пока пусто</div>';
 }
@@ -843,7 +875,7 @@ async function repairQ(){try{ban('info','Чиню очередь…');const r=aw
 $('mq_f').onclick=repairQ;$('mq_r').onclick=refreshQ;$('mq_q').onclick=requeueQ;$('mq_c').onclick=clearQ;
 function watchQ(N,cb){clearInterval(wT);const q0=M.q0;let last=Date.now(),prev='',stalled=false,lastJ=null;M.cancel=false;
   const stall=j=>{const ds=j.q.s-q0.s+(j.q.e-q0.e),live=j.hb&&Date.now()-j.hb<9e4;
-    ban('info','Отправка приостановлена: обработано '+ds+' из '+N+', в очереди '+(j.q.p+j.q.c)+'. '+(live?'Отправщик на Mac на связи'+(j.hbm?' («'+j.hbm+'»)':'')+': возможно, почтовый сервер притормаживает отправку — тогда достаточно подождать, она продолжится сама.':'Отправщик на Mac не отвечает: проверьте, что Mac включён, не спит и подключён к интернету. Письма не потеряются и уйдут, когда он снова заработает.')+' Нажмите «Проверить»; если ничего не меняется — «Вернуть зависшие в очередь».',
+    ban('info','Отправка приостановлена: обработано '+ds+' из '+N+', в очереди '+(j.q.p+j.q.c)+'. '+(live?'Отправщик на связи'+(j.hbm?' («'+j.hbm+'»)':'')+': возможно, почтовый сервер притормаживает отправку — тогда достаточно подождать, она продолжится сама.':'Отправщик не отвечает: проверьте, что компьютер с отправщиком включён, не спит и подключён к интернету (если отправщик ещё не установлен — «Настроить отправку»). Письма не потеряются и уйдут, когда он снова заработает.')+' Нажмите «Проверить»; если ничего не меняется — «Вернуть зависшие в очередь».',
       [['Проверить',async()=>{last=Date.now();try{const x=await mapi('status');renderQ(x);stall(x)}catch(e){ban('err',e.message)}}],['Вернуть зависшие в очередь',requeueQ],['Починить очередь',repairQ],['Очистить очередь',clearQ]])};
   wT=setInterval(async()=>{if(document.hidden&&Date.now()-last<6e5)return;   // вкладка не на виду — сервер не нагружаем
     const j=await mapi('status').catch(()=>null);
@@ -852,7 +884,7 @@ function watchQ(N,cb){clearInterval(wT);const q0=M.q0;let last=Date.now(),prev='
       if(left===0){clearInterval(wT);
         if(M.cancel){ban('info','Очередь очищена. Отправлено писем: '+ds+(de?', с ошибкой: '+de:'')+'. Остальные отменены.');if(cb)cb(false,(j.log||[]).slice(0,ds+de));return}
         prog(3,de>0?'err':'ok',ds,N);if(cb){let lg=j.log||[];if(ds+de>lg.length)lg=((await mapi('status',{n:Math.min(300,ds+de)}).catch(()=>null))||j).log||lg;cb(de===0,lg.slice(0,ds+de))}return}
-      if(!stalled){if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик на Mac не отвечает — письмо ждёт, пока он запустится')}}
+      if(!stalled){if(j.q.c>0||ds+de>0)prog(2,'',ds+de,N);else prog(1,'',0,N,live?'':'Отправщик не отвечает — письмо ждёт, пока он запустится')}}
     if(!stalled&&Date.now()-last>18e4&&lastJ){stalled=true;stall(lastJ)}},N>100?8000:5000)}
 const Q=async jobs=>{   // пачками по размеру (до ~1,5 МБ за запрос): 485 писем уходят в очередь за считанные запросы
   const sz=jobs.map(x=>JSON.stringify(x).length);let i=0;
@@ -1426,6 +1458,34 @@ $('im_x').onclick=()=>{$('imod').hidden=true};
 M.consHtml=hasContent(C)?buildLetter(C):'';
 consInfo();
 
+/* ---------- Настройка отправки (Windows/Outlook и macOS) ---------- */
+const mailBase=()=>{try{return new URL('mailer/',location.href).href}catch(e){return ''}};
+const PSH="[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;$w=New-Object Net.WebClient;$w.Encoding=[Text.Encoding]::UTF8;";
+function setCmds(){const B=mailBase(),u=cfg.url||'',k=cfg.key||'',h=PSH+"iex $w.DownloadString('"+B+"install-windows.ps1');";
+  return{win:h+"Install-Murr -Url '"+u+"' -Token '"+k+"' -Base '"+B+"'",winX:h+"Uninstall-Murr",
+    mac:"curl -fsSL '"+B+"install.sh' | bash -s -- '"+u+"' '"+k+"' '"+B+"'",
+    macX:"launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/ru.crm.mailer.plist; rm -rf ~/.crm-mailer ~/Library/LaunchAgents/ru.crm.mailer.plist"}}
+function sndStatus(){if(M.live===undefined)return;const t=M.live?'● Отправщик подключён и работает':'○ Отправщик не подключён — письма ждут в очереди';
+  const a=$('msnd');if(a){a.textContent=t;a.style.color=M.live?'var(--ok-tx)':'var(--bad)'}
+  const b=$('set_st');if(b){b.textContent=t+(M.hb?' · был на связи '+new Date(M.hb).toLocaleString('ru'):'');b.style.color=M.live?'var(--ok-tx)':'var(--mu)'}}
+function setOS(os){$('set_win').hidden=os!=='win';$('set_mac').hidden=os!=='mac';[...$('set_os').children].forEach(b=>b.className='sm'+(b.dataset.os===os?' on':''))}
+let setT=0;
+function openSetup(){
+  if(!cfg.url||!cfg.key)return ban('err','Сначала подключитесь к таблице (⚙).');
+  const c=setCmds(),mac=/Mac/i.test(navigator.platform||'')&&!/iPhone|iPad/i.test(navigator.userAgent||'');
+  $('set_cmd_w').value=c.win;$('set_cmd_m').value=c.mac;setOS(mac?'mac':'win');
+  $('set_e').textContent=/^https:/.test(mailBase())?'':'МУРР открыт не по адресу сайта (https://…) — команды установки не заработают. Откройте МУРР из браузера по ссылке на сайт.';
+  $('set_from').textContent='Письма «от меня» уходят с адреса: '+(ADDR.me||'⚠ не указан — задайте в ⚙ → Профиль')+'. Общая почта отдела: '+(ADDR.shared||'—')+'.';
+  sndStatus();$('setmod').hidden=false;refreshQ();clearInterval(setT);setT=setInterval(refreshQ,4000)}
+function closeSetup(){$('setmod').hidden=true;clearInterval(setT)}
+async function copyTxt(txt,btn){try{await navigator.clipboard.writeText(txt)}catch(e){const t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(x){}t.remove()}
+  const o=btn.dataset.o||btn.textContent;btn.dataset.o=o;btn.textContent='Скопировано ✓';setTimeout(()=>{btn.textContent=o},1800)}
+function dlCmd(){const txt='@echo off\r\nchcp 65001 >nul\r\npowershell -NoProfile -ExecutionPolicy Bypass -Command "'+setCmds().win+'"\r\npause\r\n',a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='murr-install.cmd';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+$('msetup').onclick=openSetup;$('set_x').onclick=closeSetup;$('set_os').onclick=e=>{const b=e.target.closest('[data-os]');if(b)setOS(b.dataset.os)};
+$('set_cw').onclick=()=>copyTxt(setCmds().win,$('set_cw'));$('set_cm').onclick=()=>copyTxt(setCmds().mac,$('set_cm'));
+$('set_cwx').onclick=()=>copyTxt(setCmds().winX,$('set_cwx'));$('set_cmx').onclick=()=>copyTxt(setCmds().macX,$('set_cmx'));$('set_dw').onclick=dlCmd;
+
 /* ---------- Старт ---------- */
 (function(){
   const now=new Date(),cur=today().slice(0,7);let o='';
@@ -1500,5 +1560,4 @@ if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=1;location.reload()}});   // новая версия подхватывается сразу, без чистки кэша
   navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{});
 }
-</script>
-</body></html>
+</script></body></html>
