@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 # CRM-отправщик для Mac: сам забирает письма из очереди (Google Таблица) и отправляет через Exchange SMTP.
 # Запускается автоматически через launchd (см. install.sh). Настройки: ~/.crm-mailer/config.json
-import json, os, re, ssl, sys, time, base64, imaplib, smtplib, subprocess, threading, queue, random, socket, urllib.request, urllib.error
+#
+# Что важно (v2):
+#  * Mac не засыпает, пока отправщик работает (caffeinate на всё время жизни процесса; выключить: "keep_awake": false).
+#  * Сигнал «я жив» уходит таблице каждые ≤15 с, результаты — каждые 5 писем или 15 с.
+#  * Копии в «Отправленные» делаются ТОЛЬКО когда очередь пуста: письма сначала спулятся на диск (sent_spool), потом докладываются.
+import json, os, re, ssl, sys, time, base64, glob, imaplib, smtplib, subprocess, random, socket, urllib.request, urllib.error
 from email import encoders
 from email.header import Header
 from email.mime.base import MIMEBase
@@ -10,12 +15,12 @@ from email.mime.text import MIMEText
 from email.utils import formataddr, formatdate, make_msgid
 
 DIR = os.path.expanduser('~/.crm-mailer')
-CFG, LEDGER = os.path.join(DIR, 'config.json'), os.path.join(DIR, 'sent.json')
-IDLE, BUSY, MAX_TRIES, MAX_THROTTLE, PER_CONN, BATCH = 20, 3, 3, 15, 40, 100  # пауза без работы / при работе (с); попыток при сбоях; ожиданий при ограничении сервера; писем на одно соединение
+CFG, LEDGER, SPOOL = os.path.join(DIR, 'config.json'), os.path.join(DIR, 'sent.json'), os.path.join(DIR, 'sent_spool')
+IDLE, BUSY, MAX_TRIES, MAX_THROTTLE, PER_CONN, BATCH = 20, 3, 3, 15, 40, 25   # пауза без работы / при работе (с); попыток при сбоях; ожиданий при ограничении сервера; писем на одно соединение; писем в пачке
+FLUSH_EVERY, FLUSH_N, COPY_STEP, SLEEP_GAP = 15, 5, 30, 180   # передача результатов: раз в N с / N писем; копий за один проход; пауза (с), после которой считаем, что Mac спал
 
-SENT_BUF = []            # письма пачки, ушедшие получателям; копии в «Отправленные» делаются позже
-SENT_Q = queue.Queue()   # очередь копий: наполняется только после передачи результатов таблице
-STATE, OUT = ['ожидаю письма'], []   # что делает отправщик (видно в CRM) и результаты, ещё не переданные таблице
+STATE, OUT, LAST = ['ожидаю письма'], [], [time.time()]   # что делает отправщик (видно в CRM); результаты, ещё не переданные таблице; время последнего контакта с таблицей
+COPY_FAILS = {}
 
 def log(*a): print(time.strftime('%Y-%m-%d %H:%M:%S'), *a, flush=True)
 
@@ -25,8 +30,7 @@ class Busy(Exception): pass   # таблица занята другим зап�
 def load_cfg(): return json.load(open(CFG, encoding='utf-8'))
 
 def api(cfg, act, d=None):
-    """Запрос к таблице. Короткие сбои (таблица занята, обрыв сети) переживаем здесь же — 3 попытки, —
-    чтобы CRM не показывала «отправщик не отвечает» из-за секундной заминки."""
+    """Запрос к таблице. Короткие сбои (таблица занята, обрыв сети) переживаем здесь же — 3 попытки."""
     body = {'k': cfg['token'], 'act': act}; body.update(d or {}); last = None
     for attempt in range(3):
         t0 = time.time()
@@ -37,6 +41,7 @@ def api(cfg, act, d=None):
             if not j.get('ok'):
                 if j.get('error') == 'busy': raise Busy('таблица занята')
                 raise RuntimeError(j.get('error') or 'ошибка API')
+            LAST[0] = time.time()
             return j
         except Busy as e: last = e; time.sleep(1.5 + random.random() * 2)
         except (urllib.error.URLError, socket.timeout, TimeoutError, ConnectionError, ValueError) as e:
@@ -87,7 +92,7 @@ def build(p, job):
     rcpt = [job['to']] + cc + ([p['from_email']] if p.get('bcc_self') else [])
     return m, rcpt
 
-bad_auth, conns = set(), {}
+bad_auth, conns, imaps = set(), {}, {}
 
 def drop(key):
     c = conns.pop(key, None)
@@ -97,6 +102,12 @@ def drop(key):
 
 def close_all():
     for k in list(conns): drop(k)
+
+def close_imap():
+    for c in list(imaps.values()):
+        try: c.logout()
+        except Exception: pass
+    imaps.clear()
 
 def smtp_for(p):
     """Одно соединение на много писем (меньше входов на сервер), раз в PER_CONN писем — новое."""
@@ -142,30 +153,51 @@ def throttled(e):
     t = str(getattr(e, 'smtp_error', e)).lower()
     return getattr(e, 'smtp_code', 0) in (421, 450, 451, 452) or any(w in t for w in ('throttl', 'rate limit', 'too many', 'limit exceeded', 'try again later'))
 
-imaps = {}
-
+# ---------- «Отправленные»: копии сначала на диск, в папку — только когда очередь пуста ----------
 def imap_conn(p, fresh=False):
     im = p['imap']; key = im['host'] + '|' + (im.get('user') or p['user'])
     if not fresh and key in imaps:
         try: imaps[key].noop(); return imaps[key]
         except Exception: imaps.pop(key, None)
-    c = imaplib.IMAP4_SSL(im['host'], int(im.get('port', 993)))
+    try: c = imaplib.IMAP4_SSL(im['host'], int(im.get('port', 993)), timeout=60)   # таймаут: после сна соединение не должно виснуть
+    except TypeError: c = imaplib.IMAP4_SSL(im['host'], int(im.get('port', 993)))
     c.login(im.get('user') or p['user'], password(p)); imaps[key] = c; return c
 
-def save_sent(p, msg):
-    """Кладёт копию в «Отправленные» (если в config.json у отправителя задан блок imap). Соединение переиспользуется; сбой не отменяет отправку."""
+def save_sent(p, raw):
+    """Кладёт копию (bytes) в «Отправленные». При неудаче бросает исключение — копия останется на диске до следующей попытки."""
     if not p.get('imap'): return
     for attempt in (0, 1):
         try:
             c = imap_conn(p, fresh=attempt == 1)
-            c.append(p['imap'].get('folder', 'Sent Items'), '\\Seen', imaplib.Time2Internaldate(time.time()), msg.as_bytes()); return
-        except Exception as e:
+            c.append(p['imap'].get('folder', 'Sent Items'), '\\Seen', imaplib.Time2Internaldate(time.time()), raw); return
+        except Exception:
             imaps.clear()
-            if attempt: log('не удалось сохранить в «Отправленные»:', e)
+            if attempt: raise
 
-def folders(name):
-    c = imap_conn(load_cfg()['senders'][name], fresh=True)
-    for f in c.list()[1]: print(f.decode('utf-8', 'replace'))
+def spool_put(sender, jid, msg):
+    os.makedirs(SPOOL, exist_ok=True)
+    path = os.path.join(SPOOL, '%d_%s.json' % (int(time.time() * 1000), re.sub(r'[^\w-]', '_', jid)))
+    with open(path + '.tmp', 'w') as f: json.dump({'s': sender, 'eml': base64.b64encode(msg.as_bytes()).decode()}, f)
+    os.replace(path + '.tmp', path)
+
+def spool_files(): return sorted(glob.glob(os.path.join(SPOOL, '*.json')))
+
+def copy_spool(cfg):
+    """Вызывается только при пустой очереди. Возвращает (сколько скопировано, сколько осталось)."""
+    files, n = spool_files(), 0
+    for path in files[:COPY_STEP]:
+        try: d = json.load(open(path)); raw = base64.b64decode(d['eml'])
+        except Exception: os.remove(path); continue
+        p = cfg['senders'].get(d.get('s') or 'me')
+        if not p or not p.get('imap'): os.remove(path); continue
+        STATE[0] = 'сохраняю копии в «Отправленные» (осталось %d)' % (len(files) - n)
+        try: save_sent(p, raw); os.remove(path); COPY_FAILS.pop(path, None); n += 1
+        except Exception as e:
+            COPY_FAILS[path] = COPY_FAILS.get(path, 0) + 1
+            log('«Отправленные» (попытка %d из 5): %s' % (COPY_FAILS[path], e))
+            if COPY_FAILS[path] >= 5 or time.time() - os.path.getmtime(path) > 3 * 86400: os.remove(path); COPY_FAILS.pop(path, None)
+            break   # IMAP сейчас недоступен — не долбим, повторим в следующий простой
+    return n, len(spool_files())
 
 def load_ledger():
     try:
@@ -176,15 +208,38 @@ def save_ledger(l):
     l = dict(sorted(l.items(), key=lambda kv: kv[1])[-3000:])
     with open(LEDGER, 'w') as f: json.dump(l, f)
 
+# ---------- результаты и «пульс» ----------
 def done(cfg, job, p, ok, err=''):
     OUT.append({'id': job['id'], 'to': job.get('to'), 'subject': job.get('subject'), 'ok': ok, 'err': err[:300], 'from': (p or {}).get('from_email') or job.get('from')})
 
 def flush(cfg):
-    """Результаты уходят в таблицу пачкой — одним запросом, а не по одному на письмо."""
+    """Результаты уходят в таблицу пачкой (заодно это «пульс» отправщика)."""
+    LAST[0] = time.time()
     while OUT:
         part = OUT[:50]
         try: api(cfg, 'outbox_done', {'items': part}); del OUT[:len(part)]
         except Exception as e: log('результаты пока не переданы (повторю):', e); return
+
+def beat(cfg):
+    try: api(cfg, 'status', {'hb': 1, 'n': 1, 'msg': STATE[0]})
+    except Exception: LAST[0] = time.time()
+
+def tick(cfg):   # вызывается между письмами: результаты — раз в 5 писем/15 с, иначе просто «я жив»
+    el = time.time() - LAST[0]
+    if OUT and (len(OUT) >= FLUSH_N or el > FLUSH_EVERY): flush(cfg)
+    elif el > 30: beat(cfg)
+
+def nap(cfg, sec):   # длинная пауза с «пульсом»
+    end = time.time() + sec
+    while time.time() < end:
+        time.sleep(min(15, max(0, end - time.time())))
+        if time.time() < end: beat(cfg)
+
+def keep_awake(cfg):
+    """Пока жив отправщик, Mac не засыпает от простоя (экран может гаснуть). Закрытая крышка ноутбука усыпит Mac всё равно."""
+    if cfg.get('keep_awake', True) is False: return
+    try: subprocess.Popen(['caffeinate', '-i', '-s', '-w', str(os.getpid())], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e: log('caffeinate не запустился:', e)
 
 def handle(cfg, job, ledger, tries):
     """True — письмо обработано; False — временный сбой (сеть/сервер), прекращаем пачку."""
@@ -203,7 +258,7 @@ def handle(cfg, job, ledger, tries):
             STATE[0] = 'пауза: почтовый сервер ограничивает скорость (%d из %d)' % (tries[k], MAX_THROTTLE)
             log('сервер ограничивает скорость (%d/%d), жду минуту:' % (tries[k], MAX_THROTTLE), e)
             if tries[k] >= MAX_THROTTLE: done(cfg, job, p, False, 'Сервер долго ограничивает отправку: %s' % e); return True
-            flush(cfg); time.sleep(60); return False
+            flush(cfg); nap(cfg, 60); return False
         tries[jid] = tries.get(jid, 0) + 1
         STATE[0] = 'сбой связи с почтовым сервером (%d из %d)' % (tries[jid], MAX_TRIES)
         log('сбой (%d/%d)' % (tries[jid], MAX_TRIES), job.get('to'), e)
@@ -211,54 +266,54 @@ def handle(cfg, job, ledger, tries):
         return False
     ledger[jid] = time.time(); save_ledger(ledger)      # сначала запоминаем, потом сообщаем — чтобы не отправить дважды
     STATE[0] = 'отправляю'
-    SENT_BUF.append((p, sent_msg))   # копию сохраним после отправки всей пачки и отчёта таблице
+    try: spool_put(job.get('from') or 'me', jid, sent_msg)   # копия ждёт на диске: в «Отправленные» она попадёт, когда уйдут все письма
+    except Exception as e: log('копия не сохранена на диск:', e)
     log('отправлено', p['from_email'], '->', job['to']); done(cfg, job, p, True)
-    if p.get('max_per_minute'):   # целевая скорость: ждём только остаток интервала (время самой отправки уже учтено)
+    if p.get('max_per_minute'):   # целевая скорость: ждём только остаток интервала
         time.sleep(max(0.0, 60.0 / max(1, int(p['max_per_minute'])) - (time.time() - t0)))
     elif p.get('delay'): time.sleep(float(p['delay']))   # без ключей max_per_minute/delay пауз между письмами нет
     return True
 
-def release_copies():
-    while SENT_BUF: SENT_Q.put(SENT_BUF.pop(0))
-
-def sent_worker():
-    while True:
-        p, msg = SENT_Q.get()
-        try: save_sent(p, msg)
-        except Exception as e: log('«Отправленные»:', e)
-
 def main():
     os.makedirs(DIR, exist_ok=True)
-    threading.Thread(target=sent_worker, daemon=True).start()
-    cfg, ledger, tries, fast, awake, fails = load_cfg(), load_ledger(), {}, 0, 0, 0
-    log('отправщик запущен')
+    cfg, ledger, tries, fast, fails = load_cfg(), load_ledger(), {}, 0, 0
+    log('отправщик запущен'); keep_awake(cfg)
+    last_tick = time.time()
     while True:
         try:
+            now = time.time()
+            if now - last_tick > SLEEP_GAP:   # Mac, вероятно, спал: старые соединения мертвы
+                log('пауза %d с — похоже, Mac спал; переподключаюсь' % (now - last_tick)); close_all(); close_imap()
+            last_tick = now
             try: cfg = load_cfg()   # настройки перечитываются сами, перезапуск после правки config.json не нужен
             except Exception as e: log('config.json:', e)
             if not tries.get('_started'):
                 api(cfg, 'outbox_requeue'); tries['_started'] = 1   # после перезапуска возвращаем «зависшие» письма в очередь
             jobs = api(cfg, 'outbox_list', {'n': BATCH, 'msg': STATE[0]})['jobs']
-            if jobs and time.time() - awake > 100:   # пока идёт отправка, не даём Mac уснуть
-                awake = time.time()
-                try: subprocess.Popen(['caffeinate', '-i', '-t', '240'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                except Exception: pass
             for i, job in enumerate(jobs):
                 if not handle(cfg, job, ledger, tries):
                     for j in jobs[i:]: api(cfg, 'outbox_requeue', {'id': j['id']})
                     break
-            flush(cfg)            # 2) результаты — в таблицу
-            release_copies()      # 3) и только теперь копии в «Отправленные» (фоном)
+                tick(cfg)
+            flush(cfg)
             if jobs: fast = time.time() + 120
-            else: close_all(); STATE[0] = 'ожидаю письма'
+            else:
+                close_all()   # очередь пуста: теперь — копии в «Отправленные»
+                n, left = copy_spool(cfg)
+                if left == 0: close_imap(); STATE[0] = 'ожидаю письма'
+                fails = 0
+                if n and left: continue   # есть что докладывать — без паузы, но очередь перед каждым проходом перепроверяется
             fails = 0
             if len(jobs) >= BATCH: continue   # очередь ещё большая — берём следующую пачку без паузы
         except Busy:
             fails += 1; wait = min(15, 2 * fails); log('таблица занята, повторю через %d с' % wait); time.sleep(wait); continue
         except Exception as e:
-            # при сбоях не засыпаем сервер запросами: пауза растёт 15 → 30 → 60 → … до 5 минут (зависшие запросы Google сами завершаются за ≤6 минут)
             fails += 1; wait = min(60, 10 * 2 ** min(fails - 1, 3)); log('нет связи с таблицей (попытка %d, повтор через %d с): %s' % (fails, wait, e)); STATE[0] = 'нет связи с таблицей'; time.sleep(wait); continue
         time.sleep(BUSY if time.time() < fast else IDLE)
+
+def folders(name):
+    c = imap_conn(load_cfg()['senders'][name], fresh=True)
+    for f in c.list()[1]: print(f.decode('utf-8', 'replace'))
 
 if __name__ == '__main__':
     if len(sys.argv) > 2 and sys.argv[1] == '--folders': folders(sys.argv[2])
