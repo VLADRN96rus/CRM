@@ -984,7 +984,8 @@ async function parseXlsx(buf){   // листы; столбцы «код СЦ» �
     sheets.push({name:ws.name,hr,ec,cc,nc,heads,rows,fb});
   });
   const names=[],seen=new Set();sheets.forEach(S=>{for(let c=1;c<=S.nc;c++){const h=S.heads[c];if(h&&!seen.has(nk(h))){seen.add(nk(h));names.push(h)}}});
-  return{buf,sheets,names,notes};
+  const slow=sheets.some(S=>{const w=wb.getWorksheet(S.name);return !!((w.conditionalFormattings||[]).length||(w.getImages&&w.getImages().length))});   // условное форматирование и картинки быстрый способ не переносит
+  return{buf,wb,sheets,names,notes,slow};
 }
 const colN=l=>[...l].reduce((n,ch)=>n*26+ch.charCodeAt(0)-64,0);
 function shiftF(f,o,n,hr,cm){   // формула строки при переезде o -> n и сдвиге колонок; ссылки на другие строки данных/удалённые колонки невозможны -> null (останется значение)
@@ -1043,7 +1044,46 @@ function filterSheet(ws,S,keep,hide){   // оставляем только св�
   fixTables(ws,S,w,del,idx);
   return del;
 }
-async function buildFile(D,rec,hide){   // rec: Map(имя листа -> строки получателя)
+async function buildFile(D,rec,hide){   // быстрый способ; при любой ошибке или «сложном» файле — прежний
+  if(!D.slow){try{return await buildFileFast(D,rec,hide)}catch(e){console.warn('Быстрая сборка не удалась, использую прежний способ:',e)}}
+  return buildFileSlow(D,rec,hide);
+}
+async function buildFileFast(D,rec,hide){   // книга D.wb читается один раз; для получателя создаётся новая книга только с его строками
+  await EJ();const out=new ExcelJS.Workbook(),rng=/^([A-Z]+)(\d+):([A-Z]+)(\d+)$/;
+  for(const S of D.sheets){
+    const mine=rec.get(S.name);if(!mine||!mine.length)continue;
+    const src=D.wb.getWorksheet(S.name),nc=S.nc,map=[];let j=0;
+    for(let c=1;c<=nc;c++)map[c]=hide.has(nk(S.heads[c]||''))?0:++j;
+    const cm=c=>map[c]||0,v0=(src.views&&src.views[0])||null;
+    const ws=out.addWorksheet(S.name,{views:v0&&v0.state==='frozen'&&v0.ySplit?[{state:'frozen',xSplit:0,ySplit:v0.ySplit}]:(v0&&v0.showGridLines===false?[{showGridLines:false}]:undefined)});
+    for(let c=1;c<=nc;c++){if(!map[c])continue;const sc=src.getColumn(c),dc=ws.getColumn(map[c]);if(sc.width)dc.width=sc.width;if(sc.hidden)dc.hidden=true}
+    const cp=(s,d,v)=>{d.value=v;const st=s.style;if(st&&Object.keys(st).length)d.style=Object.assign({},st)};
+    for(let r=1;r<=S.hr;r++){const sr=src.getRow(r),dr=ws.getRow(r);if(sr.height)dr.height=sr.height;
+      for(let c=1;c<=nc;c++){if(!map[c])continue;const s=sr.getCell(c);cp(s,dr.getCell(map[c]),s.value)}}
+    Object.values(src._merges||{}).forEach(m=>{const g=m.model;if(g.bottom>S.hr)return;const ks=[];for(let c=g.left;c<=g.right;c++)if(map[c])ks.push(map[c]);if(!ks.length)return;
+      const l=Math.min(...ks),r=Math.max(...ks);if(r>l||g.bottom>g.top){try{ws.mergeCells(g.top,l,g.bottom,r)}catch(e){}}});
+    mine.forEach((row,i)=>{const o=row.n,w=S.hr+1+i,sr=src.getRow(o),dr=ws.getRow(w);if(sr.height)dr.height=sr.height;
+      for(let c=1;c<=nc;c++){if(!map[c])continue;const s=sr.getCell(c);let v=s.value;
+        if(s.type===ExcelJS.ValueType.Formula){const nf=shiftF(s.formula,o,w,S.hr,cm);v=nf?{formula:nf,result:s.result}:(s.result===undefined?null:s.result)}
+        cp(s,dr.getCell(map[c]),v)}});
+    const last=S.hr+mine.length;let hasTbl=false;
+    Object.keys(src.tables||{}).forEach(name=>{const t=src.tables[name].table,m=rng.exec(t.tableRef||'');if(!m)return;
+      const c1=colN(m[1]),r1=+m[2],c2=colN(m[3]),kept=[];for(let c=c1;c<=c2;c++)if(map[c])kept.push(c);
+      if(r1!==S.hr||!kept.length)return;
+      const had=!!t.autoFilterRef,rows=[];for(let r=S.hr+1;r<=last;r++){const dr=ws.getRow(r);rows.push(kept.map(c=>dr.getCell(map[c]).value))}
+      ws.addTable({name:t.name||name,ref:colL(map[kept[0]])+r1,headerRow:true,totalsRow:false,style:t.style,
+        columns:kept.map(c=>({name:String(t.columns[c-c1].name),filterButton:had?(t.columns[c-c1].filterButton!==false):false})),rows});hasTbl=true});
+    const af=src.autoFilter;
+    if(af&&!hasTbl){let c1,r1,c2;
+      if(typeof af==='string'){const m=rng.exec(af);if(m){c1=colN(m[1]);r1=+m[2];c2=colN(m[3])}}
+      else if(af.from&&af.to){c1=af.from.column;r1=af.from.row;c2=af.to.column}
+      const kept=[];if(c1)for(let c=c1;c<=c2;c++)if(map[c])kept.push(c);
+      if(c1&&r1===S.hr&&kept.length)ws.autoFilter=colL(map[kept[0]])+r1+':'+colL(map[kept[kept.length-1]])+last}
+    if(ws.rowCount!==last)throw new Error('число строк не совпало');
+  }
+  return new Uint8Array(await out.xlsx.writeBuffer());
+}
+async function buildFileSlow(D,rec,hide){   // rec: Map(имя листа -> строки получателя)
   await EJ();const wb=new ExcelJS.Workbook();await wb.xlsx.load(D.buf);const ok=new Set();
   for(const S of D.sheets){const mine=rec.get(S.name);if(!mine||!mine.length)continue;ok.add(S.name);filterSheet(wb.getWorksheet(S.name),S,mine.map(x=>x.n),hide)}
   wb.worksheets.slice().forEach(ws=>{if(!ok.has(ws.name))wb.removeWorksheet(ws.id)});
@@ -1158,7 +1198,7 @@ $('mSave').onclick=async()=>{
       if(file&&!miss.length){
         msgm('Готовлю файлы: '+(++i)+' из '+G.size+'…');await new Promise(r=>setTimeout(r,0));
         const u8=await buildFile(D,rec,hide);
-        try{await verifyFile(D,rec,hide,u8,a)}catch(e){throw new Error('Проверка файла для '+a+' не пройдена ('+e.message+') — рассылка остановлена')}
+        if(D.slow||i%25===1){try{await verifyFile(D,rec,hide,u8,a)}catch(e){throw new Error('Проверка файла для '+a+' не пройдена ('+e.message+') — рассылка остановлена')}}
         const ct=codes.length<=3?codes.join(', '):codes.slice(0,3).join(', ')+' и ещё '+(codes.length-3);
         const base=pat.replace(/\{\s*код\s*\}/gi,ct).replace(/[\\/:*?"<>|]/g,'_').replace(/\s+/g,' ').trim()||'Данные';
         fl={name:base.slice(0,100)+'.xlsx',type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64:u8b64(u8)};
