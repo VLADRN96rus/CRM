@@ -111,7 +111,7 @@ em{font-style:normal;font-size:12px;font-weight:500;color:var(--mu);background:v
   .vr{height:4px;min-height:0;background:linear-gradient(90deg,#ff6ba6,#7c5cff,#22b8e8)}
   .chips{display:flex}.colbody{max-height:none;overflow:visible}
   .grid,.span .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  #p1[data-tf=hot] .col.cool,#p1[data-tf=cool] .col.hot,#p1[data-tf=hot] .vr,#p1[data-tf=cool] .vr{display:none}
+  #p1[data-tf=hot] .col.cool,#p1[data-tf=hot] .col.other,#p1[data-tf=hot] .vr,#p1[data-tf=cool] .col.hot,#p1[data-tf=cool] .col.other,#p1[data-tf=cool] .vr,#p1[data-tf=other] .col.hot,#p1[data-tf=other] .col.cool,#p1[data-tf=other] .vr,#p1:not([data-tf=all]) .hsep{display:none}
   .hr{display:none}
   .addbar{display:none;position:fixed;left:12px;right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));z-index:40;max-height:75vh;overflow:auto;padding:16px}
   .addbar.open{display:flex;animation:in .25s ease both;background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 12px 50px rgba(20,10,60,.45)}.addbar .x{display:block;position:absolute;right:12px;top:10px}
@@ -231,6 +231,19 @@ details.glass>.in{margin-top:16px}
 .stp{margin:8px 0 12px;padding-left:20px;font-size:13.5px}.stp li{margin-bottom:6px}
 #setmod code{background:var(--inp);padding:1px 6px;border-radius:6px;font-size:12.5px}
 .acts.eq .btn{flex:1 1 0;min-width:110px}
+.tgs{display:flex;flex-wrap:wrap;gap:4px;flex:0 0 auto;min-width:0}
+.tg{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:500;line-height:1.4;background:rgba(124,92,255,.14);color:#7c5cff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tg i{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.tg.late{background:rgba(224,66,90,.16);color:var(--bad)}.tg.soon{background:rgba(255,154,86,.2);color:#d9661a}
+.tg.cat{color:var(--tx)}
+@media(prefers-color-scheme:dark){.tg{color:#b3a2ff}.tg.soon{color:#ffb27a}.tg.cat{color:var(--tx)}}
+.task.hc::before{background:var(--cc)}
+.hsep{grid-column:1/-1;height:4px;border-radius:4px;margin:2px 0;background:linear-gradient(90deg,#ff6ba6,#7c5cff,#22b8e8);opacity:.85}
+.af select{height:44px}
+.catrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+@media(max-width:899px){nav{overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button{flex:1 0 auto;padding:12px 10px;white-space:nowrap}}
+#p6 .pv{height:calc(100vh - 210px);min-height:420px}
+#cx_l .li small{overflow-wrap:anywhere}.catrow input[type=color]{width:46px;height:40px;padding:2px;flex:0 0 auto}
 #adm_l .li small{overflow-wrap:anywhere}
 #cfgm details.subd summary{margin:10px 0 4px}
 </style></head><body>
@@ -248,19 +261,20 @@ details.glass>.in{margin-top:16px}
     <div class="af t"><label class="f">Новая задача</label><input id="nt" placeholder="Что нужно сделать"></div>
     <div class="af d"><label class="f">Дедлайн</label><input id="nd" type="date"></div>
     <div class="af c"><label class="f">Комментарий</label><input id="nc" placeholder="Необязательно"></div>
-    <label class="chk"><input id="ni" type="checkbox"> Важная</label>
+    <div class="af"><label class="f">Приоритет</label><select id="nb"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div>
+    <div class="af"><label class="f">Раздел</label><select id="ncat"></select></div>
     <button class="btn" id="addT">Добавить</button>
   </div>
   <div class="hr"></div>
   <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint"></span>
-    <div class="chips" id="chips"><button data-f="all" class="on">Все</button><button data-f="hot">Важно</button><button data-f="cool">Не важно</button></div></div>
-    <button class="sm okb" id="doneBtn">Выполнено</button></div>
+    <div class="chips" id="chips"><button data-f="all" class="on">Все</button><button data-f="hot">Важно</button><button data-f="cool">Не важно</button><button data-f="other">Прочие</button></div></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="cfilt" style="width:auto;padding:7px 10px;font-size:13px" aria-label="Фильтр по разделу" hidden></select><button class="sm" id="catBtn">🎨 Разделы</button><button class="sm okb" id="doneBtn">Выполнено</button></div></div>
   <div id="board"></div>
   <button id="fab" aria-label="Новая задача">＋</button>
 </section>
 
 <section id="p4" class="panel">
-  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><button class="btn" id="dadd">＋ Задача отдела</button></div>
+  <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="dcount" class="hint"></span><div class="chips" id="dchips"></div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sm" id="drep">⤓ Отчёт (Excel)</button><button class="btn" id="dadd">＋ Задача отдела</button></div></div>
   <div id="dboard"></div>
   <h2 style="margin-top:26px"><b></b>Личные задачи, открытые отделу <em id="dshn"></em></h2><div id="dshared"></div>
 </section>
@@ -271,16 +285,22 @@ details.glass>.in{margin-top:16px}
   <div class="hint" style="margin-top:10px">Нажмите на день, чтобы запланировать рассылку. Она появится в ваших личных задачах.</div>
 </section>
 
+<section id="p6" class="panel">
+  <div class="tbar"><b id="cs_t" style="font-size:16px"></b><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="sm" id="cs_r">↻ Обновить</button><a class="sm" id="cs_o" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Открыть в новой вкладке ↗</a></div></div>
+  <div class="hint" style="margin-bottom:8px">Если здесь пусто или просит войти — откройте в новой вкладке. Для таблиц надёжнее всего «Файл → Поделиться → Опубликовать в интернете» и ссылка на публикацию.</div>
+  <iframe id="cs_f" class="pv" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+</section>
 <section id="p2" class="panel">
   <div class="mnav"><button class="sm" id="pm" aria-label="Предыдущий месяц">←</button><b id="mname"></b><button class="sm" id="nm" aria-label="Следующий месяц">→</button>
-    <label class="sort">Сортировка списков <select id="sortSel"><option value="desc">Сумма: по убыванию</option><option value="asc">Сумма: по возрастанию</option><option value="name">По названию</option></select></label></div>
+    <label class="sort">Сортировка списков <select id="sortSel"><option value="desc">Сумма: по убыванию</option><option value="asc">Сумма: по возрастанию</option><option value="name">По названию</option></select></label><button class="sm" id="brep">⤓ Отчёт за период</button></div>
   <div class="bgrid">
     <div class="cA">
       <div class="hero" id="hero"><small id="heroLbl">Доступно</small><span class="big" id="heroVal">0 ₽</span><div class="sub" id="heroSub"></div></div>
       <div class="glass blk v4"><h3>Расчёт месяца</h3><div id="ledger"></div></div>
       <details class="glass blk" id="setBox"><summary>Зарплата и премия</summary><div class="in">
-        <div class="row"><div><label class="f">Зарплата за месяц, ₽</label><input id="sm" type="number" inputmode="decimal"></div>
-          <div><label class="f">Премия за квартал, ₽</label><input id="sq" type="number" inputmode="decimal"></div></div>
+        <div class="row"><div><label class="f">Моя зарплата за месяц, ₽</label><input id="sm" type="number" inputmode="decimal"></div>
+          <div><label class="f">Моя премия за квартал, ₽</label><input id="sq" type="number" inputmode="decimal"></div></div>
+        <div id="ppl"></div><div style="margin-bottom:10px"><button class="sm" id="pplAdd">＋ Человек (семейный бюджет)</button></div>
         <div class="row end"><div><label class="f">Остаток на старте, ₽</label><input id="so" type="number" inputmode="decimal"></div>
           <div><label class="f">Считать с месяца</label><select id="ss"></select></div></div>
         <div class="row end" style="margin:0"><span class="hint" style="flex:2">Премия приходит в январе, апреле, июле и октябре.</span><button class="btn" id="saveS">Сохранить</button></div></div></details>
@@ -289,18 +309,18 @@ details.glass>.in{margin-top:16px}
       <div class="glass blk"><h3>Расходы месяца <em id="oneSum"></em></h3>
         <div class="scroll" id="oneList"></div>
         <div class="add"><div class="w2"><input id="on" placeholder="Статья расхода"></div><div><input id="oa" type="number" inputmode="decimal" placeholder="Сумма"></div>
-          <div><input id="od" type="date" aria-label="Дата"></div><button class="btn" id="addO">Добавить</button></div>
+          <div><input id="od" type="date" aria-label="Дата"></div><div><select id="ow" aria-label="Кто потратил" hidden></select></div><button class="btn" id="addO">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Дату можно очистить — расход попадёт в «Желаемые».</div></div>
       <details class="glass blk v2" id="recBox"><summary>Постоянные расходы <span class="meta" id="recMeta"></span></summary><div class="in">
         <div class="scroll" id="recList" style="max-height:300px"></div>
         <div class="add"><div class="w2"><input id="rn" placeholder="Статья (аренда, интернет…)"></div><div><input id="ra" type="number" inputmode="decimal" placeholder="В месяц"></div>
-          <button class="btn" id="addR">Добавить</button></div></div></details>
+          <div><select id="rw" aria-label="Кто потратил" hidden></select></div><button class="btn" id="addR">Добавить</button></div></div></details>
     </div>
     <div class="cC">
       <div class="glass blk v3"><h3>Желаемые расходы <em id="wSum"></em></h3>
         <div class="scroll" id="wList" style="max-height:480px"></div>
         <div class="add"><div class="w2"><input id="wn" placeholder="Что хочу купить"></div><div><input id="wa" type="number" inputmode="decimal" placeholder="Сумма"></div>
-          <button class="btn" id="addW">Добавить</button></div>
+          <div><select id="ww" aria-label="Кто потратит" hidden></select></div><button class="btn" id="addW">Добавить</button></div>
         <div class="hint" style="margin-top:8px">Нажмите «В месяц», когда решите потратить: расход перейдёт на нужную дату.</div></div>
     </div>
   </div>
@@ -309,12 +329,12 @@ details.glass>.in{margin-top:16px}
   <div id="mban" class="ban" hidden></div>
   <div class="mgrid">
     <div class="mcol">
-      <div class="glass mb"><h3>Отправитель и письмо</h3>
-        <div class="fld"><label class="f">Отправитель</label><select id="mfrom"><option value="me"></option><option value="shared"></option></select><div class="hint" id="msnd" style="margin-top:6px"></div><div class="btns"><button class="sm" id="msetup">⚙ Настроить отправку</button></div></div>
-        <div class="fld"><label class="f" style="display:flex;justify-content:space-between;align-items:center;gap:8px">Письмо (шаблон)<select id="mtsort" style="width:auto;padding:4px 8px;font-size:12px" aria-label="Сортировка шаблонов"><option value="name">по названию</option><option value="new">сначала новые</option><option value="old">сначала старые</option></select></label><select id="mt"></select>
-          <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm" id="mtNew">＋ Шаблон</button><button class="sm" id="mtNewH" title="Вставить готовый HTML">＋ HTML</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
-        <div class="fld"><label class="f">Режим</label><select id="mm"><option value="1">Одно письмо</option><option value="2">Рассылка</option></select></div>
-        <div class="fld"><label class="f">Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple><div id="mfl"></div></div>
+      <div class="glass mb"><h3>Настройка отправки</h3>
+        <div class="fld"><label class="f">1. Отправитель</label><select id="mfrom"><option value="me"></option><option value="shared"></option></select><div class="hint" id="msnd" style="margin-top:6px"></div><div class="btns"><button class="sm" id="msetup">⚙ Настроить отправку</button></div></div>
+        <div class="fld"><label class="f" style="display:flex;justify-content:space-between;align-items:center;gap:8px">2. Письмо (шаблон)<select id="mtsort" style="width:auto;padding:4px 8px;font-size:12px" aria-label="Сортировка шаблонов"><option value="name">по названию</option><option value="new">сначала новые</option><option value="old">сначала старые</option></select></label><select id="mt"></select>
+          <div class="btns"><button class="sm" id="mtEdit">Править</button><button class="sm okb" id="mtOwn">Своё письмо</button><button class="sm bad" id="mtDel">Удалить</button></div></div>
+        <div class="fld"><label class="f">3. Режим отправки</label><div class="seg" id="mm_seg" style="margin:0"><button class="sm on" data-v="1">Одно письмо</button><button class="sm" data-v="2">Рассылка</button></div><select id="mm" hidden><option value="1">Одно письмо</option><option value="2">Рассылка</option></select></div>
+        <div class="fld"><label class="f">4. Вложения (к одному письму или ко всем письмам рассылки)</label><input id="mfile" type="file" multiple><div id="mfl"></div></div>
       </div>
       <div class="glass mb" id="m1"><h3>Получатель</h3>
         <div class="fld"><label class="f">Почта получателя</label><input id="me" type="email" placeholder="partner@example.ru" autocapitalize="off" autocorrect="off"></div>
@@ -369,13 +389,14 @@ details.glass>.in{margin-top:16px}
 </div></div>
 <div class="modal" id="cmod" hidden><div class="glass cwide">
   <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
+  <div class="chd" style="margin-bottom:8px"><div class="seg" id="c_mode" style="margin:0"><button class="sm on" data-m="b">Конструктор</button><button class="sm" data-m="h">HTML-код</button></div><button class="sm" id="c_fld" title="Вставить динамическое поле в место, где стоит курсор">{{…}} Динамическое поле</button></div>
   <div class="row" style="margin-bottom:8px"><div><label class="f">Тема письма</label><input id="c_subj" placeholder="Тема, которую увидит получатель"></div><div><label class="f">Прехедер (текст рядом с темой в списке писем)</label><input id="c_pre"></div></div>
   <div class="fld" style="margin-bottom:8px"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="sg_on"> Добавлять подпись в конец письма</label>
     <details class="subd"><summary>Изменить подпись (сохраняется в вашем профиле)</summary><textarea id="sg_h" rows="6" style="font-family:monospace;font-size:12.5px"></textarea></details></div>
   <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button></div>
-    <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button></div>
+    <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button><textarea id="c_raw" hidden spellcheck="false" placeholder="Вставьте готовый HTML письма. Поля {{…}} в тексте будут запрашиваться при отправке." style="width:100%;min-height:420px;font-family:monospace;font-size:12.5px"></textarea></div>
   <div class="cprev"><iframe id="cpv" class="pv" sandbox></iframe></div></div>
-  <div class="err" id="c_err"></div><div class="acts"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok">Готово</button><button class="btn" id="c_save" hidden>Сохранить шаблон</button></div>
+  <div class="err" id="c_err"></div><div class="acts eq" style="flex-wrap:wrap"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok" title="Письмо используется для этой отправки и не попадает в шаблоны">Использовать один раз</button><button class="btn" id="c_save" hidden>Сохранить шаблон</button></div>
 </div></div>
 <div class="modal" id="imod" hidden style="z-index:110"><div class="glass wide" style="max-width:680px">
   <h2 id="im_h">Изображения</h2>
@@ -425,10 +446,31 @@ details.glass>.in{margin-top:16px}
   <h2 id="mp_h2">Рассылка</h2>
   <div class="fld"><label class="f">Название</label><input id="mp_t"></div>
   <div class="fld"><label class="f">Дата рассылки</label><input id="mp_d" type="date"></div>
+  <div class="fld"><label class="f">Ответственный (задача появится у него в личных)</label><select id="mp_o"></select></div>
   <div class="fld"><label class="f">Куда занести в личных задачах</label><select id="mp_i"><option value="0">Не важно</option><option value="1">Важно</option></select></div>
   <div class="fld"><label class="f">Комментарий</label><textarea id="mp_c" rows="3"></textarea></div>
   <div class="hint" id="mp_a" style="margin-bottom:8px"></div><div class="err" id="mp_e"></div>
   <div class="tkacts"><div><button class="btn sec" id="mp_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="mp_cancel">Отмена</button><button class="btn" id="mp_save">Сохранить</button></div></div>
+</div></div>
+<div class="modal" id="brmod" hidden><div class="glass" style="max-width:480px">
+  <h2>Отчёт: доходы и расходы</h2><div class="hint" style="margin-bottom:12px">Зарплата, премия и постоянные расходы считаются за каждый месяц, затронутый периодом (начиная с месяца старта расчёта); разовые расходы — строго по датам внутри периода.</div>
+  <div class="row"><div><label class="f">С</label><input id="br_f" type="date"></div><div><label class="f">По</label><input id="br_t" type="date"></div></div>
+  <div class="hint" id="br_s" style="margin-bottom:6px"></div><div class="err" id="br_e"></div>
+  <div class="acts eq"><button class="btn sec" id="br_x">Закрыть</button><button class="btn" id="br_ok">Скачать Excel</button></div>
+</div></div>
+<div class="modal" id="catmod" hidden><div class="glass" style="max-width:480px">
+  <h2>Мои разделы</h2><div class="hint" style="margin-bottom:12px">Раздел группирует ваши личные задачи; его цвет виден на карточке.</div>
+  <div id="cat_l"></div><button class="sm" id="cat_add">＋ Раздел</button>
+  <div class="err" id="cat_e"></div>
+  <div class="acts eq"><button class="btn sec" id="cat_x">Закрыть</button><button class="btn" id="cat_ok">Сохранить</button></div>
+</div></div>
+<div class="modal" id="rpmod" hidden><div class="glass" style="max-width:480px">
+  <h2>Отчёт по задачам отдела</h2><div class="hint" style="margin-bottom:12px">Excel: листы «Отчёт» (фокус внимания → тактика → статус), «Сводка» и «Список» с фильтрами.</div>
+  <div class="row"><div><label class="f">Дедлайн с</label><input id="rp_f" type="date"></div><div><label class="f">по</label><input id="rp_t" type="date"></div></div>
+  <div class="fld"><label class="f">Ответственный</label><select id="rp_w"></select></div>
+  <label class="chk" style="padding-bottom:6px"><input id="rp_d" type="checkbox" checked> Включить выполненные</label>
+  <div class="hint" id="rp_c"></div><div class="err" id="rp_e"></div>
+  <div class="acts eq"><button class="btn sec" id="rp_x">Закрыть</button><button class="btn" id="rp_ok">Скачать Excel</button></div>
 </div></div>
 <div class="modal" id="dmod" hidden><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
@@ -438,6 +480,7 @@ details.glass>.in{margin-top:16px}
     <div><label class="f">Тактика (выберите или впишите свою)</label><input id="dm_k" list="dl_k" autocomplete="off"></div></div>
   <datalist id="dl_f"></datalist><datalist id="dl_k"></datalist>
   <div class="row"><div><label class="f">Статус</label><select id="dm_s"></select></div><div><label class="f">Дедлайн</label><input id="dm_d" type="date"></div></div>
+  <label class="chk" style="padding-bottom:6px"><input id="dm_all" type="checkbox"> Все ответственные (задача появится у каждого сотрудника, в том числе у новых)</label>
   <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
   <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
   <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
@@ -449,7 +492,7 @@ details.glass>.in{margin-top:16px}
 <div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
-  <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><label class="chk" style="align-self:flex-end"><input id="tk_i" type="checkbox"> Важная</label></div>
+  <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><div><label class="f">Приоритет</label><select id="tk_b"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div><div><label class="f">Раздел</label><select id="tk_cat"></select></div></div>
   <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
   <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
     <div class="tkp" id="tk_p"></div>
@@ -474,6 +517,14 @@ details.glass>.in{margin-top:16px}
     <label class="f" style="margin-top:10px">Рабочая почта (вход и адрес отправителя писем)</label><input id="pf_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru">
     <label class="f" style="margin-top:10px">Мои разделы</label><div id="pf_s"></div>
     <div class="err" id="pf_e"></div>
+    <div id="csb" style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+      <h2 style="font-size:16px">Свои разделы (таблицы и дашборды)</h2>
+      <div class="hint" style="margin-bottom:8px">Google Таблица, Looker Studio или веб-приложение Apps Script откроются прямо в МУРР. Добавление и удаление сохраняются сразу.</div>
+      <div class="scroll" id="cx_l" style="max-height:180px"></div>
+      <div class="row end" style="margin-top:8px"><div style="flex:0 0 70px;min-width:60px"><label class="f">Значок</label><input id="cx_i" value="📊" maxlength="4"></div><div><label class="f">Название</label><input id="cx_n" maxlength="30"></div><div style="flex:2 1 220px"><label class="f">Ссылка</label><input id="cx_u" placeholder="https://docs.google.com/…" autocapitalize="off"></div></div>
+      <label class="chk" id="cx_sw" hidden style="padding-bottom:6px"><input id="cx_s" type="checkbox"> Для всего отдела (увидят все сотрудники)</label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="sm okb" id="cx_add">＋ Добавить раздел</button><span class="err" id="cx_e" style="margin:0"></span></div>
+    </div>
     <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
       <h2 style="font-size:16px">Пароль</h2>
       <div class="hint" id="pw_h" style="margin-bottom:8px"></div>
@@ -592,7 +643,7 @@ function showCfg(msg){
   if(li){$('pf_n').value=ME.name||'';$('pf_m').value=ME.email||'';secBoxes('pf_s',secSel());$('pf_e').textContent='';
     $('pw_ow').hidden=!ME.hasPw;['pw_o','pw_n','pw_r'].forEach(i=>{$(i).value=''});$('pw_e').textContent='';
     $('pw_h').textContent=ME.hasPw?'Чтобы сменить пароль, введите текущий и новый.':'Пароль ещё не задан. Придумайте его, и вы сможете входить по почте на любом устройстве.';
-    $('adm').hidden=ME.role!=='admin';if(ME.role==='admin')admLoad()}
+    $('adm').hidden=ME.role!=='admin';if(ME.role==='admin')admLoad();cxRender();$('cx_sw').hidden=ME.role!=='admin'}
   $('cu').value=cfg.url||DEFAULT_URL;$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('conn').open=!!msg;$('cfgm').hidden=false}
 $('gear').onclick=()=>showCfg();
 $('cLater').onclick=()=>{$('cfgm').hidden=true;if(!cfg.key)openLogin()};
@@ -703,7 +754,7 @@ function sorter(){
   };
 }
 function fillSettings(){
-  const s=items.budget;if(!s)return;filled=true;
+  const s=items.budget;if(!s)return;filled=true;PPL=(s.people||[]).map(p=>Object.assign({},p));renderPpl();
   $('sm').value=s.salary??s.monthly??'';$('sq').value=s.bonus??s.quarterly??'';$('so').value=s.opening??'';
   if(s.start)$('ss').value=s.start;
   if(!num(s.salary??s.monthly))$('setBox').open=true;
@@ -712,17 +763,44 @@ function render(){loadSig();renderTasks();renderDept();renderMp();renderBudget()
 
 /* ---------- Задачи ---------- */
 function dueChip(t){
-  if(!t.deadline)return '<span class="chip">Без срока</span>';
-  if(t.archived)return '<span class="chip">'+fmt(t.deadline)+'</span>';
+  if(!t.deadline)return '<span class="tg">Без срока</span>';
+  if(t.archived)return '<span class="tg">'+fmt(t.deadline)+'</span>';
   const d=diff(t.deadline);
-  if(d<0)return '<span class="chip late">Просрочено '+(-d)+' дн.</span>';
-  if(d===0)return '<span class="chip soon">Сегодня</span>';
-  if(d===1)return '<span class="chip soon">Завтра</span>';
-  return '<span class="chip">Через '+d+' дн.</span>';
+  if(d<0)return '<span class="tg late">Просрочено '+(-d)+' дн.</span>';
+  if(d===0)return '<span class="tg soon">Сегодня</span>';
+  if(d===1)return '<span class="tg soon">Завтра</span>';
+  return '<span class="tg">Через '+d+' дн.</span>';
 }
+/* ---------- разделы (категории) личных задач ---------- */
+const PAL=['#7c5cff','#22b8e8','#ff6ba6','#34d399','#ff9a56','#ffd166','#e0425a','#5b9dff'];
+const okc=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#7c5cff';
+const bkOf=t=>t.bucket||(t.important?'hot':'cool');   // Важно / Не важно / Прочие
+function cats(){return(((items.prefs||{}).cats)||[]).map(c=>({id:String(c.id),name:String(c.name||''),color:okc(c.color)})).filter(c=>c.name)}
+const catOf=t=>t.cat?(cats().find(c=>c.id===t.cat)||null):null;
+let catF='',catSig='';
+const catPass=t=>!catF||(catF==='_'?!catOf(t):t.cat===catF);
+function fillCats(){
+  const cs=cats(),sig=JSON.stringify(cs);if(sig===catSig)return;catSig=sig;
+  const opt=cs.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join(''),keep=(id,html)=>{const v=$(id).value;$(id).innerHTML=html;if([...$(id).options].some(o=>o.value===v))$(id).value=v};
+  keep('ncat','<option value="">Без раздела</option>'+opt);keep('tk_cat','<option value="">Без раздела</option>'+opt);
+  keep('cfilt','<option value="">Все разделы</option>'+opt+'<option value="_">Без раздела</option>');
+  catF=$('cfilt').value;$('cfilt').hidden=!cs.length;
+}
+$('cfilt').onchange=()=>{catF=$('cfilt').value;renderTasks()};
+let CATS=[];
+function catRows(){$('cat_l').innerHTML=CATS.map((c,i)=>'<div class="catrow" data-i="'+i+'"><input type="color" value="'+c.color+'" data-f="c" aria-label="Цвет раздела"><input data-f="n" value="'+esc(c.name)+'" placeholder="Название раздела" maxlength="30"><button class="sm bad" data-d="1" aria-label="Удалить раздел">✕</button></div>').join('')||'<div class="empty">Разделов пока нет</div>'}
+function readCats(){document.querySelectorAll('#cat_l .catrow').forEach(r=>{const c=CATS[+r.dataset.i];c.color=r.querySelector('[data-f=c]').value;c.name=r.querySelector('[data-f=n]').value})}
+$('catBtn').onclick=()=>{CATS=cats().map(c=>Object.assign({},c));catRows();$('cat_e').textContent='';$('catmod').hidden=false};
+$('cat_add').onclick=()=>{readCats();CATS.push({id:'c'+Date.now().toString(36)+CATS.length,name:'',color:PAL[CATS.length%PAL.length]});catRows();const n=document.querySelectorAll('#cat_l [data-f=n]');if(n.length)n[n.length-1].focus()};
+$('cat_l').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;readCats();CATS.splice(+b.closest('.catrow').dataset.i,1);catRows()};
+$('cat_x').onclick=()=>{$('catmod').hidden=true};
+$('cat_ok').onclick=()=>{readCats();const l=CATS.map(c=>({id:c.id,name:c.name.trim().slice(0,30),color:okc(c.color)})).filter(c=>c.name),n=l.map(c=>c.name.toLowerCase());
+  if(new Set(n).size!==n.length)return $('cat_e').textContent='Названия разделов не должны повторяться';
+  save('prefs',{cats:l});$('catmod').hidden=true};
 function card(t){
-  const id=t.id,cls=t.archived?'dn':(t.important?'hot':'');
-  let h='<div class="task '+cls+'" data-tid="'+id+'"><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+dueChip(t)+(t.ref?'<span class="chip">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.mpref?'<span class="chip">Медиаплан</span>':'')+(t.shared?'<span class="chip">Видна отделу</span>':'');
+  const id=t.id,cat=catOf(t),cls=(t.archived?'dn':(bkOf(t)==='hot'?'hot':''))+(cat?' hc':'');
+  const tags='<div class="tgs">'+dueChip(t)+(cat?'<span class="tg cat" style="background:'+cat.color+'2e;box-shadow:inset 0 0 0 1px '+cat.color+'66" title="Раздел: '+esc(cat.name)+'"><i style="background:'+cat.color+'"></i>'+esc(cat.name)+'</span>':'')+(t.ref?'<span class="tg">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.mpref?'<span class="tg">Медиаплан</span>':'')+(t.shared?'<span class="tg" title="Видна отделу">👁 Отделу</span>':'')+'</div>';
+  let h='<div class="task '+cls+'" data-tid="'+id+'"'+(cat?' style="--cc:'+cat.color+'"':'')+'><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+tags;
   if(editC===id){
     h+='<textarea class="ced" id="ce" placeholder="Комментарий">'+esc(t.comment||'')+'</textarea>'
      +'<div class="ta"><div class="tb two"><button class="sm okb" data-a="csave" data-id="'+id+'">Сохранить</button><button class="sm" data-a="ccancel">Отмена</button></div></div>';
@@ -733,7 +811,7 @@ function card(t){
     }else{
       if(t.ref)h+='<div class="ta"><div class="tb"><button class="sm okb" style="grid-column:1/-1" data-a="odept" data-id="'+id+'">Задача отдела →</button></div></div>';else h+='<div class="ta"><input type="date" value="'+esc(t.deadline||'')+'" data-a="move" data-id="'+id+'" aria-label="Дедлайн">'
        +'<div class="tb"><button class="sm'+(t.comment?' has':'')+'" data-a="cedit" data-id="'+id+'" title="Комментарий" aria-label="Комментарий">💬</button>'
-       +'<button class="sm" data-a="flag" data-id="'+id+'" title="'+(t.important?'Сделать неважной':'Сделать важной')+'" aria-label="Важность">'+(t.important?'★':'☆')+'</button>'
+       +'<button class="sm" data-a="flag" data-id="'+id+'" title="'+(bkOf(t)==='hot'?'Сделать неважной':'Сделать важной')+'" aria-label="Важность">'+(bkOf(t)==='hot'?'★':'☆')+'</button>'
        +'<button class="sm okb ok" data-a="done" data-id="'+id+'"><i style="font-style:normal">✓ </i>Выполнено</button></div></div>';
     }
   }
@@ -744,14 +822,16 @@ function col(title,cls,arr,empty,k){
     +(arr.length?'<div class="grid">'+arr.map(card).join('')+'</div>':'<div class="empty">'+empty+'</div>')+'</div></div>';
 }
 function renderTasks(){
+  fillCats();
   const byDl=(a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||(a.title||'').localeCompare(b.title||'','ru')||cmpId(a,b);
-  const T=list('t_').filter(t=>t.title&&(!t.owner||t.owner===ME.id)),all=T.filter(t=>!!t.archived===showDone).sort(byDl);
+  const T=list('t_').filter(t=>t.title&&(!t.owner||t.owner===ME.id)),all=T.filter(t=>!!t.archived===showDone&&catPass(t)).sort(byDl);
   const act=T.filter(t=>!t.archived),late=act.filter(t=>t.deadline&&t.deadline<today()).length;
   $('doneBtn').textContent=showDone?'← К активным задачам':'✓ Выполнено ('+T.filter(t=>t.archived).length+')';
   $('tcount').textContent=showDone?'Выполненные задачи':'Активных: '+act.length+(late?' · просрочено: '+late:'');
   const a=document.activeElement;if(a&&a.id==='ce')return;
   $('board').innerHTML=showDone?col('Выполнено','dn',all,'Пока ничего не выполнено','span'):
-    col('Важно','hot',all.filter(t=>t.important),'Важных задач нет','hot')+'<div class="vr"></div>'+col('Не важно','',all.filter(t=>!t.important),'Пусто — добавьте задачу','cool');
+    col('Важно','hot',all.filter(t=>bkOf(t)==='hot'),'Важных задач нет','hot')+'<div class="vr"></div>'+col('Не важно','',all.filter(t=>bkOf(t)==='cool'),'Пусто — добавьте задачу','cool')
+    +'<div class="hsep"></div>'+col('Прочие','',all.filter(t=>bkOf(t)==='other'),'Прочих задач нет','span other');
 }
 $('board').addEventListener('click',e=>{
   if(e.target.closest('a'))return;   // клик по ссылке в комментарии не открывает задачу
@@ -761,7 +841,7 @@ $('board').addEventListener('click',e=>{
   const a=b.dataset.a,id=b.dataset.id,t=items[id]||{};
   if(a==='done')save(id,{archived:true});
   else if(a==='restore')save(id,{archived:false});
-  else if(a==='flag')save(id,{important:!t.important});
+  else if(a==='flag'){const h=bkOf(t)==='hot';save(id,{bucket:h?'cool':'hot',important:!h})}
   else if(a==='odept')openDept(t.ref)
   else if(a==='cedit')openTask(id,true)
   else if(a==='ccancel'){editC=null;renderTasks()}
@@ -771,8 +851,8 @@ $('board').addEventListener('click',e=>{
 $('board').addEventListener('change',e=>{const el=e.target;if(el.dataset.a==='move')save(el.dataset.id,{deadline:el.value})});
 $('addT').onclick=()=>{
   const t=$('nt').value.trim();if(!t){$('nt').focus();return}
-  save(nid('t_'),{title:t,deadline:$('nd').value,comment:$('nc').value.trim(),important:$('ni').checked,archived:false,created:today()});
-  $('nt').value='';$('nc').value='';$('nd').value='';$('ni').checked=false;$('side').classList.remove('open');
+  save(nid('t_'),{title:t,deadline:$('nd').value,comment:$('nc').value.trim(),bucket:$('nb').value,important:$('nb').value==='hot',cat:$('ncat').value,archived:false,created:today()});
+  $('nt').value='';$('nc').value='';$('nd').value='';$('nb').value='cool';$('side').classList.remove('open');
   if(!matchMedia('(max-width:899px)').matches)$('nt').focus();
 };
 ['nt','nc'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('addT').click()}));
@@ -788,13 +868,13 @@ function tkMode(edit){   // просмотр комментария со ссы�
 }
 function openTask(id,focusC){
   const t=items[id];if(!t)return;if(t.ref&&items[t.ref])return openDept(t.ref);tkId=id;$('tk_s').checked=!!t.shared;
-  $('tk_t').value=t.title||'';$('tk_d').value=t.deadline||'';$('tk_i').checked=!!t.important;$('tk_c').value=t.comment||'';$('tk_err').textContent='';
+  $('tk_t').value=t.title||'';$('tk_d').value=t.deadline||'';$('tk_b').value=bkOf(t);$('tk_cat').value=catOf(t)?t.cat:'';$('tk_c').value=t.comment||'';$('tk_err').textContent='';
   $('tk_done').textContent=t.archived?'↩ Вернуть':'✓ Выполнено';$('tkmod').hidden=false;tkMode(!!focusC);
 }
 $('tk_edit').onclick=()=>tkMode($('tk_c').hidden);
 $('tk_cancel').onclick=tkClose;
 $('tk_save').onclick=()=>{const t=$('tk_t').value.trim();if(!t)return $('tk_err').textContent='Укажите название задачи';
-  save(tkId,{title:t,deadline:$('tk_d').value,important:$('tk_i').checked,shared:$('tk_s').checked,comment:$('tk_c').value.trim()});tkClose()};
+  save(tkId,{title:t,deadline:$('tk_d').value,bucket:$('tk_b').value,important:$('tk_b').value==='hot',cat:$('tk_cat').value,shared:$('tk_s').checked,comment:$('tk_c').value.trim()});tkClose()};
 $('tk_done').onclick=()=>{const t=items[tkId]||{};save(tkId,{archived:!t.archived});tkClose()};
 $('tk_del').onclick=()=>arm($('tk_del'),'Точно удалить?',()=>{remove(tkId);tkClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('tkmod').hidden)tkClose()});
@@ -807,11 +887,11 @@ const DF=[['act','Активные'],['Не начато','Не начато'],[
 let dId=null,dFilter='act';
 const uname=id=>((USERS.find(u=>u.id===id)||{}).name||'—'),fst=n=>String(n).split(' ')[0];
 function dcard(d){
-  const i=DST.indexOf(d.status),dn=d.status==='Выполнено',as=(d.assignees||[]).map(x=>fst(uname(x))).join(', ');
+  const i=DST.indexOf(d.status),dn=d.status==='Выполнено',as=d.all?'Все сотрудники':(d.assignees||[]).map(x=>fst(uname(x))).join(', ');
   const tags=[d.focus,d.tactic].filter(Boolean).join(' · ');
   const txt=dn&&d.result?'Итог: '+d.result:(d.situation?(d.lastDate?fmt(d.lastDate)+': ':'')+d.situation:(d.comment||''));
   return '<div class="task '+DCL[i<0?0:i]+'" data-did="'+d.id+'"><div class="tt" title="'+esc(d.title)+'">'+esc(d.title)+'</div>'
-    +'<div class="chrow"><span class="chip">'+esc(d.status||DST[0])+'</span>'+(d.deadline?dueChip({deadline:d.deadline,archived:dn}):'')+'</div>'
+    +'<div class="tgs"><span class="tg">'+esc(d.status||DST[0])+'</span>'+(d.deadline?dueChip({deadline:d.deadline,archived:dn}):'')+'</div>'
     +'<div class="cm">'+(tags?'<b>'+esc(tags)+'</b>\n':'')+esc(txt)+'</div>'
     +'<div class="hint" style="margin-top:auto">👤 '+esc(as||'не назначен')+'</div></div>';
 }
@@ -825,7 +905,7 @@ function renderDept(){
   $('dboard').innerHTML=arr.length?'<div class="grid">'+arr.map(dcard).join('')+'</div>':'<div class="empty">Задач нет</div>';
   const sh=list('t_').filter(t=>t.shared&&t.owner&&!t.ref&&!t.archived&&t.title).sort((a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999'));
   $('dshn').textContent=sh.length;
-  $('dshared').innerHTML=sh.length?'<div class="grid">'+sh.map(t=>'<div class="task" style="cursor:default"><div class="tt">'+esc(t.title)+'</div>'+dueChip(t)+'<div class="cm">'+linkify(t.comment||'')+'</div><div class="hint" style="margin-top:auto">👤 '+esc(t.owner===ME.id?'Вы':uname(t.owner))+'</div></div>').join('')+'</div>':'<div class="empty">Пока никто не открыл личные задачи отделу</div>';
+  $('dshared').innerHTML=sh.length?'<div class="grid">'+sh.map(t=>'<div class="task" style="cursor:default"><div class="tt">'+esc(t.title)+'</div><div class="tgs">'+dueChip(t)+'</div><div class="cm">'+linkify(t.comment||'')+'</div><div class="hint" style="margin-top:auto">👤 '+esc(t.owner===ME.id?'Вы':uname(t.owner))+'</div></div>').join('')+'</div>':'<div class="empty">Пока никто не открыл личные задачи отделу</div>';
   const dc=items.dict||{};$('dl_f').innerHTML=(dc.focus||[]).map(x=>'<option value="'+esc(x)+'">').join('');$('dl_k').innerHTML=(dc.tactic||[]).map(x=>'<option value="'+esc(x)+'">').join('');
 }
 $('dchips').onclick=e=>{const b=e.target.closest('button');if(b){dFilter=b.dataset.f;renderDept()}};
@@ -839,11 +919,14 @@ function openDept(id){
   $('dm_s').innerHTML=DST.map(s=>'<option'+((x.status||DST[0])===s?' selected':'')+'>'+s+'</option>').join('');
   $('dm_d').value=x.deadline||'';$('dm_sit').value=x.situation||'';$('dm_ld').value=x.lastDate||today();$('dm_ld')._man=0;$('dm_r').value=x.result||'';
   const as=x.assignees||[];$('dm_a').innerHTML=USERS.map(u=>'<label class="chk" style="padding-bottom:4px"><input type="checkbox" value="'+esc(u.id)+'"'+(as.includes(u.id)?' checked':'')+'> '+esc(u.name)+'</label>').join('')||'<span class="hint">Список сотрудников загрузится после синхронизации</span>';
+  $('dm_all').checked=!!x.all;dmAll();
   const h=(x.history||[]).slice().reverse();$('dm_hd').hidden=!h.length;$('dm_hd').open=false;$('dm_hs').textContent='Архив действий ('+h.length+')';
   $('dm_hl').innerHTML=h.map(q=>'<div class="li"><span class="n">'+esc(q.text)+'<small>'+fmt(q.date)+(q.by?' · '+esc(uname(q.by)):'')+'</small></span></div>').join('');
   $('dm_del').hidden=!d;$('dm_err').textContent='';dmRes();$('dmod').hidden=false;
 }
 $('dm_s').onchange=dmRes;
+function dmAll(){const on=$('dm_all').checked;document.querySelectorAll('#dm_a input').forEach(i=>{if(on)i.checked=true;i.disabled=on})}
+$('dm_all').onchange=dmAll;
 $('dm_sit').oninput=()=>{if(!$('dm_ld')._man)$('dm_ld').value=today()};$('dm_ld').onchange=()=>{$('dm_ld')._man=1};
 $('dm_cancel').onclick=()=>{$('dmod').hidden=true};
 $('dm_del').onclick=()=>arm($('dm_del'),'Точно удалить?',()=>{remove(dId);$('dmod').hidden=true});
@@ -852,7 +935,7 @@ $('dm_save').onclick=()=>{
   if(!t)return $('dm_err').textContent='Укажите название задачи';
   if(st==='Выполнено'&&!res)return $('dm_err').textContent='Для статуса «Выполнено» укажите итоговый результат';
   const d={title:t,comment:$('dm_c').value.trim(),focus:f,tactic:k,status:st,deadline:$('dm_d').value,
-    assignees:[...document.querySelectorAll('#dm_a input:checked')].map(i=>i.value),situation:$('dm_sit').value.trim(),lastDate:$('dm_ld').value||today(),result:res};
+    all:$('dm_all').checked,assignees:[...document.querySelectorAll('#dm_a input:checked')].map(i=>i.value),situation:$('dm_sit').value.trim(),lastDate:$('dm_ld').value||today(),result:res};
   if(!dId){d.created=today();d.creator=ME.id}
   save(dId||nid('d_'),d);
   const dc=items.dict||{},fo=(dc.focus||[]).slice(),ta=(dc.tactic||[]).slice();let ch=0;
@@ -862,11 +945,61 @@ $('dm_save').onclick=()=>{
 };
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dmod').hidden)$('dmod').hidden=true});
 
+/* ---------- Отчёт по задачам отдела (Excel): фокус внимания → тактика → статус ---------- */
+const NOF='— без фокуса —',NOT='— без тактики —',DSC=['FFE5E7EB','FFDBEAFE','FFFEF3C7','FFD1FAE5'];
+const fmtD=s=>s?String(s).split('-').reverse().join('.'):'';
+function repData(){
+  const f=$('rp_f').value,t=$('rp_t').value,w=$('rp_w').value,dn=$('rp_d').checked,cf=(a,b,k)=>{const x=a[k]||'',y=b[k]||'';if(!x!==!y)return x?-1:1;return x.localeCompare(y,'ru')};
+  return list('d_').filter(d=>d.title&&(dn||d.status!=='Выполнено')&&(!w||d.all||(d.assignees||[]).includes(w))&&(!(f||t)||(d.deadline&&(!f||d.deadline>=f)&&(!t||d.deadline<=t))))
+    .sort((a,b)=>cf(a,b,'focus')||cf(a,b,'tactic')||(DST.indexOf(a.status)-DST.indexOf(b.status))||(a.deadline||'9999').localeCompare(b.deadline||'9999')||(a.title||'').localeCompare(b.title||'','ru')||cmpId(a,b));
+}
+async function repBuild(D){
+  await EJ();const wb=new ExcelJS.Workbook(),fill=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}});
+  const who=d=>d.all?'Все сотрудники':(d.assignees||[]).map(uname).join(', ');
+  const COLS=[['Фокус внимания',24],['Тактика',24],['Статус',14],['Задача',42],['Ответственные',26],['Дедлайн',12],['Последнее действие',16],['Текущая ситуация',50],['Итог',36],['Комментарий',36]];
+  const head=(ws,cols)=>{ws.columns=cols.map(c=>({header:c[0],width:c[1]}));const h=ws.getRow(1);h.height=30;h.eachCell({includeEmpty:true},c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill=fill('FF7C5CFF');c.alignment={vertical:'middle',wrapText:true}});ws.views=[{state:'frozen',ySplit:1}]};
+  const vals=d=>[d.focus||NOF,d.tactic||NOT,d.status||DST[0],d.title,who(d),fmtD(d.deadline),fmtD(d.lastDate),d.situation||'',d.result||'',d.comment||''];
+  const body=(ws,d)=>{const r=ws.addRow(vals(d));r.eachCell({includeEmpty:true},c=>{c.alignment={vertical:'top',wrapText:true};c.border={bottom:{style:'thin',color:{argb:'FFE5E7EB'}}}});
+    r.getCell(1).font={color:{argb:'FF888888'}};r.getCell(2).font={color:{argb:'FF888888'}};
+    const i=DST.indexOf(d.status);r.getCell(3).fill=fill(DSC[i<0?0:i]);
+    if(d.deadline&&d.status!=='Выполнено'&&d.deadline<today())r.getCell(6).font={color:{argb:'FFE0425A'},bold:true}};
+  const cF={},cT={};D.forEach(d=>{const f=d.focus||NOF,k=f+'\u0001'+(d.tactic||NOT);cF[f]=(cF[f]||0)+1;cT[k]=(cT[k]||0)+1});
+  const ws=wb.addWorksheet('Отчёт');head(ws,COLS);let pf=null,pt=null;
+  const band=(txt,argb,size)=>{const r=ws.addRow([txt]);ws.mergeCells(r.number,1,r.number,10);const c=r.getCell(1);c.font={bold:true,size};c.fill=fill(argb);c.alignment={vertical:'middle'};r.height=size>12?22:18};
+  D.forEach(d=>{const f=d.focus||NOF,t=d.tactic||NOT;
+    if(f!==pf){band('Фокус внимания: '+f+' ('+cF[f]+')','FFE6E0FF',13);pf=f;pt=null}
+    if(t!==pt){band('Тактика: '+t+' ('+cT[f+'\u0001'+t]+')','FFF3F0FF',11);pt=t}
+    body(ws,d)});
+  const w2=wb.addWorksheet('Сводка');head(w2,[['Фокус внимания',32]].concat(DST.map(s=>[s,14]),[['Всего',10]]));
+  const foci=[...new Set(D.map(d=>d.focus||NOF))],tot=DST.map(()=>0);let all=0;
+  foci.forEach(f=>{const row=DST.map((s,i)=>{const n=D.filter(d=>(d.focus||NOF)===f&&(DST.indexOf(d.status)<0?0:DST.indexOf(d.status))===i).length;tot[i]+=n;return n}),sum=row.reduce((a,b)=>a+b,0);all+=sum;w2.addRow([f].concat(row,[sum]))});
+  const tr=w2.addRow(['Итого'].concat(tot,[all]));tr.font={bold:true};
+  const w3=wb.addWorksheet('Список');head(w3,COLS);D.forEach(d=>body(w3,d));w3.autoFilter={from:{row:1,column:1},to:{row:1+D.length,column:10}};
+  return new Uint8Array(await wb.xlsx.writeBuffer());
+}
+function dlXlsx(u8,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u8],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+const repCnt=()=>{$('rp_c').textContent='В отчёт попадёт задач: '+repData().length;$('rp_e').textContent=''};
+$('drep').onclick=()=>{$('rp_w').innerHTML='<option value="">Все сотрудники</option>'+USERS.map(u=>'<option value="'+esc(u.id)+'">'+esc(u.name)+'</option>').join('');repCnt();$('rpmod').hidden=false};
+['rp_f','rp_t','rp_w','rp_d'].forEach(i=>$(i).addEventListener('change',repCnt));
+$('rp_x').onclick=()=>{$('rpmod').hidden=true};
+$('rp_ok').onclick=async()=>{const D=repData(),b=$('rp_ok');if(!D.length)return $('rp_e').textContent='Нет задач по выбранным условиям';
+  b.disabled=true;$('rp_e').textContent='Готовлю файл…';
+  try{dlXlsx(await repBuild(D),'Отчёт отдела '+today()+'.xlsx');$('rp_e').textContent='';$('rpmod').hidden=true}
+  catch(e){$('rp_e').textContent=e.message}finally{b.disabled=false}};
+
 /* ---------- Бюджет ---------- */
 const BONUS={1:4,4:1,7:2,10:3}; // месяц выплаты -> квартал, за который премия
 const sumM=m=>list('o_').filter(e=>(e.date||'').indexOf(m)===0).reduce((x,e)=>x+num(e.amount),0);
+/* люди семейного бюджета: «я» (зарплата и премия из основных полей) + добавленные */
+function budgetPeople(){const s=items.budget||{};
+  return[{id:'me',name:ME.name?fst(ME.name):'Я',salary:num(s.salary??s.monthly),bonus:num(s.bonus??s.quarterly)}].concat((s.people||[]).map(p=>({id:p.id,name:p.name||'Человек',salary:num(p.salary),bonus:num(p.bonus)})))}
+const whoName=id=>{const p=budgetPeople().find(x=>x.id===id);return p?p.name:''};
+const whoTxt=q=>{const n=q.who?whoName(q.who):'';return n?' · '+esc(n):''};
+const whoSm=q=>{const n=q.who?whoName(q.who):'';return n?'<small>'+esc(n)+'</small>':''};
+function whoOpts(){const P=budgetPeople();return P.length>1?'<option value="">Общий</option>'+P.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join(''):''}
+function fillWho(){const h=whoOpts();['rw','ow','ww'].forEach(i=>{const v=$(i).value;$(i).innerHTML=h;$(i).hidden=!h;if(v&&[...$(i).options].some(o=>o.value===v))$(i).value=v})}
 function monthRow(m,carry){
-  const s=items.budget||{},salary=num(s.salary??s.monthly),bonusAmt=num(s.bonus??s.quarterly);
+  const BP=budgetPeople(),salary=BP.reduce((x,p)=>x+p.salary,0),bonusAmt=BP.reduce((x,p)=>x+p.bonus,0);
   const rec=list('r_').reduce((x,r)=>x+num(r.amount),0),mm=+m.slice(5),bq=BONUS[mm]||0;
   const bonus=bq?bonusAmt:0,net=salary-rec,one=sumM(m);
   return{carry,salary,rec,net,bonus,bq,one,avail:carry+net+bonus-one};
@@ -885,6 +1018,7 @@ function setNum(el,v){
   (function step(t){const k=Math.min(1,(t-t0)/650),e=1-Math.pow(1-k,3);el.textContent=money(from+(v-from)*e);if(k<1)el._r=requestAnimationFrame(step)})(t0);
 }
 function renderBudget(){
+  fillWho();
   const r=calc(mon),srt=sorter(),O=list('o_').filter(q=>q.name);
   $('sortSel').value=(items.prefs||{}).sort||'desc';
   $('mname').textContent=monthName(mon);
@@ -896,9 +1030,9 @@ function renderBudget(){
   const L=(lbl,sub,val,sign,cls)=>'<div class="l '+(cls||'')+'"><span>'+lbl+(sub?'<small>'+sub+'</small>':'')+'</span><span class="v '+(sign>0?'pos':sign<0?'neg':'')+'">'+(sign>0?'+ ':sign<0?'− ':'')+money(Math.abs(val))+'</span></div>';
   $('ledger').innerHTML=
     L(r.first?'Начальный остаток':'Остаток с прошлого месяца',r.before?'':'переносится автоматически',r.carry,r.carry<0?-1:1)
-   +L('Зарплата','',r.salary,1)+L('Постоянные расходы','',r.rec,-1)
+   +L('Зарплата',(budgetPeople().length>1?budgetPeople().map(p=>esc(p.name)+' '+money(p.salary)).join(' · '):''),r.salary,1)+L('Постоянные расходы','',r.rec,-1)
    +'<div class="l net"><span>Чистая прибыль<small>зарплата минус постоянные расходы</small></span><span class="v '+(r.net<0?'neg':'')+'">'+(r.net<0?'− ':'')+money(Math.abs(r.net))+'</span></div>'
-   +(r.bq?'<div class="l bonus"><span>Премия за '+r.bq+' квартал<small>выплата в этом месяце</small></span><span class="v pos">+ '+money(r.bonus)+'</span></div>':'')
+   +(r.bq?'<div class="l bonus"><span>Премия за '+r.bq+' квартал<small>'+(budgetPeople().length>1?budgetPeople().map(p=>esc(p.name)+' '+money(p.bonus)).join(' · '):'выплата в этом месяце')+'</small></span><span class="v pos">+ '+money(r.bonus)+'</span></div>':'')
    +L('Расходы на даты','',r.one,-1)
    +'<div class="l"><span><b>Итого доступно</b></span><span class="v '+(r.avail<0?'neg':'')+'" style="font-size:18px">'+(r.avail<0?'− ':'')+money(Math.abs(r.avail))+'</span></div>';
 
@@ -906,18 +1040,18 @@ function renderBudget(){
   const rec=list('r_').filter(q=>q.name).sort(srt),recSum=rec.reduce((s,q)=>s+num(q.amount),0);
   $('recMeta').textContent=rec.length+' · '+money(recSum)+'/мес';
   if(!$('recBox')._init){$('recBox')._init=1;$('recBox').open=rec.length===0}
-  $('recList').innerHTML=rec.length?rec.map(q=>'<div class="li"><span class="n">'+esc(q.name)+'</span><span class="r">'+money(q.amount)+x(q.id)+'</span></div>').join(''):'<div class="empty">Статей пока нет</div>';
+  $('recList').innerHTML=rec.length?rec.map(q=>'<div class="li"><span class="n">'+esc(q.name)+whoSm(q)+'</span><span class="r">'+money(q.amount)+x(q.id)+'</span></div>').join(''):'<div class="empty">Статей пока нет</div>';
 
   const one=O.filter(e=>(e.date||'').indexOf(mon)===0).sort((a,b)=>a.date.localeCompare(b.date)||num(b.amount)-num(a.amount)||cmpId(a,b));
   $('oneSum').textContent=money(one.reduce((s,q)=>s+num(q.amount),0));
-  $('oneList').innerHTML=one.length?one.map(q=>'<div class="li"><span class="n">'+esc(q.name)+'<small>'+fmt(q.date)+'</small></span><span class="r">'+money(q.amount)
+  $('oneList').innerHTML=one.length?one.map(q=>'<div class="li"><span class="n">'+esc(q.name)+'<small>'+fmt(q.date)+whoTxt(q)+'</small></span><span class="r">'+money(q.amount)
     +'<button class="sm" data-act="unplan" data-id="'+q.id+'" title="Вернуть в желаемые" aria-label="Вернуть в желаемые">↩</button>'+x(q.id)+'</span></div>').join(''):'<div class="empty">В этом месяце расходов нет</div>';
 
   const w=O.filter(e=>!e.date).sort(srt);
   $('wSum').textContent=w.length+' · '+money(w.reduce((s,q)=>s+num(q.amount),0));
   const ae=document.activeElement;
   if(!(ae&&ae.id==='pd'))$('wList').innerHTML=w.length?w.map(q=>
-    '<div class="li plan"><span class="n">'+esc(q.name)+'</span><span class="r">'+money(q.amount)
+    '<div class="li plan"><span class="n">'+esc(q.name)+whoSm(q)+'</span><span class="r">'+money(q.amount)
     +'<button class="sm okb" data-act="plan" data-id="'+q.id+'">В месяц</button>'+x(q.id)+'</span>'
     +(planId===q.id?'<div class="pl"><input type="date" id="pd" value="'+mon+'-01" aria-label="Дата расхода"><button class="btn" data-act="planok" data-id="'+q.id+'" style="padding:6px 16px">Ок</button></div>':'')+'</div>').join(''):'<div class="empty">Список пуст. Добавьте то, что хотите купить</div>';
 }
@@ -932,16 +1066,65 @@ $('p2').addEventListener('click',e=>{
 });
 $('sortSel').onchange=()=>save('prefs',{sort:$('sortSel').value});
 $('saveS').onclick=()=>{
-  save('budget',{salary:num($('sm').value),bonus:num($('sq').value),opening:num($('so').value),start:$('ss').value});
+  readPpl();save('budget',{salary:num($('sm').value),bonus:num($('sq').value),opening:num($('so').value),start:$('ss').value,people:PPL.filter(p=>String(p.name).trim()).map(p=>({id:p.id,name:String(p.name).trim().slice(0,30),salary:num(p.salary),bonus:num(p.bonus)}))});
   $('saveS').textContent='Сохранено ✓';setTimeout(()=>$('saveS').textContent='Сохранить',1500);
 };
-$('addR').onclick=()=>{const n=$('rn').value.trim(),a=num($('ra').value);if(!n||!a)return;save(nid('r_'),{name:n,amount:a});$('rn').value='';$('ra').value='';$('rn').focus()};
-$('addO').onclick=()=>{const n=$('on').value.trim(),a=num($('oa').value),d=$('od').value;if(!n||!a)return;save(nid('o_'),{name:n,amount:a,date:d||''});$('on').value='';$('oa').value='';$('od').value=mon+'-01'};
-$('addW').onclick=()=>{const n=$('wn').value.trim(),a=num($('wa').value);if(!n||!a)return;save(nid('o_'),{name:n,amount:a,date:''});$('wn').value='';$('wa').value='';$('wn').focus()};
+$('addR').onclick=()=>{const n=$('rn').value.trim(),a=num($('ra').value);if(!n||!a)return;save(nid('r_'),{name:n,amount:a,who:$('rw').value});$('rn').value='';$('ra').value='';$('rn').focus()};
+$('addO').onclick=()=>{const n=$('on').value.trim(),a=num($('oa').value),d=$('od').value;if(!n||!a)return;save(nid('o_'),{name:n,amount:a,date:d||'',who:$('ow').value});$('on').value='';$('oa').value='';$('od').value=mon+'-01'};
+$('addW').onclick=()=>{const n=$('wn').value.trim(),a=num($('wa').value);if(!n||!a)return;save(nid('o_'),{name:n,amount:a,date:'',who:$('ww').value});$('wn').value='';$('wa').value='';$('wn').focus()};
 ['rn','ra'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('addR').click()}));
 ['wn','wa'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('addW').click()}));
 ['on','oa'].forEach(i=>$(i).addEventListener('keydown',e=>{if(e.key==='Enter')$('addO').click()}));
 $('pm').onclick=()=>shiftMon(-1);$('nm').onclick=()=>shiftMon(1);
+/* ---- люди семейного бюджета ---- */
+let PPL=[];
+function renderPpl(){$('ppl').innerHTML=PPL.map((p,i)=>'<div class="row end" data-pi="'+i+'" style="margin-bottom:8px"><div><label class="f">Имя</label><input data-f="n" value="'+esc(p.name)+'" placeholder="Например, Анна" maxlength="30"></div><div><label class="f">Зарплата, ₽</label><input data-f="s" type="number" inputmode="decimal" value="'+(p.salary||'')+'"></div><div><label class="f">Премия за квартал, ₽</label><input data-f="b" type="number" inputmode="decimal" value="'+(p.bonus||'')+'"></div><button class="sm bad" data-d="1" style="flex:0 0 auto" aria-label="Убрать человека">✕</button></div>').join('')}
+function readPpl(){document.querySelectorAll('#ppl [data-pi]').forEach(r=>{const p=PPL[+r.dataset.pi];if(!p)return;p.name=r.querySelector('[data-f=n]').value;p.salary=num(r.querySelector('[data-f=s]').value);p.bonus=num(r.querySelector('[data-f=b]').value)})}
+$('pplAdd').onclick=()=>{readPpl();PPL.push({id:nid('p'),name:'',salary:0,bonus:0});renderPpl();const n=document.querySelectorAll('#ppl [data-f=n]');if(n.length)n[n.length-1].focus()};
+$('ppl').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;readPpl();PPL.splice(+b.closest('[data-pi]').dataset.pi,1);renderPpl()};
+/* ---- отчёт за период: доходы и расходы ---- */
+function brData(f,t){
+  const P=budgetPeople(),start=(items.budget||{}).start||'',R=list('r_').filter(q=>q.name),
+    O=list('o_').filter(q=>q.name&&q.date&&q.date>=f&&q.date<=t).sort((a,b)=>a.date.localeCompare(b.date)||cmpId(a,b));
+  const months=[];for(let m=f.slice(0,7);m<=t.slice(0,7)&&months.length<121;m=nextMon(m))months.push(m);
+  const on=m=>!start||m>=start,wk=q=>P.length===1?'me':(P.some(p=>p.id===q.who)?q.who:'');
+  const per={};P.forEach(p=>{per[p.id]={name:p.name,inc:0,exp:0}});per['']={name:'Общий',inc:0,exp:0};
+  const rows=months.map(m=>{const o=on(m),bq=BONUS[+m.slice(5)]||0;let sal=0,bon=0,rec=0;
+    if(o){P.forEach(p=>{sal+=p.salary;per[p.id].inc+=p.salary;if(bq){bon+=p.bonus;per[p.id].inc+=p.bonus}});R.forEach(q=>{const a=num(q.amount);rec+=a;per[wk(q)||''].exp+=a})}
+    const one=O.filter(q=>q.date.slice(0,7)===m).reduce((x,q)=>x+num(q.amount),0);
+    return{m,sal,bon,inc:sal+bon,rec,one,exp:rec+one,bal:sal+bon-rec-one}});
+  O.forEach(q=>{per[wk(q)||''].exp+=num(q.amount)});
+  const sum=k=>rows.reduce((x,r)=>x+r[k],0);
+  return{P,R,O,rows,per,months,on,wk,inc:sum('inc'),exp:sum('exp'),bal:sum('bal')}
+}
+async function brBuild(f,t){
+  await EJ();const D=brData(f,t),wb=new ExcelJS.Workbook(),fill=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}}),MF='#,##0';
+  const head=(ws,cols)=>{ws.columns=cols.map(c=>({header:c[0],width:c[1]}));const h=ws.getRow(1);h.height=26;h.eachCell({includeEmpty:true},c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill=fill('FF7C5CFF');c.alignment={vertical:'middle',wrapText:true}});ws.views=[{state:'frozen',ySplit:1}]};
+  const money=(ws,cols)=>cols.forEach(c=>{ws.getColumn(c).numFmt=MF});
+  const w1=wb.addWorksheet('По месяцам');head(w1,[['Месяц',18],['Зарплата',14],['Премия',14],['Доходы',14],['Постоянные расходы',20],['Разовые расходы',18],['Расходы',14],['Баланс',14]]);
+  D.rows.forEach(r=>w1.addRow([monthName(r.m),r.sal,r.bon,r.inc,r.rec,r.one,r.exp,r.bal]));
+  const tr=w1.addRow(['Итого',D.rows.reduce((x,r)=>x+r.sal,0),D.rows.reduce((x,r)=>x+r.bon,0),D.inc,D.rows.reduce((x,r)=>x+r.rec,0),D.rows.reduce((x,r)=>x+r.one,0),D.exp,D.bal]);tr.font={bold:true};money(w1,[2,3,4,5,6,7,8]);
+  const w2=wb.addWorksheet('По людям');head(w2,[['Человек',22],['Доходы',16],['Расходы',16],['Баланс',16]]);
+  Object.keys(D.per).forEach(k=>{const p=D.per[k];if(k===''&&!p.exp&&!p.inc)return;w2.addRow([p.name,p.inc,p.exp,p.inc-p.exp])});money(w2,[2,3,4]);
+  const nm=D.months.filter(D.on).length,w3=wb.addWorksheet('Разовые расходы');head(w3,[['Дата',14],['Статья',34],['Кто',18],['Сумма',14]]);
+  D.O.forEach(q=>w3.addRow([fmtD(q.date),q.name,(q.who&&whoName(q.who))||(D.P.length>1?'Общий':D.P[0].name),num(q.amount)]));
+  if(D.O.length)w3.addRow(['','Итого','',D.O.reduce((x,q)=>x+num(q.amount),0)]).font={bold:true};money(w3,[4]);
+  const w4=wb.addWorksheet('Постоянные расходы');head(w4,[['Статья',34],['Кто',18],['В месяц',14],['Месяцев в периоде',18],['Итого',14]]);
+  D.R.forEach(q=>w4.addRow([q.name,(q.who&&whoName(q.who))||(D.P.length>1?'Общий':D.P[0].name),num(q.amount),nm,num(q.amount)*nm]));money(w4,[3,5]);
+  return new Uint8Array(await wb.xlsx.writeBuffer());
+}
+const brSum=()=>{const f=$('br_f').value,t=$('br_t').value,e=$('br_e');e.textContent='';
+  if(!f||!t||f>t){$('br_s').textContent='';return false}
+  const D=brData(f,t);$('br_s').textContent='Доходы '+money(D.inc)+' · расходы '+money(D.exp)+' · баланс '+(D.bal<0?'− ':'')+money(Math.abs(D.bal));return true};
+$('brep').onclick=()=>{const[y,m]=mon.split('-').map(Number);$('br_f').value=mon+'-01';$('br_t').value=iso(new Date(y,m,0));brSum();$('brmod').hidden=false};
+['br_f','br_t'].forEach(i=>$(i).addEventListener('change',brSum));
+$('br_x').onclick=()=>{$('brmod').hidden=true};
+$('br_ok').onclick=async()=>{const f=$('br_f').value,t=$('br_t').value,e=$('br_e'),b=$('br_ok');
+  if(!f||!t)return e.textContent='Укажите обе даты';if(f>t)return e.textContent='Дата «С» позже даты «По»';
+  if(brData(f,t).months.length>120)return e.textContent='Период слишком большой (не более 10 лет)';
+  b.disabled=true;e.textContent='Готовлю файл…';
+  try{dlXlsx(await brBuild(f,t),'Доходы и расходы '+f+' — '+t+'.xlsx');e.textContent='';$('brmod').hidden=true}catch(er){e.textContent=er.message}finally{b.disabled=false}};
+
 
 /* ---------- Письма ---------- */
 const M={tpl:[],ok:false,files:[],q:null,q0:{s:0,e:0},reg:new Map()};
@@ -1013,7 +1196,7 @@ const Q=async jobs=>{   // пачками по размеру (до ~1,5 МБ з
 async function Qsend(jobs,cb){const N=jobs.length;let j;prog(0,'',0,N);try{j=await mapi('status');M.q0=j.q;await Q(jobs)}catch(e){prog(0,'err',0,N,e.message);return false}renderQ(j);prog(1,'',0,N);watchQ(N,cb);return true}
 const FREE='__free',t2h=x=>'<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.5">'+esc(x).replace(/\n/g,'<br>')+'</div>';
 const curT=()=>$('mt').value===FREE?{id:FREE,name:'',subject:'',html:M.consHtml||t2h($('mbody').value)}:M.tpl.find(t=>t.id===$('mt').value);
-function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=sortedTpl().map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (без шаблона)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
+function fillTpl(sel){const v=sel||$('mt').value;$('mt').innerHTML=sortedTpl().map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('')+'<option value="'+FREE+'">✎ Своё письмо (одноразовое)</option>';if(v&&(v===FREE||M.tpl.some(t=>t.id===v)))$('mt').value=v;fillVars()}
 const gv=()=>{const v={};document.querySelectorAll('#mv [data-v]').forEach(i=>v[i.dataset.v]=i.value.trim());return v};
 function fillVars(){
   const t=curT(),fr=t&&t.id===FREE,ns=t?vnames((t.html||'')+' '+(fr?'':t.subject)):[],old=gv();
@@ -1030,6 +1213,7 @@ function renderFiles(){$('mfl').innerHTML=M.files.map((f,i)=>'<span class="chip"
 $('mfile').onchange=e=>{const add=[...e.target.files];e.target.value='';const all=M.files.concat(add);if(all.reduce((s,f)=>s+f.size,0)>15e6)return ban('err','Вложения больше 15 МБ — уменьшите');M.files=all;renderFiles()};
 $('mfl').onclick=e=>{const x=e.target.closest('[data-x]');if(x){M.files.splice(+x.dataset.x,1);renderFiles()}};
 $('mm').onchange=()=>{const m=$('mm').value==='2';$('m1').hidden=m;$('m2').hidden=!m};
+$('mm_seg').onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;$('mm').value=b.dataset.v;[...$('mm_seg').children].forEach(x=>{x.className='sm'+(x===b?' on':'')});$('mm').onchange()};
 $('mClose').onclick=()=>{$('mmod').hidden=true};
 $('mccx').onchange=()=>{$('mcopyw').hidden=!$('mccx').checked;if(!$('mccx').checked)$('mcopy').value=''};
 function arm(b,txt,fn){if(!b.dataset.arm){b.dataset.arm=1;b._o=b.textContent;b.textContent=txt;clearTimeout(b._t);b._t=setTimeout(()=>{if(b.dataset.arm){b.dataset.arm='';b.textContent=b._o}},5000);return}b.dataset.arm='';clearTimeout(b._t);b.textContent=b._o;fn()}
@@ -1367,8 +1551,8 @@ toggleT();toggleS();renderM2();renderFiles();
 
 /* шаблоны (модалка) */
 function openT(t){$('te_id').value=t?t.id:'';$('te_n').value=t?t.name:'';$('te_s').value=t?t.subject:'';$('te_h').value=t?t.html:'';$('te_err').textContent='';$('tmod').hidden=false}
-$('mtNew').onclick=()=>openCons('tpl',null);$('mtNewH').onclick=()=>openT();
-$('mtEdit').onclick=()=>{const t=curT();if(!t)return msg('Выберите шаблон для правки',1);if(t.id===FREE)return openCons('free');if(t.model)return openCons('tpl',t.id);openT(t)};
+$('mtOwn').onclick=()=>{$('mt').value=FREE;fillVars();openCons('free')};
+$('mtEdit').onclick=()=>{const t=curT();if(!t)return msg('Выберите шаблон для правки',1);if(t.id===FREE)return openCons('free');return openCons('tpl',t.id)};
 $('te_cancel').onclick=()=>{$('tmod').hidden=true};
 $('te_save').onclick=async()=>{
   const n=$('te_n').value.trim();let h=$('te_h').value,s=$('te_s').value.trim();
@@ -1459,7 +1643,7 @@ function sigSave(){
   M.tpl.forEach(t=>{if(t.model)t.html=buildLetter(t.model)});cprev();if(M.ok)fillVars();
 }
 function cardEmpty(c){return !c.img&&!(c.title||'').trim()&&!(c.it||[]).some(it=>it.t==='c'?(it.h||'').trim():it.t==='p'?richParts(it.h).length:it.t==='l'?(it.li||[]).some(r=>richParts(r.h).length):(it.b||[]).some(b=>b.t.trim()))}
-const hasContent=L=>L.cards.some(c=>!cardEmpty(c));
+const hasContent=L=>L.h?!!(L.raw||'').trim():L.cards.some(c=>!cardEmpty(c));
 function cardHtml(c,x){
   let h=KIT.open,ico=false;
   if(c.k==='banner'&&c.img)h+='<a href="https://kontur.ru/partnership" target="_blank" style="text-decoration:none;color:#015ccb"><img src="'+esc(c.img)+'" alt="Контур" width="500" style="clear:both;display:block;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;border:none;max-width:500px;width:100%"></a>'+spc(30,25);
@@ -1468,7 +1652,13 @@ function cardHtml(c,x){
   (c.it||[]).forEach(it=>{if(it.t==='p')richParts(it.h).forEach(x=>{h+=pHtml(x)});else if(it.t==='l')h+=listHtml(it);else if(it.t==='b')h+=btnGroup(it);else if(it.t==='c')h+=codeHtml(it)});
   return h+(x||'')+KIT.close;
 }
+const preOf=h=>{const m=String(h||'').match(/<span class="preheader"[^>]*>([\s\S]*?)<\/span>/i);return m?m[1].replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').trim():''};
+function injectPre(h,pre){   // прехедер в готовом HTML: старый убираем, новый вставляем сразу после <body>
+  h=String(h||'').replace(/<span class="preheader"[\s\S]*?<\/span>/i,'');if(!String(pre||'').trim())return h;
+  const sp='<span class="preheader" style="visibility:hidden;font-size:1px;color:#f5f5f5;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;display:none;mso-hide:all">'+escT(pre)+'</span>';
+  return /<body[^>]*>/i.test(h)?h.replace(/<body[^>]*>/i,m=>m+sp):sp+h}
 function buildLetter(L){
+  if(L.h)return (L.raw||'').trim()?injectPre(L.raw,L.pre):'';
   const cs=L.cards.filter(c=>!cardEmpty(c));if(!cs.length)return '';
   return KIT.head+'<title>'+esc(L.subj||'')+'</title></head> '+KIT.body.replace('%%PRE%%',()=>escT(L.pre||''))+cs.map((c,i)=>cardHtml(c,i===cs.length-1?sigRender():'')).join('')+KIT.foot;
 }
@@ -1511,6 +1701,7 @@ function itemHtml(it,ii,n){
     +it.b.map((b,j)=>'<div class="row" data-bj="'+j+'" style="margin-bottom:6px"><div><input data-f="bt" placeholder="Текст кнопки" value="'+esc(b.t)+'"></div><div><input data-f="bu" placeholder="Ссылка https://… или {{Ссылка}}" value="'+esc(b.u)+'" autocapitalize="off"></div><div style="flex:0 0 130px;min-width:110px"><select data-f="bs"><option value="fill"'+(b.s!=='line'?' selected':'')+'>Тёмная</option><option value="line"'+(b.s==='line'?' selected':'')+'>Контурная</option></select></div></div>').join('')+'</div>';
 }
 function renderC(){
+  cModeUI();
   $('c_subj').value=C.subj||'';$('c_pre').value=C.pre||'';const n=C.cards.length;
   $('cb').innerHTML=C.cards.map((c,ci)=>{
     const ctl='<span class="btns" style="margin:0">'+(ci>0?'<button class="sm" data-a="cup" title="Выше">↑</button>':'')+(ci<n-1?'<button class="sm" data-a="cdn" title="Ниже">↓</button>':'')+(n>1?'<button class="sm bad" data-a="cdel" title="Удалить карточку">✕</button>':'')+'</span>';
@@ -1569,6 +1760,24 @@ $('ctb').addEventListener('click',async e=>{const b=e.target.closest('[data-cmd]
 $('c_subj').oninput=()=>{C.subj=$('c_subj').value;saveC();cprevD()};$('c_pre').oninput=()=>{C.pre=$('c_pre').value;saveC();cprevD()};
 $('sg_on').onchange=sigSave;$('sg_h').onchange=sigSave;
 $('sg_h').placeholder='<spacer size="20" size-mobile="15" />\n<hr />\n<spacer size="15" size-mobile="10"></spacer>\n<p><b>Имя Фамилия</b><br />Должность, <a href="https://kontur.ru">Контур</a><br />8 800 …</p>';
+function cModeUI(){const h=!!C.h;$('c_raw').hidden=!h;$('ctb').hidden=h;$('cb').hidden=h;$('c_add').hidden=h;$('c_raw').value=C.raw||'';[...$('c_mode').children].forEach(b=>{b.className='sm'+((b.dataset.m==='h')===h?' on':'')})}
+$('c_mode').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;const h=b.dataset.m==='h';if(h===!!C.h)return;
+  if(h){const cur=Object.assign({},C,{h:0});if(!(C.raw||'').trim()&&hasContent(cur))C.raw=buildLetter(cur);C.h=1}   // из конструктора — готовый HTML как отправная точка
+  else{if((C.raw||'').trim()&&!confirm('Вернуться в конструктор? Письмо будет собрано из карточек, а введённый HTML-код не используется.'))return;C.h=0}
+  renderC();saveC();cprev()};
+$('c_raw').oninput=()=>{C.raw=$('c_raw').value;saveC();cprevD()};
+/* динамические поля {{…}}: вставляются в тему, прехедер, заголовок, текст, HTML — туда, где стоит курсор */
+let FOC=null;
+$('cmod').addEventListener('focusin',e=>{const t=e.target;if(t.matches&&t.matches('input:not([type=checkbox]),textarea,.ced2')&&t.id!=='c_ps')FOC=t});
+$('c_fld').onmousedown=e=>e.preventDefault();
+$('c_fld').onclick=async()=>{
+  const t=FOC;if(!t||!t.isConnected||!$('cmod').contains(t)){$('c_err').textContent='Поставьте курсор туда, где нужно поле: в тему, прехедер, заголовок, текст или HTML';return}
+  $('c_err').textContent='';const sel=t.isContentEditable?(LAST&&LAST.ed===t?LAST.r:null):[t.selectionStart,t.selectionEnd];
+  const r=await ask('Динамическое поле',[{k:'n',l:'Название поля (запросится при отправке; в рассылке по Excel берётся из столбца с таким названием)',v:''}],[{t:'Отмена',v:null,sec:1},{t:'Вставить',v:'ok'}],v=>v.n&&!/[{}]/.test(v.n)?'':'Введите название без скобок');
+  if(!r.btn)return;const tag='{{'+r.vals.n+'}}';t.focus();
+  if(t.isContentEditable){const g=getSelection();g.removeAllRanges();if(sel)g.addRange(sel);document.execCommand('insertText',false,tag)}
+  else{const a=sel[0]==null?t.value.length:sel[0],b=sel[1]==null?a:sel[1];t.setRangeText(tag,a,b,'end')}
+  t.dispatchEvent(new Event('input',{bubbles:true}))};
 $('c_add').onclick=()=>{C.cards.push(newCard('icon'));renderC();saveC();cprev();const l=$('cb').lastElementChild;if(l&&l.scrollIntoView)l.scrollIntoView({block:'nearest'})};
 $('c_ps').innerHTML='<option value="">Начать с готового письма…</option>'+PRESETS.map((p,i)=>'<option value="'+i+'">'+esc(p.n)+'</option>').join('');
 $('c_ps').onchange=()=>{const i=$('c_ps').value;if(i==='')return;if(hasContent(C)&&!confirm('Заменить текущее письмо выбранным готовым? Несохранённые правки пропадут.')){$('c_ps').value='';return}C=cl(PRESETS[+i].m);renderC();saveC();cprev()};
@@ -1587,7 +1796,7 @@ function consReset(){C=newLetter();M.consHtml='';saveC();consInfo()}
 function openCons(mode,id){
   if(BAK){C=BAK;BAK=null}
   CM={mode,id:id||null};let t=null;
-  if(mode==='tpl'){BAK=C;t=id&&M.tpl.find(x=>x.id===id);C=t&&t.model?cl(t.model):newLetter()}
+  if(mode==='tpl'){BAK=C;t=id&&M.tpl.find(x=>x.id===id);C=t?(t.model?cl(t.model):{subj:t.subject||'',pre:preOf(t.html),cards:[newCard('banner')],h:1,raw:t.html||''}):newLetter()}
   $('c_h2').textContent=mode==='tpl'?(t?'Шаблон: '+t.name:'Новый шаблон'):'Конструктор письма';
   $('c_ok').hidden=mode==='tpl';$('c_tpl').hidden=mode==='tpl';$('c_save').hidden=mode!=='tpl';$('c_ps').value='';
   $('c_err').textContent='';renderC();cprev();sigUI();$('cmod').hidden=false}
@@ -1643,7 +1852,8 @@ function setCmds(){const B=mailBase(),u=cfg.url||'',k=cfg.key||'',h=PSH+"iex $w.
     mac:"curl -fsSL '"+B+"install.sh' | bash -s -- '"+u+"' '"+k+"' '"+B+"'",
     macX:"launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/ru.crm.mailer.plist; rm -rf ~/.crm-mailer ~/Library/LaunchAgents/ru.crm.mailer.plist"}}
 function sndStatus(){if(M.live===undefined)return;const t=M.live?'● Отправщик подключён и работает':'○ Отправщик не подключён — письма ждут в очереди';
-  const a=$('msnd');if(a){a.textContent=t;a.style.color=M.live?'var(--ok-tx)':'var(--bad)'}
+  const a=$('msnd');if(a){a.textContent=t;a.style.color=M.live?'var(--ok-tx)':'var(--bad)';a.style.cursor=M.live?'pointer':'';a.title=M.live?'Нажмите, чтобы открыть настройку отправки (например, для другого компьютера)':''}
+  const sb=$('msetup');if(sb&&sb.parentElement)sb.parentElement.hidden=!!M.live;   // отправщик работает — кнопка настройки не нужна
   const b=$('set_st');if(b){b.textContent=t+(M.hb?' · был на связи '+new Date(M.hb).toLocaleString('ru'):'');b.style.color=M.live?'var(--ok-tx)':'var(--mu)'}}
 function setOS(os){$('set_win').hidden=os!=='win';$('set_mac').hidden=os!=='mac';[...$('set_os').children].forEach(b=>b.className='sm'+(b.dataset.os===os?' on':''))}
 let setT=0;
@@ -1659,10 +1869,37 @@ async function copyTxt(txt,btn){try{await navigator.clipboard.writeText(txt)}cat
   const o=btn.dataset.o||btn.textContent;btn.dataset.o=o;btn.textContent='Скопировано ✓';setTimeout(()=>{btn.textContent=o},1800)}
 function dlCmd(){const txt='@echo off\r\nchcp 65001 >nul\r\npowershell -NoProfile -ExecutionPolicy Bypass -Command "'+setCmds().win+'"\r\npause\r\n',a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='murr-install.cmd';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
-$('msetup').onclick=openSetup;$('set_x').onclick=closeSetup;$('set_os').onclick=e=>{const b=e.target.closest('[data-os]');if(b)setOS(b.dataset.os)};
+$('msetup').onclick=openSetup;$('msnd').onclick=()=>{if(M.live)openSetup()};$('set_x').onclick=closeSetup;$('set_os').onclick=e=>{const b=e.target.closest('[data-os]');if(b)setOS(b.dataset.os)};
 $('set_cw').onclick=()=>copyTxt(setCmds().win,$('set_cw'));$('set_cm').onclick=()=>copyTxt(setCmds().mac,$('set_cm'));
 $('set_cwx').onclick=()=>copyTxt(setCmds().winX,$('set_cwx'));$('set_cmx').onclick=()=>copyTxt(setCmds().macX,$('set_cmx'));$('set_dw').onclick=dlCmd;
 
+/* ---------- Свои разделы: таблицы и дашборды Google ---------- */
+let CS_CUR='';
+const CS_HOST=/^(docs|script|sheets|lookerstudio|datastudio)\.google\.com$|(^|\.)googleusercontent\.com$/;
+function csUrl(u){let x;try{x=new URL(String(u||'').trim())}catch(e){return ''}
+  if(x.protocol!=='https:'||!CS_HOST.test(x.hostname))return '';
+  if(/\/pubhtml$/.test(x.pathname)){if(!x.searchParams.has('widget'))x.searchParams.set('widget','true');if(!x.searchParams.has('headers'))x.searchParams.set('headers','false')}
+  return x.href}
+const csAll=()=>(((items.sections||{}).list)||[]).map(x=>Object.assign({},x,{shared:1})).concat(((items.prefs||{}).custom)||[]).filter(x=>x&&x.id&&x.title&&csUrl(x.url));
+function csOpen(id){const x=csAll().find(q=>q.id===id);if(!x)return tab('home');CS_CUR=id;
+  $('cs_t').textContent=(x.icon||'📊')+' '+x.title;const u=csUrl(x.url);$('cs_o').href=u;
+  if($('cs_f').dataset.u!==u){$('cs_f').dataset.u=u;$('cs_f').src=u}}
+$('cs_r').onclick=()=>{const f=$('cs_f'),u=f.dataset.u;if(!u)return;f.src='about:blank';setTimeout(()=>{f.src=u},60)};
+$('navbar').addEventListener('click',e=>{const b=e.target.closest('[data-cs]');if(b)tab('cs:'+b.dataset.cs)});
+function cxRender(){const l=csAll();$('cx_e').textContent='';
+  $('cx_l').innerHTML=l.length?l.map(x=>{let h='';try{h=new URL(x.url).hostname}catch(e){}
+    return '<div class="li"><span class="n">'+esc(x.icon||'📊')+' '+esc(x.title)+'<small>'+esc(h)+' · '+(x.shared?'для отдела':'личный')+'</small></span><span class="r"><button class="sm bad" data-x="'+esc(x.id)+'" data-sh="'+(x.shared?1:0)+'"'+(x.shared&&ME.role!=='admin'?' disabled title="Удалить общий раздел может администратор"':'')+' aria-label="Удалить раздел">✕</button></span></div>'}).join(''):'<div class="empty">Своих разделов пока нет</div>'}
+$('cx_add').onclick=()=>{
+  const t=$('cx_n').value.trim(),u=csUrl($('cx_u').value),ic=$('cx_i').value.trim()||'📊',sh=$('cx_s').checked&&ME.role==='admin',e=$('cx_e');e.textContent='';
+  if(!t)return e.textContent='Укажите название';
+  if(!u)return e.textContent='Нужна ссылка https:// на Google Таблицу, Looker Studio или веб-приложение Apps Script';
+  const x={id:nid('x'),title:t.slice(0,30),icon:ic.slice(0,4),url:u};
+  if(sh)save('sections',{list:(((items.sections||{}).list)||[]).concat([x])});else save('prefs',{custom:(((items.prefs||{}).custom)||[]).concat([x])});
+  $('cx_n').value='';$('cx_u').value='';$('cx_s').checked=false;cxRender()};
+$('cx_l').onclick=e=>{const b=e.target.closest('[data-x]');if(!b||b.disabled)return;
+  if(!confirm('Удалить раздел из МУРР? Сама таблица не пострадает.'))return;
+  if(b.dataset.sh==='1')save('sections',{list:(((items.sections||{}).list)||[]).filter(q=>q.id!==b.dataset.x)});
+  else save('prefs',{custom:(((items.prefs||{}).custom)||[]).filter(q=>q.id!==b.dataset.x)});cxRender()};
 /* ---------- Старт ---------- */
 (function(){
   const now=new Date(),cur=today().slice(0,7);let o='';
@@ -1673,13 +1910,19 @@ $('set_cwx').onclick=()=>copyTxt(setCmds().winX,$('set_cwx'));$('set_cmx').oncli
 function tab(n){
   $('home').className='panel'+(n==='home'?' on':'');
   [1,2,3,4,5].forEach(i=>{$('p'+i).className='panel'+(n==i?' on':'');$('n'+i).className=n==i?'on':''});
+  const cs=String(n).indexOf('cs:')===0;$('p6').className='panel'+(cs?' on':'');
+  document.querySelectorAll('#navbar [data-cs]').forEach(b=>{b.className=(cs&&'cs:'+b.dataset.cs===n)?'on':''});if(cs)csOpen(n.slice(3));
   $('navbar').hidden=n==='home';
   if(n==='home')$('hello').textContent='Здравствуйте'+(ME.name?', '+ME.name.split(' ')[0]:'')+'! Выберите раздел';
 }
 const SECS=[[1,'✓','Личные задачи'],[4,'👥','Задачи отдела'],[2,'₽','Бюджет'],[3,'✉','Письма'],[5,'📅','Медиаплан']];
 const secSel=()=>{const v=(items.prefs||{}).sections;return Array.isArray(v)&&v.length?v.map(Number):[1,4,2,3,5]};
+function csNav(){
+  document.querySelectorAll('#navbar [data-cs]').forEach(b=>b.remove());const on=$('p6').classList.contains('on');
+  $('navbar').insertAdjacentHTML('beforeend',csAll().map(x=>'<button data-cs="'+esc(x.id)+'" class="'+(on&&x.id===CS_CUR?'on':'')+'">'+esc(x.icon||'📊')+' '+esc(x.title)+'</button>').join(''));
+  return csAll().map(x=>'<button class="tile" data-cs="'+esc(x.id)+'"><span>'+esc(x.icon||'📊')+'</span>'+esc(x.title)+'</button>').join('')}
 function applySections(){const sel=secSel();[1,2,3,4,5].forEach(i=>{$('n'+i).hidden=!sel.includes(i)});
-  $('tiles').innerHTML=SECS.filter(x=>sel.includes(x[0])).map(x=>'<button class="tile" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>').join('')}
+  $('tiles').innerHTML=SECS.filter(x=>sel.includes(x[0])).map(x=>'<button class="tile" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>').join('')+csNav()}
 function secBoxes(el,sel){$(el).innerHTML=SECS.map(x=>'<label class="chk" style="padding-bottom:6px"><input type="checkbox" value="'+x[0]+'"'+(sel.includes(x[0])?' checked':'')+'> '+x[1]+' '+x[2]+'</label>').join('')}
 const secGet=el=>[...document.querySelectorAll('#'+el+' input:checked')].map(i=>+i.value).sort((a,b)=>[1,4,2,3,5].indexOf(a)-[1,4,2,3,5].indexOf(b));
 async function saveProfile(nEl,bEl,eEl,mEl){
@@ -1708,7 +1951,7 @@ function renderMp(){
   let h=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(x=>'<div class="cw">'+x+'</div>').join('');
   for(let i=0;i<Math.ceil((off+dim)/7)*7;i++){const d=new Date(y,m-1,1-off+i),k=iso(d);
     h+='<div class="cd'+(d.getMonth()!==m-1?' oth':'')+(k===today()?' td':'')+'" data-day="'+k+'"><span>'+d.getDate()+'</span>'
-      +(by[k]||[]).sort((a,b)=>cmpId(a,b)).map(e=>'<button class="ce'+(e.important?' hot':'')+'" data-mp="'+e.id+'" title="'+esc(e.title)+'">'+esc(e.title)+'</button>').join('')+'</div>'}
+      +(by[k]||[]).sort((a,b)=>cmpId(a,b)).map(e=>'<button class="ce'+(e.important?' hot':'')+'" data-mp="'+e.id+'" title="'+esc(e.title+' · '+uname(e.resp||e.owner))+'">'+esc(e.title)+'</button>').join('')+'</div>'}
   $('cal').innerHTML=h;
 }
 function shiftMp(n){const[y,m]=mpMon.split('-').map(Number),d=new Date(y,m-1+n,1);mpMon=d.getFullYear()+'-'+p2(d.getMonth()+1);renderMp()}
@@ -1716,6 +1959,7 @@ $('mpp').onclick=()=>shiftMp(-1);$('mpn').onclick=()=>shiftMp(1);
 function openMp(id,day){
   const e=id?items[id]:null;if(id&&!e)return;mpId=id||null;
   $('mp_h2').textContent=e?'Рассылка':'Новая рассылка';$('mp_t').value=e?e.title:'';$('mp_d').value=e?e.date:(day||today());$('mp_c').value=e?e.comment||'':'';$('mp_i').value=e&&e.important?'1':'0';
+  $('mp_o').innerHTML=USERS.map(u=>'<option value="'+esc(u.id)+'">'+esc(u.name)+'</option>').join('');$('mp_o').value=(e&&(e.resp||e.owner))||ME.id;
   $('mp_a').textContent=e&&e.owner?'Автор: '+uname(e.owner):'';$('mp_del').hidden=!e;$('mp_e').textContent='';$('mpmod').hidden=false;
 }
 $('cal').onclick=e=>{const b=e.target.closest('[data-mp]');if(b)return openMp(b.dataset.mp);const c=e.target.closest('[data-day]');if(c)openMp(null,c.dataset.day)};
@@ -1724,8 +1968,8 @@ $('mp_cancel').onclick=()=>{$('mpmod').hidden=true};
 $('mp_del').onclick=()=>arm($('mp_del'),'Точно удалить?',()=>{remove(mpId);$('mpmod').hidden=true});
 $('mp_save').onclick=()=>{const t=$('mp_t').value.trim(),d=$('mp_d').value;
   if(!t)return $('mp_e').textContent='Укажите название';if(!d)return $('mp_e').textContent='Укажите дату рассылки';
-  save(mpId||nid('mp_'),{title:t,date:d,comment:$('mp_c').value.trim(),important:$('mp_i').value==='1'});mpMon=d.slice(0,7);$('mpmod').hidden=true;renderMp()};
-$('tiles').onclick=e=>{const b=e.target.closest('.tile');if(b&&+b.dataset.s)$('n'+b.dataset.s).click()};
+  save(mpId||nid('mp_'),{title:t,date:d,comment:$('mp_c').value.trim(),important:$('mp_i').value==='1',resp:$('mp_o').value});mpMon=d.slice(0,7);$('mpmod').hidden=true;renderMp()};
+$('tiles').onclick=e=>{const b=e.target.closest('.tile');if(b&&+b.dataset.s)$('n'+b.dataset.s).click();else if(b&&b.dataset.cs)tab('cs:'+b.dataset.cs)};
 $('logo').onclick=()=>tab('home');$('n4').onclick=()=>tab(4);$('n5').onclick=()=>tab(5);
 $('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
