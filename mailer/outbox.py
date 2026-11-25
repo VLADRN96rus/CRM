@@ -21,6 +21,7 @@ FLUSH_EVERY, FLUSH_N, COPY_STEP, SLEEP_GAP = 15, 5, 30, 180   # передача
 
 STATE, OUT, LAST = ['ожидаю письма'], [], [time.time()]   # что делает отправщик (видно в CRM); результаты, ещё не переданные таблице; время последнего контакта с таблицей
 COPY_FAILS = {}
+DEFER, ADAPT = [], [1.0]   # письма, отложенные из-за лимита сервера (добиваются в конце); множитель паузы (растёт при лимите, плавно падает при успехах)
 
 def log(*a): print(time.strftime('%Y-%m-%d %H:%M:%S'), *a, flush=True)
 
@@ -142,8 +143,10 @@ def send(p, job):
         bad_auth.add(key); drop(key)   # не долбим сервер неверным паролем: во избежание блокировки учётки
         raise Perm('Ошибка входа в почту: %s' % e)
     except (smtplib.SMTPRecipientsRefused, smtplib.SMTPSenderRefused) as e:
+        if throttled(e): drop(key); raise   # лимит скорости — не ошибка адреса
         raise Perm('Сервер отклонил адрес: %s' % e)
     except smtplib.SMTPResponseException as e:
+        if throttled(e): drop(key); raise   # лимит скорости (даже с кодом 5xx) — не отказ письма
         if 500 <= e.smtp_code < 600: raise Perm('Сервер отклонил письмо: %s %s' % (e.smtp_code, e.smtp_error))
         drop(key); raise
     except Exception:
@@ -151,7 +154,7 @@ def send(p, job):
 
 def throttled(e):
     t = str(getattr(e, 'smtp_error', e)).lower()
-    return getattr(e, 'smtp_code', 0) in (421, 450, 451, 452) or any(w in t for w in ('throttl', 'rate limit', 'too many', 'limit exceeded', 'try again later'))
+    return getattr(e, 'smtp_code', 0) in (421, 450, 451, 452) or any(w in t for w in ('throttl', 'rate limit', 'too many', 'limit exceeded', 'try again later', 'submission rate', 'configured limit', 'exceeded the configured'))
 
 # ---------- «Отправленные»: копии сначала на диск, в папку — только когда очередь пуста ----------
 def imap_conn(p, fresh=False):
@@ -258,7 +261,9 @@ def handle(cfg, job, ledger, tries):
             STATE[0] = 'пауза: почтовый сервер ограничивает скорость (%d из %d)' % (tries[k], MAX_THROTTLE)
             log('сервер ограничивает скорость (%d/%d), жду минуту:' % (tries[k], MAX_THROTTLE), e)
             if tries[k] >= MAX_THROTTLE: done(cfg, job, p, False, 'Сервер долго ограничивает отправку: %s' % e); return True
-            flush(cfg); nap(cfg, 60); return False
+            ADAPT[0] = min(4.0, ADAPT[0] * 1.3); DEFER.append(job)   # письмо откладываем, остальные идут дальше, скорость снижается
+            STATE[0] = 'лимит сервера: отложено писем %d, добью в конце (замедление x%.1f)' % (len(DEFER), ADAPT[0])
+            drop(p['user'] + '|' + p['host']); nap(cfg, 30); return True
         tries[jid] = tries.get(jid, 0) + 1
         STATE[0] = 'сбой связи с почтовым сервером (%d из %d)' % (tries[jid], MAX_TRIES)
         log('сбой (%d/%d)' % (tries[jid], MAX_TRIES), job.get('to'), e)
@@ -269,9 +274,10 @@ def handle(cfg, job, ledger, tries):
     try: spool_put(job.get('from') or 'me', jid, sent_msg)   # копия ждёт на диске: в «Отправленные» она попадёт, когда уйдут все письма
     except Exception as e: log('копия не сохранена на диск:', e)
     log('отправлено', p['from_email'], '->', job['to']); done(cfg, job, p, True)
-    if p.get('max_per_minute'):   # целевая скорость: ждём только остаток интервала
-        time.sleep(max(0.0, 60.0 / max(1, int(p['max_per_minute'])) - (time.time() - t0)))
-    elif p.get('delay'): time.sleep(float(p['delay']))   # без ключей max_per_minute/delay пауз между письмами нет
+    if p.get('delay') and not p.get('max_per_minute'): time.sleep(float(p['delay']))
+    else:   # потолок скорости (по умолчанию 60/мин); после лимита сервера пауза растёт, после успехов плавно возвращается
+        ADAPT[0] = max(1.0, ADAPT[0] * 0.98)
+        time.sleep(max(0.0, 60.0 / max(1, int(p.get('max_per_minute') or 60)) * ADAPT[0] - (time.time() - t0)))
     return True
 
 def main():
@@ -290,6 +296,8 @@ def main():
             if not tries.get('_started'):
                 api(cfg, 'outbox_requeue'); tries['_started'] = 1   # после перезапуска возвращаем «зависшие» письма в очередь
             jobs = api(cfg, 'outbox_list', {'n': BATCH, 'msg': STATE[0]})['jobs']
+            if not jobs and DEFER:   # очередь пуста — добиваем отложенные из-за лимита
+                jobs = DEFER[:]; del DEFER[:]; STATE[0] = 'добиваю отложенные письма (%d)' % len(jobs)
             for i, job in enumerate(jobs):
                 if not handle(cfg, job, ledger, tries):
                     for j in jobs[i:]: api(cfg, 'outbox_requeue', {'id': j['id']})
