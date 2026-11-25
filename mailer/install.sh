@@ -18,7 +18,7 @@ if [ ! -f "$D/config.json" ]; then
   python3 - "$URL" "$TOKEN" "$LOGIN" "$FNAME" "$FMAIL" "$D/config.json" <<'PY'
 import json, sys
 url, token, login, fname, fmail, path = sys.argv[1:7]
-base = {"host": "smtp.skbkontur.ru", "port": 587, "user": login, "bcc_self": False}
+base = {"host": "smtp.skbkontur.ru", "port": 587, "user": login, "bcc_self": False, "max_per_minute": 60}
 cfg = {"url": url, "token": token, "senders": {
   "me":     dict(base, from_email=fmail, from_name=fname, imap={"host": "imap.skbkontur.ru", "port": 993, "folder": "Sent Items"}),
   "shared": dict(base, from_email="ornp@skbkontur.ru", from_name="ОРНП")}}
