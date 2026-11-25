@@ -277,7 +277,7 @@ def handle(cfg, job, ledger, tries):
     if p.get('delay') and not p.get('max_per_minute'): time.sleep(float(p['delay']))
     else:   # потолок скорости (по умолчанию 60/мин); после лимита сервера пауза растёт, после успехов плавно возвращается
         ADAPT[0] = max(1.0, ADAPT[0] * 0.98)
-        time.sleep(max(0.0, 60.0 / max(1, int(p.get('max_per_minute') or 60)) * ADAPT[0] - (time.time() - t0)))
+        time.sleep(max(0.0, 60.0 / max(1, int(p.get('max_per_minute'))) * ADAPT[0] - (time.time() - t0)))
     return True
 
 def main():
