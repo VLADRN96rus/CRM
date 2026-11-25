@@ -230,6 +230,9 @@ details.glass>.in{margin-top:16px}
 @media(min-width:900px){#dboard .grid,#dshared .grid{grid-template-columns:repeat(auto-fill,minmax(200px,230px));justify-content:start}}
 .stp{margin:8px 0 12px;padding-left:20px;font-size:13.5px}.stp li{margin-bottom:6px}
 #setmod code{background:var(--inp);padding:1px 6px;border-radius:6px;font-size:12.5px}
+.acts.eq .btn{flex:1 1 0;min-width:110px}
+#adm_l .li small{overflow-wrap:anywhere}
+#cfgm details.subd summary{margin:10px 0 4px}
 </style></head><body>
 <div class="aurora"><i></i><i></i><i></i></div>
 <div class="wrap">
@@ -367,6 +370,8 @@ details.glass>.in{margin-top:16px}
 <div class="modal" id="cmod" hidden><div class="glass cwide">
   <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
   <div class="row" style="margin-bottom:8px"><div><label class="f">Тема письма</label><input id="c_subj" placeholder="Тема, которую увидит получатель"></div><div><label class="f">Прехедер (текст рядом с темой в списке писем)</label><input id="c_pre"></div></div>
+  <div class="fld" style="margin-bottom:8px"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="sg_on"> Добавлять подпись в конец письма</label>
+    <details class="subd"><summary>Изменить подпись (сохраняется в вашем профиле)</summary><textarea id="sg_h" rows="6" style="font-family:monospace;font-size:12.5px"></textarea></details></div>
   <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button></div>
     <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button></div>
   <div class="cprev"><iframe id="cpv" class="pv" sandbox></iframe></div></div>
@@ -452,20 +457,48 @@ details.glass>.in{margin-top:16px}
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
+<div class="modal" id="lgm" hidden style="z-index:140"><div class="glass">
+  <h2>Вход в МУРР</h2><p id="lg_p"></p>
+  <div class="fld" id="lg_ew"><label class="f">Рабочая почта</label><input id="lg_e" type="email" autocomplete="username" autocapitalize="off" autocorrect="off" placeholder="name@skbkontur.ru"></div>
+  <div class="fld" id="lg_pw" hidden><label class="f" id="lg_pl">Пароль</label><input id="lg_p1" type="password" autocomplete="current-password"></div>
+  <div class="fld" id="lg_p2w" hidden><label class="f">Повторите пароль</label><input id="lg_p2" type="password" autocomplete="new-password"></div>
+  <div class="err" id="lg_err"></div>
+  <div class="acts eq"><button class="btn sec" id="lg_back" hidden>Назад</button><button class="btn" id="lg_ok">Далее</button></div>
+  <div class="hint" style="margin-top:12px"><a href="#" id="lg_code" style="color:#5b9dff">Войти по коду доступа</a></div>
+</div></div>
 <div class="modal" id="cfgm" hidden><div class="glass" style="max-height:92vh;overflow:auto">
-  <h2>Подключение к таблице</h2>
-  <p>Адрес и код вы получаете при настройке Apps Script. Достаточно ввести их один раз на каждом устройстве.</p>
-  <label class="f">Адрес веб-приложения (заканчивается на /exec)</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off">
-  <label class="f" style="margin-top:10px">Код доступа</label><input id="ck" placeholder="Код из setup()" autocapitalize="off" autocorrect="off">
-  <div class="err" id="cerr"></div>
-  <div id="prof" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+  <h2>Настройки</h2>
+  <div id="prof" hidden>
     <h2 style="font-size:16px">Профиль</h2>
     <label class="f">Имя Фамилия</label><input id="pf_n" autocomplete="name">
-    <label class="f" style="margin-top:10px">Рабочая почта (адрес отправителя писем)</label><input id="pf_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru">
+    <label class="f" style="margin-top:10px">Рабочая почта (вход и адрес отправителя писем)</label><input id="pf_m" type="email" autocapitalize="off" placeholder="name@skbkontur.ru">
     <label class="f" style="margin-top:10px">Мои разделы</label><div id="pf_s"></div>
-    <div class="err" id="pf_e"></div><div class="row end" style="margin:6px 0 0"><button class="btn" id="pf_save">Сохранить профиль</button></div>
+    <div class="err" id="pf_e"></div>
+    <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+      <h2 style="font-size:16px">Пароль</h2>
+      <div class="hint" id="pw_h" style="margin-bottom:8px"></div>
+      <div id="pw_ow"><label class="f">Текущий пароль</label><input id="pw_o" type="password" autocomplete="current-password"></div>
+      <label class="f" style="margin-top:10px">Новый пароль (не короче 8 знаков; пусто — не менять)</label><input id="pw_n" type="password" autocomplete="new-password">
+      <label class="f" style="margin-top:10px">Повторите новый пароль</label><input id="pw_r" type="password" autocomplete="new-password">
+      <div class="err" id="pw_e"></div>
+    </div>
+    <div id="adm" hidden style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
+      <h2 style="font-size:16px">Сотрудники</h2>
+      <div class="scroll" id="adm_l" style="max-height:240px"></div>
+      <div class="row end" style="margin-top:10px"><div><label class="f">Рабочая почта нового сотрудника</label><input id="adm_e" type="email" autocapitalize="off"></div>
+        <div><label class="f">Имя Фамилия (необязательно)</label><input id="adm_n"></div>
+        <div style="flex:0 0 150px"><label class="f">Роль</label><select id="adm_r"><option value="user">Сотрудник</option><option value="admin">Администратор</option></select></div>
+        <button class="sm okb" id="adm_add" style="flex:0 0 auto">＋ Добавить</button></div>
+      <div class="hint" id="adm_m">Новый сотрудник открывает МУРР, вводит свою почту и придумывает пароль (в течение 7 дней после добавления).</div>
+    </div>
+    <div style="margin-top:12px"><button class="sm bad" id="lo_btn">Выйти из аккаунта на этом устройстве</button></div>
   </div>
-  <div class="row end" style="margin:10px 0 0"><button class="sm" id="cLater">Позже</button><button class="btn" id="cOk">Подключить</button></div>
+  <details class="subd" id="conn"><summary>Подключение к таблице (технические настройки)</summary>
+    <label class="f">Адрес веб-приложения (заканчивается на /exec)</label><input id="cu" placeholder="https://script.google.com/macros/s/…/exec" autocapitalize="off" autocorrect="off">
+    <label class="f" style="margin-top:10px">Ключ доступа (выдаётся при входе; прежний личный код тоже подходит)</label><input id="ck" autocapitalize="off" autocorrect="off">
+    <div class="err" id="cerr"></div>
+  </details>
+  <div class="acts eq" style="margin-top:14px"><button class="btn sec" id="cLater">Закрыть</button><button class="btn" id="cOk">Сохранить</button></div>
 </div></div>
 
 <script>
@@ -512,7 +545,7 @@ const persist=()=>LS.set('crm.state',JSON.stringify(st));
 function save(id,d){const c=!items[id]||id==='budget'||id==='prefs',op={t:'p',id,d,c:c?1:0};st.queue.push(op);applyOp(op);persist();render();schedule()}
 function remove(id){const op={t:'d',id};st.queue.push(op);applyOp(op);persist();render();schedule()}
 
-let syncing=false,timer=null,filled=false,lastErr='';
+let syncing=false,timer=null,filled=false,lastErr='',errN=0;
 const schedule=()=>{clearTimeout(timer);timer=setTimeout(sync,500)};
 function setStatus(k){
   const q=st.queue.length,b=$('sync');let cls='',txt;
@@ -520,7 +553,7 @@ function setStatus(k){
   else if(k==='auth'){cls='err';txt='Нужен код доступа'}
   else if(!navigator.onLine){cls='off';txt='Офлайн'+(q?' · ждут '+q:'')}
   else if(k==='err'){cls='err';txt='Нет связи с сервером'+(q?' · ждут '+q:'')}
-  else if(!cfg.url){cls='off';txt='Не подключено'+(q?' · ждут '+q:'')}
+  else if(!cfg.url||!cfg.key){cls='off';txt='Не подключено'+(q?' · ждут '+q:'')}
   else if(q)txt='Ожидает отправки · '+q;
   else{cls='ok';txt='Синхронизировано'}
   b.className=cls;b.querySelector('span').textContent=txt;
@@ -532,16 +565,17 @@ async function sync(){
   syncing=true;setStatus('busy');let res='';
   const n=st.queue.length,ops=st.queue.slice(0,n);
   try{
-    const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:cfg.key,ops}),redirect:'follow'});
-    const j=await r.json();
-    if(!j.ok){if(j.error==='auth'){res='auth';showCfg('Неверный код доступа')}else throw new Error(j.error)}
+    const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({k:cfg.key,ops,rev:n?'':(st.rev||'')}),redirect:'follow'});
+    const j=await r.json();errN=0;
+    if(!j.ok){if(j.error==='auth'){res='auth';openLogin('Сеанс недействителен — войдите снова')}else throw new Error(j.error)}
+    else if(j.same){ME=j.me||ME;USERS=j.users||USERS}
     else{
       const before=JSON.stringify(items);
-      st.queue.splice(0,n);st.base=j.items||{};ME=j.me||ME;USERS=j.users||[];LS.set('crm.me',JSON.stringify(ME));LS.set('crm.users',JSON.stringify(USERS));derive();persist();afterAuth();
+      st.queue.splice(0,n);st.rev=j.rev||'';st.base=j.items||{};ME=j.me||ME;USERS=j.users||[];LS.set('crm.me',JSON.stringify(ME));LS.set('crm.users',JSON.stringify(USERS));derive();persist();afterAuth();
       if(JSON.stringify(items)!==before)render();
       if(!filled)fillSettings();
     }
-  }catch(e){res='err'}
+  }catch(e){res='err';if(errN++<3)setTimeout(sync,4000)}   // короткий сбой связи переживаем тихим повтором
   finally{syncing=false}
   setStatus(res);
   if(!res&&st.queue.length)schedule();
@@ -551,17 +585,103 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync()});
 setInterval(()=>{if(!document.hidden)sync()},20000);
 $('sync').onclick=()=>sync();
 
-/* подключение */
-function showCfg(msg){$('prof').hidden=!ME.id;if(ME.id){$('pf_n').value=ME.name||'';$('pf_m').value=ME.email||'';secBoxes('pf_s',secSel());$('pf_e').textContent=''}
-  $('cu').value=cfg.url||'';$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('cfgm').hidden=false}
+/* ---------- вход, профиль, пароль, сотрудники ---------- */
+const DEFAULT_URL='https://script.google.com/macros/s/AKfycbyMnygDDitsqYcR-ZCSx0o5r_4A8OCBcdnd3zGt1jvBDduIogBtWN4Olrcq9y8O-7VvOw/exec';
+function showCfg(msg){
+  const li=!!ME.id;$('prof').hidden=!li;
+  if(li){$('pf_n').value=ME.name||'';$('pf_m').value=ME.email||'';secBoxes('pf_s',secSel());$('pf_e').textContent='';
+    $('pw_ow').hidden=!ME.hasPw;['pw_o','pw_n','pw_r'].forEach(i=>{$(i).value=''});$('pw_e').textContent='';
+    $('pw_h').textContent=ME.hasPw?'Чтобы сменить пароль, введите текущий и новый.':'Пароль ещё не задан. Придумайте его, и вы сможете входить по почте на любом устройстве.';
+    $('adm').hidden=ME.role!=='admin';if(ME.role==='admin')admLoad()}
+  $('cu').value=cfg.url||DEFAULT_URL;$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('conn').open=!!msg;$('cfgm').hidden=false}
 $('gear').onclick=()=>showCfg();
-$('cLater').onclick=()=>{$('cfgm').hidden=true};
-$('cOk').onclick=()=>{
-  const u=$('cu').value.trim(),k=$('ck').value.trim();
-  if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)){$('cerr').textContent='Адрес должен начинаться с https://script.google.com и заканчиваться на /exec';return}
-  if(!k){$('cerr').textContent='Введите код доступа';return}
-  if(cfg.key&&cfg.key!==k){st={base:{},queue:[]};ME={id:'',name:''};LS.set('crm.me','{}');persist();derive();render()}   // другой сотрудник на этом устройстве — чужой кэш не оставляем
-  cfg={url:u,key:k};LS.set('crm.cfg',JSON.stringify(cfg));$('cfgm').hidden=true;sync();
+$('cLater').onclick=()=>{$('cfgm').hidden=true;if(!cfg.key)openLogin()};
+async function changePw(){
+  const o=$('pw_o').value,n=$('pw_n').value,r=$('pw_r').value,e=$('pw_e');e.textContent='';
+  if(!o&&!n&&!r)return true;
+  if(n.length<8){e.textContent='Новый пароль — не короче 8 знаков';return false}
+  if(n!==r){e.textContent='Пароли не совпадают';return false}
+  try{await mapi('chpass',{old:o,pw:n});ME.hasPw=true;LS.set('crm.me',JSON.stringify(ME));return true}
+  catch(err){e.textContent=err.message;return false}
+}
+$('cOk').onclick=async()=>{   // «Сохранить»: подключение + профиль + пароль одним действием
+  const u=$('cu').value.trim(),k=$('ck').value.trim(),e=$('cerr'),b=$('cOk');e.textContent='';
+  if(!/^https:\/\/script\.google\.com\/.+\/exec/.test(u)){$('conn').open=true;e.textContent='Адрес должен начинаться с https://script.google.com и заканчиваться на /exec';return}
+  if(!k){$('conn').open=true;e.textContent='Введите ключ доступа или выйдите и войдите по почте';return}
+  b.disabled=true;
+  try{
+    if(u!==cfg.url||k!==cfg.key){
+      if(cfg.key&&cfg.key!==k){st={base:{},queue:[]};ME={id:'',name:''};LS.set('crm.me','{}');persist();derive();render()}   // другой сотрудник на этом устройстве — чужой кэш не оставляем
+      cfg={url:u,key:k};LS.set('crm.cfg',JSON.stringify(cfg))}
+    if(ME.id){if(!await saveProfile('pf_n','pf_s','pf_e','pf_m'))return;if(!await changePw())return}
+    $('cfgm').hidden=true;sync();
+  }finally{b.disabled=false}
+};
+$('lo_btn').onclick=async()=>{
+  const q=st.queue.length;if(!confirm('Выйти из аккаунта на этом устройстве?'+(q?'\nНе отправлено изменений: '+q+' — они будут потеряны.':'')))return;
+  try{await mapi('logout')}catch(e){}
+  cfg={url:cfg.url||DEFAULT_URL,key:''};LS.set('crm.cfg',JSON.stringify(cfg));st={base:{},queue:[]};ME={id:'',name:''};USERS=[];
+  LS.set('crm.me','{}');LS.set('crm.users','[]');persist();derive();render();M.ok=false;setStatus();openLogin()};
+/* вход по почте и паролю */
+let LG={step:'email',email:''};
+function lgShow(step){LG.step=step;$('lg_ew').hidden=step!=='email';$('lg_pw').hidden=step==='email';$('lg_p2w').hidden=step!=='create';$('lg_back').hidden=step==='email';
+  $('lg_pl').textContent=step==='create'?'Придумайте пароль (не короче 8 знаков)':'Пароль';$('lg_p1').autocomplete=step==='create'?'new-password':'current-password';
+  $('lg_ok').textContent=step==='email'?'Далее':step==='create'?'Создать пароль и войти':'Войти';
+  $('lg_p').textContent=step==='email'?'Введите рабочую почту, которую добавил администратор.':LG.email+(step==='create'?' — первый вход. Придумайте пароль: на сервере он хранится только в виде хэша.':'');
+  setTimeout(()=>{const f=$(step==='email'?'lg_e':'lg_p1');if(f)f.focus()},50)}
+function openLogin(msg){
+  if(!$('lgm').hidden)return;$('cfgm').hidden=true;LG.email='';['lg_p1','lg_p2'].forEach(i=>{$(i).value=''});lgShow('email');$('lg_err').textContent=msg||'';$('lgm').hidden=false}
+async function lapi(act,d){
+  const r=await fetch(cfg.url||DEFAULT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({act},d)),redirect:'follow'});
+  const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||j.error||'Ошибка сервера');return j}
+$('lg_ok').onclick=async()=>{
+  const e=$('lg_err'),b=$('lg_ok');e.textContent='';
+  if(!navigator.onLine){e.textContent='Нет подключения к интернету';return}
+  b.disabled=true;
+  try{
+    if(LG.step==='email'){
+      const em=$('lg_e').value.trim().toLowerCase();if(!EM.test(em)){e.textContent='Введите корректную почту';return}
+      const j=await lapi('login_check',{email:em});LG.email=em;lgShow(j.state);return}
+    const p1=$('lg_p1').value,cr=LG.step==='create';
+    if(cr){if(p1.length<8){e.textContent='Пароль — не короче 8 знаков';return}if(p1!==$('lg_p2').value){e.textContent='Пароли не совпадают';return}}
+    else if(!p1){e.textContent='Введите пароль';return}
+    const j=await lapi('login',{email:LG.email,pw:p1,create:cr?1:0});
+    if(ME.id&&ME.id!==j.me.id){st={base:{},queue:[]};persist()}   // вошёл другой сотрудник — чужой кэш не оставляем
+    cfg={url:cfg.url||DEFAULT_URL,key:j.token};LS.set('crm.cfg',JSON.stringify(cfg));ME=j.me;LS.set('crm.me',JSON.stringify(ME));
+    ['lg_p1','lg_p2'].forEach(i=>{$(i).value=''});$('lgm').hidden=true;derive();render();sync();
+  }catch(er){e.textContent=er.message}finally{b.disabled=false}
+};
+$('lg_back').onclick=()=>{['lg_p1','lg_p2'].forEach(i=>{$(i).value=''});$('lg_err').textContent='';lgShow('email')};
+['lg_e','lg_p1','lg_p2'].forEach(i=>$(i).addEventListener('keydown',ev=>{if(ev.key==='Enter')$('lg_ok').click()}));
+$('lg_code').onclick=ev=>{ev.preventDefault();$('lgm').hidden=true;showCfg();$('conn').open=true};
+/* сотрудники (администратор) */
+const ADM={list:[]};
+async function admLoad(){try{ADM.list=(await mapi('adm_list')).list;admRender()}catch(e){$('adm_m').textContent=e.message}}
+function admRender(){
+  $('adm_l').innerHTML=ADM.list.map(x=>{const me=x.id===ME.id,sts=x.off?'отключён':x.pw?'активен':x.pending?'ждёт первого входа':'пароль не задан';
+    return '<div class="li"><span class="n">'+esc(x.name)+(x.role==='admin'?' · админ':'')+'<small>'+esc(x.email||'почта не указана')+' · '+sts+'</small></span><span class="r">'
+      +'<button class="sm" data-aa="edit" data-id="'+esc(x.id)+'" title="Изменить имя и почту" aria-label="Изменить">✎</button>'
+      +(me?'':'<button class="sm" data-aa="reset" data-id="'+esc(x.id)+'" title="Сбросить пароль и выдать новое приглашение">Сброс</button><button class="sm'+(x.off?' okb':' bad')+'" data-aa="off" data-id="'+esc(x.id)+'">'+(x.off?'Вкл.':'Откл.')+'</button>')+'</span></div>'}).join('')}
+$('adm_l').onclick=async ev=>{
+  const b=ev.target.closest('[data-aa]');if(!b)return;const x=ADM.list.find(q=>q.id===b.dataset.id);if(!x)return;const m=$('adm_m');m.textContent='';
+  try{
+    if(b.dataset.aa==='edit'){
+      const r=await ask('Сотрудник',[{k:'e',l:'Рабочая почта',v:x.email},{k:'n',l:'Имя Фамилия',v:x.name}],[{t:'Отмена',v:null,sec:1},{t:'Сохранить',v:'ok'}],v=>!EM.test(v.e.toLowerCase())?'Введите корректную почту':v.n.length<2?'Укажите имя и фамилию':'');
+      if(!r.btn)return;ADM.list=(await mapi('adm_edit',{id:x.id,email:r.vals.e,name:r.vals.n})).list}
+    else if(b.dataset.aa==='reset'){
+      if(!confirm('Сбросить пароль и все входы сотрудника «'+x.name+'»? Он заново придумает пароль при входе (7 дней). Его отправщик писем придётся настроить заново.'))return;
+      ADM.list=(await mapi('adm_reset',{id:x.id})).list;m.textContent='Готово: пусть откроет МУРР, введёт почту и придумает пароль.'}
+    else if(b.dataset.aa==='off'){
+      if(!x.off&&!confirm('Отключить доступ сотрудника «'+x.name+'»?'))return;ADM.list=(await mapi('adm_off',{id:x.id,off:!x.off})).list}
+    admRender();
+  }catch(er){m.textContent=er.message}
+};
+$('adm_add').onclick=async()=>{
+  const em=$('adm_e').value.trim().toLowerCase(),m=$('adm_m');
+  if(!EM.test(em)){m.textContent='Введите корректную почту сотрудника';return}
+  try{ADM.list=(await mapi('adm_add',{email:em,name:$('adm_n').value.trim(),role:$('adm_r').value})).list;admRender();$('adm_e').value='';$('adm_n').value='';
+    m.textContent='Добавлено. Сотрудник открывает МУРР, вводит эту почту и придумывает пароль (в течение 7 дней).'}
+  catch(er){m.textContent=er.message}
 };
 (function(){ // ссылка вида ...#u=<адрес>&k=<код> настраивает устройство автоматически
   const h=new URLSearchParams(location.hash.slice(1));
@@ -588,7 +708,7 @@ function fillSettings(){
   if(s.start)$('ss').value=s.start;
   if(!num(s.salary??s.monthly))$('setBox').open=true;
 }
-function render(){renderTasks();renderDept();renderMp();renderBudget();applySections()}
+function render(){loadSig();renderTasks();renderDept();renderMp();renderBudget();applySections()}
 
 /* ---------- Задачи ---------- */
 function dueChip(t){
@@ -1139,7 +1259,7 @@ function renderMiss(missing){
 function fillMV(){   // поля {{…}}, которых нет в данных, — ручной ввод (одно значение на все письма); {{email}}/{{почта}} — адрес получателя
   const old={};document.querySelectorAll('#mmv [data-m]').forEach(i=>old[i.dataset.m]=i.value);
   const t=curT(),file=$('msrc').value==='file',H=new Set(file&&D?D.names.map(nk):[]),hasCode=!!(file&&D&&D.sheets.length);
-  const man=t&&t.id!==FREE?vnames(t.html+' '+t.subject).filter(n=>{const al=AL[nk(n)];return !(al==='email'||H.has(nk(n))||(al==='code'&&hasCode))}):[];
+  const man=t?vnames(t.html+' '+(t.id===FREE?$('ms').value:t.subject)).filter(n=>{const al=AL[nk(n)];return !(al==='email'||H.has(nk(n))||(al==='code'&&hasCode))}):[];
   $('mmv').innerHTML=man.length?'<div class="hint" style="margin-bottom:8px">В письме есть поля {{…}}, которых нет в данных, — заполните вручную (одно значение для всех писем):</div>'+man.map(n=>'<div class="fld"><label class="f">'+esc(n)+'</label><input data-m="'+esc(n)+'" value="'+esc(old[n]||'')+'"></div>').join(''):'';
 }
 const gm=()=>{const v={};document.querySelectorAll('#mmv [data-m]').forEach(i=>v[i.dataset.m]=i.value.trim());return v};
@@ -1157,7 +1277,8 @@ function renderM2(){
 $('mpl').addEventListener('click',e=>{const r=e.target.closest('[data-i]');if(r&&PL[+r.dataset.i].html)$('pv').srcdoc=PL[+r.dataset.i].html});
 $('mOpen').onclick=()=>{msgm('');toggleS();fillMV();toggleT();$('mmod').hidden=false};
 $('mSave').onclick=async()=>{
-  const t=curT();if(!t||t.id===FREE)return msgm('Выберите шаблон (не «своё письмо»)',1);
+  let t=curT();if(!t)return msgm('Выберите письмо',1);
+  if(t.id===FREE){const sj=$('ms').value.trim();if(!sj)return msgm('Укажите тему письма (поле «Тема»)',1);if(!M.consHtml)return msgm('Сначала соберите письмо в конструкторе',1);t=Object.assign({},t,{subject:sj})}
   const file=$('msrc').value==='file',W=[],G=new Map(),used=[],missL=[],skip=skipMiss;skipMiss=false;let hide=new Set();
   if(file){if(!D)return msgm('Загрузите Excel-файл',1);
     hide=new Set([...document.querySelectorAll('#mcd input:checked')].map(i=>i.dataset.h));let orph=0,multi=0,viaReg=0;
@@ -1207,7 +1328,7 @@ $('mSave').onclick=async()=>{
       out.push({a,codes,rows:nrow,miss,subject:miss.length?'':fillT(t.subject,vs),html:miss.length?'':fillT(clean(t.html),v,true),file:fl});
     }
     if(!out.some(p=>!p.miss.length))throw new Error('Некому отправлять: '+(W.join('; ')||'нет получателей'));
-    PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id,miss:missL};
+    PL=out;M2={test,tt,tested:false,warn:W.join('\n'),tid:t.id===FREE?'free:'+t.subject:t.id,miss:missL};
     if(used.length&&$('mmsave').checked){used.forEach(x=>M.reg.set(ncode(x.c),{c:x.c,e:x.e}));saveReg().then(regInfo).catch(()=>ban('err','Не удалось сохранить новые адреса в реестр'))}
     LS.set('crm.mtest',test?'1':'0');LS.set('crm.mtsel',k);if(k==='other')LS.set('crm.testto',tt);LS.set('crm.mfn',pat);
     $('pv').srcdoc=okPL()[0].html;$('mmod').hidden=true;msgm('');renderM2();
@@ -1323,19 +1444,33 @@ function btnGroup(it){   // кнопки как в ваших шаблонах: 
   return spc(5,5)+'<div style="'+(ctr?'text-align:center':'')+'">'+mso+bs.map(a).join('')+'</div>';
 }
 const codeHtml=it=>'<table style="border-spacing:0;border-collapse:collapse;width:100%"><tr><td bgcolor="#F5F5F5" align="center" style="padding:20px 24px;border-radius:10px;'+FF+'font-size:32px;line-height:40px;font-weight:700;color:#000;text-align:center;letter-spacing:1px">'+escT((it.h||'').trim())+'</td></tr></table>'+spc(25,20);
+let SIG={on:false,html:''};
+function sigRender(){   // подпись в конец последней карточки; поддерживается разметка <spacer size="20" size-mobile="15" />, <hr />, <p>
+  if(!SIG.on||!SIG.html.trim())return '';
+  return SIG.html.replace(/<(script|style|iframe|object)[\s\S]*?<\/\1>/gi,'').replace(/\son\w+="[^"]*"/gi,'').replace(/javascript:/gi,'')
+    .replace(/<spacer\s+size="(\d+)"(?:\s+size-mobile="(\d+)")?\s*(?:\/>|>\s*<\/spacer>)/gi,(m,d,mb)=>spc(+d,+(mb||d)))
+    .replace(/<hr\s*\/?>/gi,'<hr style="border:0;border-top:1px solid #e0e0e0;margin:0">')
+    .replace(/<p>/gi,'<p style="color:#000;'+FF+'font-size:16px;line-height:24px;margin:0 0 15px">');
+}
+function loadSig(){const s=(items.prefs||{}).sig;if(s)SIG={on:!!s.on,html:s.html||''}}
+function sigUI(){$('sg_on').checked=SIG.on;$('sg_h').value=SIG.html}
+function sigSave(){
+  SIG={on:$('sg_on').checked,html:$('sg_h').value};save('prefs',{sig:SIG});
+  M.tpl.forEach(t=>{if(t.model)t.html=buildLetter(t.model)});cprev();if(M.ok)fillVars();
+}
 function cardEmpty(c){return !c.img&&!(c.title||'').trim()&&!(c.it||[]).some(it=>it.t==='c'?(it.h||'').trim():it.t==='p'?richParts(it.h).length:it.t==='l'?(it.li||[]).some(r=>richParts(r.h).length):(it.b||[]).some(b=>b.t.trim()))}
 const hasContent=L=>L.cards.some(c=>!cardEmpty(c));
-function cardHtml(c){
+function cardHtml(c,x){
   let h=KIT.open,ico=false;
   if(c.k==='banner'&&c.img)h+='<a href="https://kontur.ru/partnership" target="_blank" style="text-decoration:none;color:#015ccb"><img src="'+esc(c.img)+'" alt="Контур" width="500" style="clear:both;display:block;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;border:none;max-width:500px;width:100%"></a>'+spc(30,25);
   else if(c.k==='icon'&&c.img){ico=true;h+='<img width="64" height="64" style="clear:both;outline:0;text-decoration:none;-ms-interpolation-mode:bicubic;max-width:100%;display:inline-block;width:64px;height:auto" class="icon" src="'+esc(c.img)+'" alt>'}
   const t=(c.title||'').trim();if(t)h+=hHtml(t,c.k==='banner',ico?25:0);
   (c.it||[]).forEach(it=>{if(it.t==='p')richParts(it.h).forEach(x=>{h+=pHtml(x)});else if(it.t==='l')h+=listHtml(it);else if(it.t==='b')h+=btnGroup(it);else if(it.t==='c')h+=codeHtml(it)});
-  return h+KIT.close;
+  return h+(x||'')+KIT.close;
 }
 function buildLetter(L){
   const cs=L.cards.filter(c=>!cardEmpty(c));if(!cs.length)return '';
-  return KIT.head+'<title>'+esc(L.subj||'')+'</title></head> '+KIT.body.replace('%%PRE%%',()=>escT(L.pre||''))+cs.map(cardHtml).join('')+KIT.foot;
+  return KIT.head+'<title>'+esc(L.subj||'')+'</title></head> '+KIT.body.replace('%%PRE%%',()=>escT(L.pre||''))+cs.map((c,i)=>cardHtml(c,i===cs.length-1?sigRender():'')).join('')+KIT.foot;
 }
 /* ---------- состояние ---------- */
 let C=parse(LS.get('crm.cons2'),null);if(!C||!Array.isArray(C.cards)||!C.cards.length)C=newLetter();
@@ -1432,6 +1567,8 @@ $('ctb').addEventListener('click',async e=>{const b=e.target.closest('[data-cmd]
   else{restore();document.execCommand(b.dataset.cmd,false,null)}
   L0.ed.dispatchEvent(new Event('input',{bubbles:true}))});
 $('c_subj').oninput=()=>{C.subj=$('c_subj').value;saveC();cprevD()};$('c_pre').oninput=()=>{C.pre=$('c_pre').value;saveC();cprevD()};
+$('sg_on').onchange=sigSave;$('sg_h').onchange=sigSave;
+$('sg_h').placeholder='<spacer size="20" size-mobile="15" />\n<hr />\n<spacer size="15" size-mobile="10"></spacer>\n<p><b>Имя Фамилия</b><br />Должность, <a href="https://kontur.ru">Контур</a><br />8 800 …</p>';
 $('c_add').onclick=()=>{C.cards.push(newCard('icon'));renderC();saveC();cprev();const l=$('cb').lastElementChild;if(l&&l.scrollIntoView)l.scrollIntoView({block:'nearest'})};
 $('c_ps').innerHTML='<option value="">Начать с готового письма…</option>'+PRESETS.map((p,i)=>'<option value="'+i+'">'+esc(p.n)+'</option>').join('');
 $('c_ps').onchange=()=>{const i=$('c_ps').value;if(i==='')return;if(hasContent(C)&&!confirm('Заменить текущее письмо выбранным готовым? Несохранённые правки пропадут.')){$('c_ps').value='';return}C=cl(PRESETS[+i].m);renderC();saveC();cprev()};
@@ -1453,7 +1590,7 @@ function openCons(mode,id){
   if(mode==='tpl'){BAK=C;t=id&&M.tpl.find(x=>x.id===id);C=t&&t.model?cl(t.model):newLetter()}
   $('c_h2').textContent=mode==='tpl'?(t?'Шаблон: '+t.name:'Новый шаблон'):'Конструктор письма';
   $('c_ok').hidden=mode==='tpl';$('c_tpl').hidden=mode==='tpl';$('c_save').hidden=mode!=='tpl';$('c_ps').value='';
-  $('c_err').textContent='';renderC();cprev();$('cmod').hidden=false}
+  $('c_err').textContent='';renderC();cprev();sigUI();$('cmod').hidden=false}
 function closeCons(){if(BAK){C=BAK;BAK=null}CM={mode:'free',id:null};$('cmod').hidden=true}
 $('cOpen').onclick=()=>openCons('free');
 $('c_cancel').onclick=closeCons;
@@ -1561,8 +1698,7 @@ function fillSenders(){ADDR.me=ME.email||'';ADDR.shared=M.shared||'';
 const needFrom=()=>{if($('mfrom').value==='me'&&!ADDR.me){ban('err','Укажите свою рабочую почту: ⚙ → Профиль — или выберите общую почту отдела.');return true}return false};
 function openOnb(){$('ob_n').value=/^Имя\s/.test(ME.name||'')?'':(ME.name||'');$('ob_m').value=ME.email||'';secBoxes('ob_s',[]);$('ob_e').textContent='';$('onb').hidden=false}
 $('ob_ok').onclick=async()=>{if(await saveProfile('ob_n','ob_s','ob_e','ob_m')){$('onb').hidden=true;tab('home')}};
-$('pf_save').onclick=async()=>{if(await saveProfile('pf_n','pf_s','pf_e','pf_m'))$('pf_e').textContent='Сохранено ✓'};
-function afterAuth(){render();fillSenders();if($('home').classList.contains('on'))tab('home');if(ME.id&&!(items.prefs&&items.prefs.sections)&&$('onb').hidden&&$('cfgm').hidden)openOnb()}
+function afterAuth(){render();fillSenders();if($('home').classList.contains('on'))tab('home');if(ME.id&&!(items.prefs&&items.prefs.sections)&&$('onb').hidden&&$('cfgm').hidden&&$('lgm').hidden)openOnb()}
 /* ---------- Медиаплан ---------- */
 let mpMon=today().slice(0,7),mpId=null;
 function renderMp(){
@@ -1594,7 +1730,8 @@ $('logo').onclick=()=>tab('home');$('n4').onclick=()=>tab(4);$('n5').onclick=()=
 $('n1').onclick=()=>tab(1);$('n2').onclick=()=>tab(2);$('n3').onclick=()=>{tab(3);if(!M.ok)loadMail();else refreshQ()};
 $('od').value=mon+'-01';
 derive();render();fillSettings();setStatus();tab('home');fillSenders();
-if(!cfg.url)showCfg();else sync();
+if(!cfg.url)cfg={url:DEFAULT_URL,key:cfg.key||''};
+if(!cfg.key)openLogin();else sync();
 if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
   const had=!!navigator.serviceWorker.controller;let rl=0;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=1;location.reload()}});   // новая версия подхватывается сразу, без чистки кэша
