@@ -4,7 +4,7 @@
 $ErrorActionPreference = 'Stop'
 $Dir = Join-Path $env:LOCALAPPDATA 'MURR-mailer'
 $CfgPath = Join-Path $Dir 'config.json'; $LedgerPath = Join-Path $Dir 'sent.json'; $LogPath = Join-Path $Dir 'mailer.log'
-$script:State = 'ожидаю письма'; $script:Started = $false; $script:Fast = [DateTime]::MinValue; $script:WaitSec = 0; $script:OL = $null; $script:Cfg = $null
+$script:State = 'ожидаю письма'; $script:Started = $false; $script:Fast = [DateTime]::MinValue; $script:WaitSec = 0; $script:OL = $null; $script:Cfg = $null; $script:Defer = New-Object System.Collections.ArrayList; $script:Adapt = 1.0
 $BATCH = 20; $IDLE = 20; $BUSY = 3; $MAX_TRIES = 3; $MAX_THROTTLE = 15
 
 try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}   # старые Windows без TLS 1.2 по умолчанию
@@ -84,7 +84,7 @@ function Send-Mail($job) {
     }
 }
 
-function Is-Throttle($t) { return ($t -match '(?i)throttl|rate limit|too many|limit exceeded|quota|try again later|превыш|лимит') }
+function Is-Throttle($t) { return ($t -match '(?i)throttl|rate limit|too many|limit exceeded|quota|try again later|submission rate|configured limit|превыш|лимит') }
 function Is-NoOutlook($t) { return ($t -match '(?i)80040154|class not registered|не зарегистрирован|Недопустимая строка класса') }
 function Add-Result($out, $job, $ok, $err) { [void]$out.Add(@{ id = [string]$job['id']; to = [string]$job['to']; subject = [string]$job['subject']; ok = [bool]$ok; err = ([string]$err).Substring(0, [Math]::Min(300, ([string]$err).Length)); from = [string]$job['fromAddr'] }) }
 function Flush-Results($out) {
@@ -108,7 +108,8 @@ function Handle-Job($job, $ledger, $tries, $out) {
             $k = 't' + $id; $tries[$k] = 1 + [int]$tries[$k]
             $script:State = 'пауза: сервер ограничивает скорость (' + $tries[$k] + ' из ' + $MAX_THROTTLE + ')'; Log $script:State
             if ($tries[$k] -ge $MAX_THROTTLE) { Add-Result $out $job $false ('Сервер долго ограничивает отправку: ' + $msg); return $true }
-            $script:WaitSec = 60; return $false
+            $script:Adapt = [Math]::Min(4.0, $script:Adapt * 1.3); [void]$script:Defer.Add($job)   # письмо откладываем, остальные идут дальше
+            $script:State = 'лимит сервера: отложено писем ' + $script:Defer.Count + ', добью в конце'; Start-Sleep -Seconds 30; return $true
         }
         $script:OL = $null; $tries[$id] = 1 + [int]$tries[$id]
         $script:State = 'сбой отправки через Outlook (' + $tries[$id] + ' из ' + $MAX_TRIES + ')'; Log ($script:State + ' ' + [string]$job['to'] + ': ' + $msg)
@@ -118,7 +119,8 @@ function Handle-Job($job, $ledger, $tries, $out) {
     $ledger[$id] = [double]([DateTimeOffset]::UtcNow.ToUnixTimeSeconds()); Save-Ledger $ledger   # сначала запоминаем, потом сообщаем: дубль исключён
     $script:State = 'отправляю'; Log ('отправлено ' + [string]$job['fromAddr'] + ' -> ' + [string]$job['to']); Add-Result $out $job $true ''
     $mpm = 0; try { $mpm = [int]$script:Cfg['max_per_minute'] } catch {}
-    if ($mpm -gt 0) { $left = (60.0 / $mpm) - ((Get-Date) - $t0).TotalSeconds; if ($left -gt 0) { Start-Sleep -Milliseconds ([int]($left * 1000)) } }
+    $script:Adapt = [Math]::Max(1.0, $script:Adapt * 0.98)
+    if ($mpm -gt 0) { $left = (60.0 / $mpm) * $script:Adapt - ((Get-Date) - $t0).TotalSeconds; if ($left -gt 0) { Start-Sleep -Milliseconds ([int]($left * 1000)) } }
     return $true
 }
 
@@ -128,6 +130,7 @@ function Run-Once($ledger, $tries) {
     if (-not $script:Started) { [void](Api 'outbox_requeue' $null); $script:Started = $true }   # после перезапуска «зависшие» письма возвращаются в очередь
     $r = Api 'outbox_list' @{ n = $BATCH; msg = $script:State }
     $jobs = @($r['jobs'] | Where-Object { $_ })
+    if ($jobs.Count -eq 0 -and $script:Defer.Count -gt 0) { $jobs = @($script:Defer); $script:Defer.Clear(); $script:State = 'добиваю отложенные письма (' + $jobs.Count + ')' }
     $out = New-Object System.Collections.ArrayList
     if ($jobs.Count -gt 0) { Keep-Awake $true }
     for ($i = 0; $i -lt $jobs.Count; $i++) {
