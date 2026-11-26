@@ -241,6 +241,8 @@ details.glass>.in{margin-top:16px}
 .hsep{grid-column:1/-1;height:4px;border-radius:4px;margin:2px 0;background:linear-gradient(90deg,#ff6ba6,#7c5cff,#22b8e8);opacity:.85}
 .af select{height:44px}
 .catrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.chips button.bc::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bc);margin-right:6px}
+.chips button.bc.on{background:var(--bc);border-color:transparent;animation:none}.chips button.bc.on::before{background:#fff}
 @media(max-width:899px){nav{overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}nav button{flex:1 0 auto;padding:12px 10px;white-space:nowrap}}
 #p6 .pv{height:calc(100vh - 210px);min-height:420px}
 #cx_l .li small{overflow-wrap:anywhere}.catrow input[type=color]{width:46px;height:40px;padding:2px;flex:0 0 auto}
@@ -262,13 +264,13 @@ details.glass>.in{margin-top:16px}
     <div class="af d"><label class="f">Дедлайн</label><input id="nd" type="date"></div>
     <div class="af c"><label class="f">Комментарий</label><input id="nc" placeholder="Необязательно"></div>
     <div class="af"><label class="f">Приоритет</label><select id="nb"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div>
-    <div class="af"><label class="f">Раздел</label><select id="ncat"></select></div>
+    <div class="af"><label class="f">Тег</label><select id="ncat"></select></div>
     <button class="btn" id="addT">Добавить</button>
   </div>
   <div class="hr"></div>
   <div class="tbar"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span id="tcount" class="hint"></span>
     <div class="chips" id="chips"><button data-f="all" class="on">Все</button><button data-f="hot">Важно</button><button data-f="cool">Не важно</button><button data-f="other">Прочие</button></div></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="cfilt" style="width:auto;padding:7px 10px;font-size:13px" aria-label="Фильтр по разделу" hidden></select><button class="sm" id="catBtn">🎨 Разделы</button><button class="sm okb" id="doneBtn">Выполнено</button></div></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><select id="cfilt" style="width:auto;padding:7px 10px;font-size:13px" aria-label="Фильтр по тегу" hidden></select><button class="sm" id="catBtn">🏷 Теги</button><button class="sm okb" id="doneBtn">Выполнено</button></div></div>
   <div id="board"></div>
   <button id="fab" aria-label="Новая задача">＋</button>
 </section>
@@ -463,9 +465,12 @@ details.glass>.in{margin-top:16px}
   <div class="hint" id="br_s" style="margin-bottom:6px"></div><div class="err" id="br_e"></div>
   <div class="acts eq"><button class="btn sec" id="br_x">Закрыть</button><button class="btn" id="br_ok">Скачать Excel</button></div>
 </div></div>
-<div class="modal" id="catmod" hidden><div class="glass" style="max-width:480px">
-  <h2>Мои разделы</h2><div class="hint" style="margin-bottom:12px">Раздел группирует ваши личные задачи; его цвет виден на карточке.</div>
-  <div id="cat_l"></div><button class="sm" id="cat_add">＋ Раздел</button>
+<div class="modal" id="catmod" hidden><div class="glass" style="max-width:480px;max-height:92vh;overflow:auto">
+  <h2>Теги и колонки</h2>
+  <h2 style="font-size:15px;margin-bottom:6px">Колонки</h2><div class="hint" style="margin-bottom:10px">Переименуйте и перекрасьте «Важно», «Не важно» и «Прочие». Цвет виден у заголовка колонки, на карточках и в кнопках фильтра. ↺ — вернуть стандартные.</div>
+  <div id="bk_l"></div>
+  <h2 style="font-size:15px;margin:16px 0 6px">Теги</h2><div class="hint" style="margin-bottom:10px">Тег группирует ваши личные задачи; его цвет виден на карточке (и важнее цвета колонки).</div>
+  <div id="cat_l"></div><button class="sm" id="cat_add">＋ Тег</button>
   <div class="err" id="cat_e"></div>
   <div class="acts eq"><button class="btn sec" id="cat_x">Закрыть</button><button class="btn" id="cat_ok">Сохранить</button></div>
 </div></div>
@@ -505,7 +510,7 @@ details.glass>.in{margin-top:16px}
 <div class="modal" id="tkmod" hidden><div class="glass wide" style="max-width:560px">
   <h2>Задача</h2>
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
-  <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><div><label class="f">Приоритет</label><select id="tk_b"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div><div><label class="f">Раздел</label><select id="tk_cat"></select></div></div>
+  <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><div><label class="f">Приоритет</label><select id="tk_b"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div><div><label class="f">Тег</label><select id="tk_cat"></select></div></div>
   <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
   <div class="fld"><label class="f">Комментарий</label>
     <div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><div class="tkp" id="tk_p"></div>
@@ -791,7 +796,20 @@ function dueChip(t){
 /* ---------- разделы (категории) личных задач ---------- */
 const PAL=['#7c5cff','#22b8e8','#ff6ba6','#34d399','#ff9a56','#ffd166','#e0425a','#5b9dff'];
 const okc=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#7c5cff';
-const bkOf=t=>t.ref?'hot':(t.bucket||(t.important?'hot':'cool'));   // задачи отдела — всегда «Важно»   // Важно / Не важно / Прочие
+const bkOf=t=>t.ref?'hot':(t.bucket||(t.important?'hot':'cool'));   // задачи отдела — всегда «Важно»
+const BK_DEF={hot:['Важно','#ff6ba6'],cool:['Не важно','#7c5cff'],other:['Прочие','#22b8e8']};   // стандартные название и цвет
+const bkCfg=k=>(((items.prefs||{}).bk)||{})[k]||{};
+const bkName=k=>String(bkCfg(k).n||'').trim().slice(0,20)||BK_DEF[k][0];
+const bkColor=k=>{const c=bkCfg(k).c;return /^#[0-9a-f]{6}$/i.test(c||'')?c:''};   // пусто — стандартное оформление
+function applyBk(){   // названия в формах и кнопках фильтра, цвет кнопок фильтра
+  ['hot','cool','other'].forEach(k=>{const n=bkName(k),c=bkColor(k);
+    [...$('nb').options,...$('tk_b').options].forEach(o=>{if(o.value===k)o.textContent=n});
+    const b=document.querySelector('#chips [data-f="'+k+'"]');
+    if(b){b.textContent=n;b.classList.toggle('bc',!!c);if(c)b.style.setProperty('--bc',c);else b.style.removeProperty('--bc')}})}
+function bkRows(){$('bk_l').innerHTML=['hot','cool','other'].map(k=>'<div class="catrow" data-k="'+k+'"><input type="color" value="'+(bkColor(k)||BK_DEF[k][1])+'" data-f="c" aria-label="Цвет колонки"><input data-f="n" value="'+esc(bkName(k))+'" maxlength="20" placeholder="'+esc(BK_DEF[k][0])+'" aria-label="Название колонки"><button class="sm" data-r="1" title="Вернуть стандартные название и цвет" aria-label="Сбросить">↺</button></div>').join('')}
+function readBk(){const o={};document.querySelectorAll('#bk_l .catrow').forEach(r=>{const k=r.dataset.k,n=r.querySelector('[data-f=n]').value.trim().slice(0,20),c=r.querySelector('[data-f=c]').value,v={};
+  if(n&&n!==BK_DEF[k][0])v.n=n;if(c&&c.toLowerCase()!==BK_DEF[k][1])v.c=c;if(v.n||v.c)o[k]=v});return o}
+$('bk_l').onclick=e=>{const b=e.target.closest('[data-r]');if(!b)return;const r=b.closest('.catrow'),k=r.dataset.k;r.querySelector('[data-f=n]').value=BK_DEF[k][0];r.querySelector('[data-f=c]').value=BK_DEF[k][1]};   // Важно / Не важно / Прочие
 function cats(){return(((items.prefs||{}).cats)||[]).map(c=>({id:String(c.id),name:String(c.name||''),color:okc(c.color)})).filter(c=>c.name)}
 const catOf=t=>t.cat?(cats().find(c=>c.id===t.cat)||null):null;
 let catF='',catSig='';
@@ -799,25 +817,25 @@ const catPass=t=>!catF||(catF==='_'?!catOf(t):t.cat===catF);
 function fillCats(){
   const cs=cats(),sig=JSON.stringify(cs);if(sig===catSig)return;catSig=sig;
   const opt=cs.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join(''),keep=(id,html)=>{const v=$(id).value;$(id).innerHTML=html;if([...$(id).options].some(o=>o.value===v))$(id).value=v};
-  keep('ncat','<option value="">Без раздела</option>'+opt);keep('tk_cat','<option value="">Без раздела</option>'+opt);
-  keep('cfilt','<option value="">Все разделы</option>'+opt+'<option value="_">Без раздела</option>');
+  keep('ncat','<option value="">Без тега</option>'+opt);keep('tk_cat','<option value="">Без тега</option>'+opt);
+  keep('cfilt','<option value="">Все теги</option>'+opt+'<option value="_">Без тега</option>');
   catF=$('cfilt').value;$('cfilt').hidden=!cs.length;
 }
 $('cfilt').onchange=()=>{catF=$('cfilt').value;renderTasks()};
 let CATS=[];
-function catRows(){$('cat_l').innerHTML=CATS.map((c,i)=>'<div class="catrow" data-i="'+i+'"><input type="color" value="'+c.color+'" data-f="c" aria-label="Цвет раздела"><input data-f="n" value="'+esc(c.name)+'" placeholder="Название раздела" maxlength="30"><button class="sm bad" data-d="1" aria-label="Удалить раздел">✕</button></div>').join('')||'<div class="empty">Разделов пока нет</div>'}
+function catRows(){$('cat_l').innerHTML=CATS.map((c,i)=>'<div class="catrow" data-i="'+i+'"><input type="color" value="'+c.color+'" data-f="c" aria-label="Цвет тега"><input data-f="n" value="'+esc(c.name)+'" placeholder="Название тега" maxlength="30"><button class="sm bad" data-d="1" aria-label="Удалить тег">✕</button></div>').join('')||'<div class="empty">Разделов пока нет</div>'}
 function readCats(){document.querySelectorAll('#cat_l .catrow').forEach(r=>{const c=CATS[+r.dataset.i];c.color=r.querySelector('[data-f=c]').value;c.name=r.querySelector('[data-f=n]').value})}
-$('catBtn').onclick=()=>{CATS=cats().map(c=>Object.assign({},c));catRows();$('cat_e').textContent='';$('catmod').hidden=false};
+$('catBtn').onclick=()=>{CATS=cats().map(c=>Object.assign({},c));catRows();bkRows();$('cat_e').textContent='';$('catmod').hidden=false};
 $('cat_add').onclick=()=>{readCats();CATS.push({id:'c'+Date.now().toString(36)+CATS.length,name:'',color:PAL[CATS.length%PAL.length]});catRows();const n=document.querySelectorAll('#cat_l [data-f=n]');if(n.length)n[n.length-1].focus()};
 $('cat_l').onclick=e=>{const b=e.target.closest('[data-d]');if(!b)return;readCats();CATS.splice(+b.closest('.catrow').dataset.i,1);catRows()};
 $('cat_x').onclick=()=>{$('catmod').hidden=true};
 $('cat_ok').onclick=()=>{readCats();const l=CATS.map(c=>({id:c.id,name:c.name.trim().slice(0,30),color:okc(c.color)})).filter(c=>c.name),n=l.map(c=>c.name.toLowerCase());
-  if(new Set(n).size!==n.length)return $('cat_e').textContent='Названия разделов не должны повторяться';
-  save('prefs',{cats:l});$('catmod').hidden=true};
+  if(new Set(n).size!==n.length)return $('cat_e').textContent='Названия тегов не должны повторяться';
+  save('prefs',{cats:l,bk:readBk()});$('catmod').hidden=true};
 function card(t){
-  const id=t.id,cat=catOf(t),cls=(t.archived?'dn':(bkOf(t)==='hot'?'hot':''))+(cat?' hc':'');
-  const tags='<div class="tgs">'+dueChip(t)+(cat?'<span class="tg cat" style="background:'+cat.color+'2e;box-shadow:inset 0 0 0 1px '+cat.color+'66" title="Раздел: '+esc(cat.name)+'"><i style="background:'+cat.color+'"></i>'+esc(cat.name)+'</span>':'')+(t.ref?'<span class="tg">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.mpref?'<span class="tg">Медиаплан</span>':'')+(t.shared?'<span class="tg" title="Видна отделу">👁 Отделу</span>':'')+'</div>';
-  let h='<div class="task '+cls+'" data-tid="'+id+'"'+(cat?' style="--cc:'+cat.color+'"':'')+'><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+tags;
+  const id=t.id,cat=catOf(t),bc=t.archived?'':bkColor(bkOf(t)),cc=cat?cat.color:bc,cls=(t.archived?'dn':(bkOf(t)==='hot'?'hot':''))+(cc?' hc':'');
+  const tags='<div class="tgs">'+dueChip(t)+(cat?'<span class="tg cat" style="background:'+cat.color+'2e;box-shadow:inset 0 0 0 1px '+cat.color+'66" title="Тег: '+esc(cat.name)+'"><i style="background:'+cat.color+'"></i>'+esc(cat.name)+'</span>':'')+(t.ref?'<span class="tg">Отдел · '+esc(t.dstatus||'')+'</span>':'')+(t.mpref?'<span class="tg">Медиаплан</span>':'')+(t.shared?'<span class="tg" title="Видна отделу">👁 Отделу</span>':'')+'</div>';
+  let h='<div class="task '+cls+'" data-tid="'+id+'"'+(cc?' style="--cc:'+cc+'"':'')+'><div class="tt" title="'+esc(t.title)+'">'+esc(t.title)+'</div>'+tags;
   if(editC===id){
     h+='<textarea class="ced" id="ce" placeholder="Комментарий">'+esc(t.comment||'')+'</textarea>'
      +'<div class="ta"><div class="tb two"><button class="sm okb" data-a="csave" data-id="'+id+'">Сохранить</button><button class="sm" data-a="ccancel">Отмена</button></div></div>';
@@ -834,12 +852,12 @@ function card(t){
   }
   return h+'</div>';
 }
-function col(title,cls,arr,empty,k){
-  return '<div class="col '+k+'"><h2 class="'+cls+'"><b></b>'+title+' <em>'+arr.length+'</em></h2><div class="colbody">'
+function col(title,cls,arr,empty,k,clr){
+  return '<div class="col '+k+'"><h2 class="'+cls+'"><b'+(clr?' style="background:'+clr+';box-shadow:0 0 10px '+clr+'"':'')+'></b>'+title+' <em>'+arr.length+'</em></h2><div class="colbody">'
     +(arr.length?'<div class="grid">'+arr.map(card).join('')+'</div>':'<div class="empty">'+empty+'</div>')+'</div></div>';
 }
 function renderTasks(){
-  fillCats();
+  fillCats();applyBk();
   const byDl=(a,b)=>(a.deadline||'9999').localeCompare(b.deadline||'9999')||(a.title||'').localeCompare(b.title||'','ru')||cmpId(a,b);
   const T=list('t_').filter(t=>t.title&&(!t.owner||t.owner===ME.id)),all=T.filter(t=>!!t.archived===showDone&&catPass(t)).sort(byDl);
   const act=T.filter(t=>!t.archived),late=act.filter(t=>t.deadline&&t.deadline<today()).length;
@@ -847,8 +865,8 @@ function renderTasks(){
   $('tcount').textContent=showDone?'Выполненные задачи':'Активных: '+act.length+(late?' · просрочено: '+late:'');
   const a=document.activeElement;if(a&&a.id==='ce')return;
   $('board').innerHTML=showDone?col('Выполнено','dn',all,'Пока ничего не выполнено','span'):
-    col('Важно','hot',all.filter(t=>bkOf(t)==='hot'),'Важных задач нет','hot')+'<div class="vr"></div>'+col('Не важно','',all.filter(t=>bkOf(t)==='cool'),'Пусто — добавьте задачу','cool')
-    +'<div class="hsep"></div>'+col('Прочие','',all.filter(t=>bkOf(t)==='other'),'Прочих задач нет','span other');
+    col(esc(bkName('hot')),'hot',all.filter(t=>bkOf(t)==='hot'),'Задач нет','hot',bkColor('hot'))+'<div class="vr"></div>'+col(esc(bkName('cool')),'',all.filter(t=>bkOf(t)==='cool'),'Пусто — добавьте задачу','cool',bkColor('cool'))
+    +'<div class="hsep"></div>'+col(esc(bkName('other')),'',all.filter(t=>bkOf(t)==='other'),'Задач нет','span other',bkColor('other'));
 }
 $('board').addEventListener('click',e=>{
   if(e.target.closest('a'))return;   // клик по ссылке в комментарии не открывает задачу
@@ -896,7 +914,7 @@ $('tk_done').onclick=()=>{const t=items[tkId]||{};save(tkId,{archived:!t.archive
 $('tk_del').onclick=()=>arm($('tk_del'),'Точно удалить?',()=>{remove(tkId);tkClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('tkmod').hidden)tkClose()});
 $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
-  $('p1').dataset.tf=b.dataset.f;[...$('chips').children].forEach(x=>x.className=x===b?'on':'')});
+  $('p1').dataset.tf=b.dataset.f;[...$('chips').children].forEach(x=>x.classList.toggle('on',x===b))});
 
 /* ---------- Задачи отдела ---------- */
 const DST=['Не начато','В процессе','На проверке','Выполнено'],DCL=['s0','','sc','dn'];
