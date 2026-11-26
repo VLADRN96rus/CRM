@@ -93,14 +93,14 @@ em{font-style:normal;font-size:12px;font-weight:500;color:var(--mu);background:v
 .ced{flex:1;min-height:0;resize:none;font-size:13px;padding:8px}
 .ta{margin-top:auto;display:flex;flex-direction:column;gap:5px;min-width:0}
 .ta input[type=date]{height:32px;padding:4px 8px;font-size:13px;border-radius:10px}
-.tb{display:grid;grid-template-columns:32px 32px minmax(0,1fr);gap:5px;min-width:0}
+.tb{display:grid;grid-template-columns:32px minmax(0,1fr);gap:5px;min-width:0}
 .tb.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .tb .sm{padding:6px 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;text-align:center}
 @container (max-width:190px){
   .ok i{display:none}.cm{font-size:12px}
   .tt{-webkit-line-clamp:2;font-size:13px}
   .chip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px}
-  .tb{grid-template-columns:28px 28px minmax(0,1fr)}.tb.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .tb{grid-template-columns:28px minmax(0,1fr)}.tb.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
   .tb .sm{font-size:12px}
 }
 .tt,.chip{flex:0 0 auto}
@@ -388,12 +388,17 @@ details.glass>.in{margin-top:16px}
   <div class="acts"><button class="btn sec" id="mClose">Отмена</button><button class="btn" id="mSave">Сохранить</button></div>
 </div></div>
 <div class="modal" id="cmod" hidden><div class="glass cwide">
-  <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"></select><button class="sm" id="c_imp" title="Добавить все готовые письма Контура в список шаблонов">⤓ Все готовые в шаблоны</button><button class="sm" id="c_clr">Очистить</button></div></div>
-  <div class="chd" style="margin-bottom:8px"><div class="seg" id="c_mode" style="margin:0"><button class="sm on" data-m="b">Конструктор</button><button class="sm" data-m="h">HTML-код</button></div><button class="sm" id="c_fld" title="Вставить динамическое поле в место, где стоит курсор">{{…}} Динамическое поле</button></div>
+  <div class="chd"><h2 id="c_h2" style="margin:0">Конструктор письма</h2><div class="btns" style="margin:0"><select id="c_ps" style="width:auto;max-width:260px"></select><button class="sm" id="c_clr">Очистить</button></div></div>
+  <div class="chd" style="margin-bottom:8px"><div class="seg" id="c_mode" style="margin:0"><button class="sm on" data-m="b">Конструктор</button><button class="sm" data-m="h">HTML-код</button></div></div>
   <div class="row" style="margin-bottom:8px"><div><label class="f">Тема письма</label><input id="c_subj" placeholder="Тема, которую увидит получатель"></div><div><label class="f">Прехедер (текст рядом с темой в списке писем)</label><input id="c_pre"></div></div>
   <div class="fld" style="margin-bottom:8px"><label class="chk" style="padding-bottom:0"><input type="checkbox" id="sg_on"> Добавлять подпись в конец письма</label>
-    <details class="subd"><summary>Изменить подпись (сохраняется в вашем профиле)</summary><textarea id="sg_h" rows="6" style="font-family:monospace;font-size:12.5px"></textarea></details></div>
-  <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button></div>
+    <details class="subd"><summary>Подпись: ФИО, должность, ссылка, телефон (сохраняется в вашем профиле)</summary>
+      <div class="row" style="margin-top:6px"><div><label class="f">ФИО</label><input id="sg_fio" placeholder="Имя Фамилия"></div><div><label class="f">Должность</label><input id="sg_pos" placeholder="Консультант по новым бизнесам"></div></div>
+      <div class="row"><div><label class="f">Текст ссылки</label><input id="sg_lt" placeholder="Контур Банк"></div><div><label class="f">Адрес ссылки</label><input id="sg_lu" placeholder="https://kontur.ru/bank" autocapitalize="off"></div></div>
+      <div class="row"><div><label class="f">Телефон</label><input id="sg_tel" placeholder="8 800 500-02-41"></div></div>
+      <details class="subd"><summary>HTML-код подписи (для опытных; поля выше его заменят)</summary><textarea id="sg_h" rows="6" style="font-family:monospace;font-size:12.5px"></textarea></details>
+    </details></div>
+  <div class="cgrid"><div class="cedit"><div class="ctb sticky" id="ctb"><button class="sm" data-cmd="bold"><b>Ж</b></button><button class="sm" data-cmd="italic"><i>К</i></button><button class="sm" data-cmd="underline"><u>Ч</u></button><button class="sm" data-cmd="createLink">🔗 Ссылка</button><button class="sm" data-cmd="removeFormat">Очистить формат</button><button class="sm" id="c_fld" title="Вставить динамическое поле {{…}} туда, где стоит курсор">{{…}} Поле</button></div>
     <div id="cb"></div><button class="btn sec" id="c_add" style="width:100%;margin-top:4px">＋ Добавить карточку</button><textarea id="c_raw" hidden spellcheck="false" placeholder="Вставьте готовый HTML письма. Поля {{…}} в тексте будут запрашиваться при отправке." style="width:100%;min-height:420px;font-family:monospace;font-size:12.5px"></textarea></div>
   <div class="cprev"><iframe id="cpv" class="pv" sandbox></iframe></div></div>
   <div class="err" id="c_err"></div><div class="acts eq" style="flex-wrap:wrap"><button class="btn sec" id="c_cancel">Закрыть</button><button class="btn sec" id="c_tpl">Сохранить как шаблон…</button><button class="btn" id="c_ok" title="Письмо используется для этой отправки и не попадает в шаблоны">Использовать один раз</button><button class="btn" id="c_save" hidden>Сохранить шаблон</button></div>
@@ -474,16 +479,24 @@ details.glass>.in{margin-top:16px}
 </div></div>
 <div class="modal" id="dmod" hidden><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
-  <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
-  <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
-  <div class="row"><div><label class="f">Фокус внимания (выберите или впишите свой)</label><input id="dm_f" list="dl_f" autocomplete="off"></div>
-    <div><label class="f">Тактика (выберите или впишите свою)</label><input id="dm_k" list="dl_k" autocomplete="off"></div></div>
-  <datalist id="dl_f"></datalist><datalist id="dl_k"></datalist>
-  <div class="row"><div><label class="f">Статус</label><select id="dm_s"></select></div><div><label class="f">Дедлайн</label><input id="dm_d" type="date"></div></div>
-  <label class="chk" style="padding-bottom:6px"><input id="dm_all" type="checkbox"> Все ответственные (задача появится у каждого сотрудника, в том числе у новых)</label>
-  <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
-  <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
-  <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
+  <div style="margin-bottom:10px"><button class="sm" id="dm_edit" hidden>✎ Изменить основные данные</button></div>
+  <div id="dm_main">
+    <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
+    <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
+    <div class="row"><div><label class="f">Фокус внимания (выберите или впишите свой)</label><input id="dm_f" list="dl_f" autocomplete="off"></div>
+      <div><label class="f">Тактика (выберите или впишите свою)</label><input id="dm_k" list="dl_k" autocomplete="off"></div></div>
+    <datalist id="dl_f"></datalist><datalist id="dl_k"></datalist>
+    <div class="fld"><label class="f">Дедлайн</label><input id="dm_d" type="date"></div>
+  </div>
+  <div class="fld"><label class="f">Статус</label><select id="dm_s"></select></div>
+  <div id="dm_asg">
+    <label class="chk" style="padding-bottom:6px"><input id="dm_all" type="checkbox"> Все ответственные (задача появится у каждого сотрудника, в том числе у новых)</label>
+    <div class="fld"><label class="f">Ответственные (задача появится у них в личных)</label><div id="dm_a" style="display:flex;flex-wrap:wrap;gap:4px 18px"></div></div>
+  </div>
+  <div id="dm_sitw">
+    <div class="fld"><label class="f">Текущая ситуация (старый текст уйдёт в архив действий)</label><textarea id="dm_sit" rows="3"></textarea></div>
+    <div class="row"><div><label class="f">Дата последнего действия</label><input id="dm_ld" type="date"></div></div>
+  </div>
   <div class="fld" id="dm_rw" hidden><label class="f">Итоговый результат (обязательно для «Выполнено»)</label><textarea id="dm_r" rows="3"></textarea></div>
   <details class="fld" id="dm_hd" hidden><summary class="hint" style="cursor:pointer" id="dm_hs"></summary><div id="dm_hl" class="scroll" style="max-height:200px"></div></details>
   <div class="err" id="dm_err"></div>
@@ -494,9 +507,10 @@ details.glass>.in{margin-top:16px}
   <div class="fld"><label class="f">Название</label><input id="tk_t"></div>
   <div class="row"><div><label class="f">Дедлайн</label><input id="tk_d" type="date"></div><div><label class="f">Приоритет</label><select id="tk_b"><option value="cool">Не важно</option><option value="hot">Важно</option><option value="other">Прочие</option></select></div><div><label class="f">Раздел</label><select id="tk_cat"></select></div></div>
   <label class="chk" style="padding-bottom:12px"><input id="tk_s" type="checkbox"> Показать отделу (увидят все сотрудники)</label>
-  <div class="fld"><div class="tkh"><label class="f" style="margin:0">Комментарий</label><button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div>
-    <div class="tkp" id="tk_p"></div>
+  <div class="fld"><label class="f">Комментарий</label>
+    <div style="display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><div class="tkp" id="tk_p"></div>
     <textarea id="tk_c" rows="6" hidden placeholder="Текст комментария. Ссылки https://… станут кликабельными, можно писать [текст](ссылка)"></textarea></div>
+    <button class="sm" id="tk_edit" title="Редактировать комментарий" aria-label="Редактировать комментарий">✎</button></div></div>
   <div class="err" id="tk_err"></div>
   <div class="tkacts"><div><button class="btn sec" id="tk_done">✓ Выполнено</button><button class="btn sec" id="tk_del" style="color:var(--bad)">Удалить</button></div><div><button class="btn sec" id="tk_cancel">Отмена</button><button class="btn" id="tk_save">Сохранить</button></div></div>
 </div></div>
@@ -521,9 +535,12 @@ details.glass>.in{margin-top:16px}
       <h2 style="font-size:16px">Свои разделы (таблицы и дашборды)</h2>
       <div class="hint" style="margin-bottom:8px">Google Таблица, Looker Studio или веб-приложение Apps Script откроются прямо в МУРР. Добавление и удаление сохраняются сразу.</div>
       <div class="scroll" id="cx_l" style="max-height:180px"></div>
-      <div class="row end" style="margin-top:8px"><div style="flex:0 0 70px;min-width:60px"><label class="f">Значок</label><input id="cx_i" value="📊" maxlength="4"></div><div><label class="f">Название</label><input id="cx_n" maxlength="30"></div><div style="flex:2 1 220px"><label class="f">Ссылка</label><input id="cx_u" placeholder="https://docs.google.com/…" autocapitalize="off"></div></div>
+      <div class="row end" style="margin-top:8px"><div><label class="f">Название</label><input id="cx_n" maxlength="30"></div><div style="flex:2 1 220px"><label class="f">Ссылка</label><input id="cx_u" placeholder="https://docs.google.com/…" autocapitalize="off"></div></div>
+      <label class="f">Значок (необязательно: выберите, впишите свой или оставьте без значка)</label>
+      <div class="seg" id="cx_p"></div>
+      <div class="row" style="margin-bottom:6px"><div style="flex:0 0 150px"><input id="cx_i" maxlength="8" placeholder="свой значок" aria-label="Свой значок" autocomplete="off"></div></div>
       <label class="chk" id="cx_sw" hidden style="padding-bottom:6px"><input id="cx_s" type="checkbox"> Для всего отдела (увидят все сотрудники)</label>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="sm okb" id="cx_add">＋ Добавить раздел</button><span class="err" id="cx_e" style="margin:0"></span></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="sm okb" id="cx_add">＋ Добавить раздел</button><button class="sm" id="cx_x" hidden>Отмена</button><span class="err" id="cx_e" style="margin:0"></span></div>
     </div>
     <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px">
       <h2 style="font-size:16px">Пароль</h2>
@@ -643,7 +660,7 @@ function showCfg(msg){
   if(li){$('pf_n').value=ME.name||'';$('pf_m').value=ME.email||'';secBoxes('pf_s',secSel());$('pf_e').textContent='';
     $('pw_ow').hidden=!ME.hasPw;['pw_o','pw_n','pw_r'].forEach(i=>{$(i).value=''});$('pw_e').textContent='';
     $('pw_h').textContent=ME.hasPw?'Чтобы сменить пароль, введите текущий и новый.':'Пароль ещё не задан. Придумайте его, и вы сможете входить по почте на любом устройстве.';
-    $('adm').hidden=ME.role!=='admin';if(ME.role==='admin')admLoad();cxRender();$('cx_sw').hidden=ME.role!=='admin'}
+    $('adm').hidden=ME.role!=='admin';if(ME.role==='admin')admLoad();cxRender();cxPal();$('cx_sw').hidden=ME.role!=='admin'}
   $('cu').value=cfg.url||DEFAULT_URL;$('ck').value=cfg.key||'';$('cerr').textContent=msg||'';$('conn').open=!!msg;$('cfgm').hidden=false}
 $('gear').onclick=()=>showCfg();
 $('cLater').onclick=()=>{$('cfgm').hidden=true;if(!cfg.key)openLogin()};
@@ -774,7 +791,7 @@ function dueChip(t){
 /* ---------- разделы (категории) личных задач ---------- */
 const PAL=['#7c5cff','#22b8e8','#ff6ba6','#34d399','#ff9a56','#ffd166','#e0425a','#5b9dff'];
 const okc=c=>/^#[0-9a-f]{6}$/i.test(c||'')?c:'#7c5cff';
-const bkOf=t=>t.bucket||(t.important?'hot':'cool');   // Важно / Не важно / Прочие
+const bkOf=t=>t.ref?'hot':(t.bucket||(t.important?'hot':'cool'));   // задачи отдела — всегда «Важно»   // Важно / Не важно / Прочие
 function cats(){return(((items.prefs||{}).cats)||[]).map(c=>({id:String(c.id),name:String(c.name||''),color:okc(c.color)})).filter(c=>c.name)}
 const catOf=t=>t.cat?(cats().find(c=>c.id===t.cat)||null):null;
 let catF='',catSig='';
@@ -811,7 +828,7 @@ function card(t){
     }else{
       if(t.ref)h+='<div class="ta"><div class="tb"><button class="sm okb" style="grid-column:1/-1" data-a="odept" data-id="'+id+'">Задача отдела →</button></div></div>';else h+='<div class="ta"><input type="date" value="'+esc(t.deadline||'')+'" data-a="move" data-id="'+id+'" aria-label="Дедлайн">'
        +'<div class="tb"><button class="sm'+(t.comment?' has':'')+'" data-a="cedit" data-id="'+id+'" title="Комментарий" aria-label="Комментарий">💬</button>'
-       +'<button class="sm" data-a="flag" data-id="'+id+'" title="'+(bkOf(t)==='hot'?'Сделать неважной':'Сделать важной')+'" aria-label="Важность">'+(bkOf(t)==='hot'?'★':'☆')+'</button>'
+       
        +'<button class="sm okb ok" data-a="done" data-id="'+id+'"><i style="font-style:normal">✓ </i>Выполнено</button></div></div>';
     }
   }
@@ -914,7 +931,8 @@ $('dadd').onclick=()=>openDept();
 const dmRes=()=>{$('dm_rw').hidden=$('dm_s').value!=='Выполнено'};
 function openDept(id){
   const d=id?items[id]:null;if(id&&!d)return;dId=id||null;const x=d||{};
-  $('dm_h2').textContent=d?'Задача отдела':'Новая задача отдела';
+  $('dm_h2').textContent=d?(d.title||'Задача отдела'):'Новая задача отдела';
+  $('dm_main').hidden=!!d;$('dm_asg').hidden=!!d;$('dm_sitw').hidden=!d;$('dm_edit').hidden=!d;$('dm_edit').textContent='✎ Изменить основные данные';   // созданная задача: только статус и ситуация; новая: без ситуации
   $('dm_t').value=x.title||'';$('dm_c').value=x.comment||'';$('dm_f').value=x.focus||'';$('dm_k').value=x.tactic||'';
   $('dm_s').innerHTML=DST.map(s=>'<option'+((x.status||DST[0])===s?' selected':'')+'>'+s+'</option>').join('');
   $('dm_d').value=x.deadline||'';$('dm_sit').value=x.situation||'';$('dm_ld').value=x.lastDate||today();$('dm_ld')._man=0;$('dm_r').value=x.result||'';
@@ -927,6 +945,7 @@ function openDept(id){
 $('dm_s').onchange=dmRes;
 function dmAll(){const on=$('dm_all').checked;document.querySelectorAll('#dm_a input').forEach(i=>{if(on)i.checked=true;i.disabled=on})}
 $('dm_all').onchange=dmAll;
+$('dm_edit').onclick=()=>{const open=$('dm_main').hidden;$('dm_main').hidden=!open;$('dm_asg').hidden=!open;$('dm_edit').textContent=open?'▲ Скрыть основные данные':'✎ Изменить основные данные'};
 $('dm_sit').oninput=()=>{if(!$('dm_ld')._man)$('dm_ld').value=today()};$('dm_ld').onchange=()=>{$('dm_ld')._man=1};
 $('dm_cancel').onclick=()=>{$('dmod').hidden=true};
 $('dm_del').onclick=()=>arm($('dm_del'),'Точно удалить?',()=>{remove(dId);$('dmod').hidden=true});
@@ -1630,17 +1649,33 @@ function btnGroup(it){   // кнопки как в ваших шаблонах: 
 const codeHtml=it=>'<table style="border-spacing:0;border-collapse:collapse;width:100%"><tr><td bgcolor="#F5F5F5" align="center" style="padding:20px 24px;border-radius:10px;'+FF+'font-size:32px;line-height:40px;font-weight:700;color:#000;text-align:center;letter-spacing:1px">'+escT((it.h||'').trim())+'</td></tr></table>'+spc(25,20);
 let SIG={on:false,html:''};
 function sigRender(){   // подпись в конец последней карточки; поддерживается разметка <spacer size="20" size-mobile="15" />, <hr />, <p>
-  if(!SIG.on||!SIG.html.trim())return '';
-  return SIG.html.replace(/<(script|style|iframe|object)[\s\S]*?<\/\1>/gi,'').replace(/\son\w+="[^"]*"/gi,'').replace(/javascript:/gi,'')
+  const H=sigHtml();if(!SIG.on||!H.trim())return '';
+  return H.replace(/<(script|style|iframe|object)[\s\S]*?<\/\1>/gi,'').replace(/\son\w+="[^"]*"/gi,'').replace(/javascript:/gi,'')
     .replace(/<spacer\s+size="(\d+)"(?:\s+size-mobile="(\d+)")?\s*(?:\/>|>\s*<\/spacer>)/gi,(m,d,mb)=>spc(+d,+(mb||d)))
     .replace(/<hr\s*\/?>/gi,'<hr style="border:0;border-top:1px solid #e0e0e0;margin:0">')
     .replace(/<p>/gi,'<p style="color:#000;'+FF+'font-size:16px;line-height:24px;margin:0 0 15px">');
 }
-function loadSig(){const s=(items.prefs||{}).sig;if(s)SIG={on:!!s.on,html:s.html||''}}
-function sigUI(){$('sg_on').checked=SIG.on;$('sg_h').value=SIG.html}
+const sigHtml=()=>SIG.f?sigGen(SIG.f):SIG.html;
+function sigGen(f){   // подпись по вашей формуле: отступ, линия, ФИО жирным, «должность, ссылка», телефон
+  f=f||{};const fio=(f.fio||'').trim(),pos=(f.pos||'').trim(),lt=(f.lt||'').trim(),lu=safeUrl(f.lu),tel=(f.tel||'').trim();
+  if(!fio&&!pos&&!lt&&!lu&&!tel)return '';
+  const link=lu?'<a style="color:#366AF3" href="'+esc(lu)+'">'+escT(lt||lu.replace(/^https?:\/\//,'').replace(/\/$/,''))+'</a>':escT(lt);
+  const l2=[pos?escT(pos):'',link].filter(Boolean).join(', ');
+  return '<spacer size="20" size-mobile="15" />\n<hr />\n<spacer size="15" size-mobile="10"></spacer>\n<p>'+(fio?'<b>'+escT(fio)+'</b>':'')+(l2?(fio?'<br />':'')+l2:'')+(tel?((fio||l2)?'<br />':'')+escT(tel):'')+'</p>';
+}
+function loadSig(){if(!$('cmod').hidden)return;const s=(items.prefs||{}).sig;if(s)SIG={on:!!s.on,f:s.f||null,html:s.html||''}}
+function sigUI(){const f=SIG.f||{};$('sg_on').checked=SIG.on;$('sg_fio').value=f.fio||'';$('sg_pos').value=f.pos||'';$('sg_lt').value=f.lt||'';$('sg_lu').value=f.lu||'';$('sg_tel').value=f.tel||'';$('sg_h').value=sigHtml()}
+const sigFields=()=>({fio:$('sg_fio').value.trim(),pos:$('sg_pos').value.trim(),lt:$('sg_lt').value.trim(),lu:$('sg_lu').value.trim(),tel:$('sg_tel').value.trim()});
+function sigApply(src){   // src: 'f' — правка полей, 'h' — правка HTML вручную, иначе — только переключатель
+  const on=$('sg_on').checked;
+  if(src==='h')SIG={on,f:null,html:$('sg_h').value};
+  else if(src==='f'||SIG.f){const f=sigFields();SIG={on,f,html:sigGen(f)};if(src==='f')$('sg_h').value=SIG.html}
+  else SIG=Object.assign({},SIG,{on});
+  cprevD();
+}
 function sigSave(){
-  SIG={on:$('sg_on').checked,html:$('sg_h').value};save('prefs',{sig:SIG});
-  M.tpl.forEach(t=>{if(t.model)t.html=buildLetter(t.model)});cprev();if(M.ok)fillVars();
+  save('prefs',{sig:SIG});
+  M.tpl.forEach(t=>{if(t.model&&!t.model.h)t.html=buildLetter(t.model)});if(M.ok)fillVars();
 }
 function cardEmpty(c){return !c.img&&!(c.title||'').trim()&&!(c.it||[]).some(it=>it.t==='c'?(it.h||'').trim():it.t==='p'?richParts(it.h).length:it.t==='l'?(it.li||[]).some(r=>richParts(r.h).length):(it.b||[]).some(b=>b.t.trim()))}
 const hasContent=L=>L.h?!!(L.raw||'').trim():L.cards.some(c=>!cardEmpty(c));
@@ -1758,9 +1793,11 @@ $('ctb').addEventListener('click',async e=>{const b=e.target.closest('[data-cmd]
   else{restore();document.execCommand(b.dataset.cmd,false,null)}
   L0.ed.dispatchEvent(new Event('input',{bubbles:true}))});
 $('c_subj').oninput=()=>{C.subj=$('c_subj').value;saveC();cprevD()};$('c_pre').oninput=()=>{C.pre=$('c_pre').value;saveC();cprevD()};
-$('sg_on').onchange=sigSave;$('sg_h').onchange=sigSave;
+['sg_fio','sg_pos','sg_lt','sg_lu','sg_tel'].forEach(i=>{$(i).oninput=()=>sigApply('f');$(i).onchange=sigSave});
+$('sg_on').onchange=()=>{sigApply('on');sigSave()};$('sg_h').oninput=()=>sigApply('h');$('sg_h').onchange=sigSave;
 $('sg_h').placeholder='<spacer size="20" size-mobile="15" />\n<hr />\n<spacer size="15" size-mobile="10"></spacer>\n<p><b>Имя Фамилия</b><br />Должность, <a href="https://kontur.ru">Контур</a><br />8 800 …</p>';
-function cModeUI(){const h=!!C.h;$('c_raw').hidden=!h;$('ctb').hidden=h;$('cb').hidden=h;$('c_add').hidden=h;$('c_raw').value=C.raw||'';[...$('c_mode').children].forEach(b=>{b.className='sm'+((b.dataset.m==='h')===h?' on':'')})}
+function cModeUI(){const h=!!C.h;$('c_raw').hidden=!h;document.querySelectorAll('#ctb [data-cmd]').forEach(b=>{b.hidden=h});   // в режиме HTML остаётся только кнопка поля
+  $('cb').hidden=h;$('c_add').hidden=h;$('c_raw').value=C.raw||'';[...$('c_mode').children].forEach(b=>{b.className='sm'+((b.dataset.m==='h')===h?' on':'')})}
 $('c_mode').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;const h=b.dataset.m==='h';if(h===!!C.h)return;
   if(h){const cur=Object.assign({},C,{h:0});if(!(C.raw||'').trim()&&hasContent(cur))C.raw=buildLetter(cur);C.h=1}   // из конструктора — готовый HTML как отправная точка
   else{if((C.raw||'').trim()&&!confirm('Вернуться в конструктор? Письмо будет собрано из карточек, а введённый HTML-код не используется.'))return;C.h=0}
@@ -1781,10 +1818,6 @@ $('c_fld').onclick=async()=>{
 $('c_add').onclick=()=>{C.cards.push(newCard('icon'));renderC();saveC();cprev();const l=$('cb').lastElementChild;if(l&&l.scrollIntoView)l.scrollIntoView({block:'nearest'})};
 $('c_ps').innerHTML='<option value="">Начать с готового письма…</option>'+PRESETS.map((p,i)=>'<option value="'+i+'">'+esc(p.n)+'</option>').join('');
 $('c_ps').onchange=()=>{const i=$('c_ps').value;if(i==='')return;if(hasContent(C)&&!confirm('Заменить текущее письмо выбранным готовым? Несохранённые правки пропадут.')){$('c_ps').value='';return}C=cl(PRESETS[+i].m);renderC();saveC();cprev()};
-$('c_imp').onclick=async()=>{const have=new Set(M.tpl.map(t=>t.name)),prev=M.tpl.slice();let n=0;
-  PRESETS.forEach((p,i)=>{if(have.has(p.n))return;const m=cl(p.m),ts=Date.now()+i;M.tpl.push({id:'m'+ts.toString(36),name:p.n,subject:m.subj,model:m,ts,html:buildLetter(m)});n++});
-  if(!n){$('c_err').textContent='Все готовые письма уже есть в ваших шаблонах';return}
-  try{await mapi('tpl',{list:tplSave()});fillTpl();$('c_err').textContent='';ban('ok','В шаблоны добавлено писем: '+n+' (с темой, баннерами и иконками). Они отсортированы по номеру.');closeCons()}catch(er){M.tpl=prev;$('c_err').textContent=er.message}};
 $('c_clr').onclick=()=>arm($('c_clr'),'Точно очистить?',()=>{C=newLetter();renderC();saveC();cprev()});
 function cCheck(){
   for(let i=0;i<C.cards.length;i++)for(const it of C.cards[i].it)if(it.t==='b')for(const x of it.b){
@@ -1882,24 +1915,41 @@ function csUrl(u){let x;try{x=new URL(String(u||'').trim())}catch(e){return ''}
   return x.href}
 const csAll=()=>(((items.sections||{}).list)||[]).map(x=>Object.assign({},x,{shared:1})).concat(((items.prefs||{}).custom)||[]).filter(x=>x&&x.id&&x.title&&csUrl(x.url));
 function csOpen(id){const x=csAll().find(q=>q.id===id);if(!x)return tab('home');CS_CUR=id;
-  $('cs_t').textContent=(x.icon||'📊')+' '+x.title;const u=csUrl(x.url);$('cs_o').href=u;
+  $('cs_t').textContent=(x.icon?x.icon+' ':'')+x.title;const u=csUrl(x.url);$('cs_o').href=u;
   if($('cs_f').dataset.u!==u){$('cs_f').dataset.u=u;$('cs_f').src=u}}
 $('cs_r').onclick=()=>{const f=$('cs_f'),u=f.dataset.u;if(!u)return;f.src='about:blank';setTimeout(()=>{f.src=u},60)};
 $('navbar').addEventListener('click',e=>{const b=e.target.closest('[data-cs]');if(b)tab('cs:'+b.dataset.cs)});
+const CX_ICONS=['📊','📈','📉','📋','📅','🗂️','💼','🧾','💰','🎯','📞','✉️','🔗','⚙️','⭐','🏠'];
+let CXE=null;   // редактируемый раздел: {id, shared}
+function cxPal(){const v=$('cx_i').value;$('cx_p').innerHTML=CX_ICONS.map(i=>'<button type="button" class="sm'+(i===v?' on':'')+'" data-ic="'+i+'">'+i+'</button>').join('')+'<button type="button" class="sm'+(!v?' on':'')+'" data-ic="">Без значка</button>'}
+function cxReset(){CXE=null;['cx_n','cx_u','cx_i'].forEach(i=>{$(i).value=''});$('cx_s').checked=false;$('cx_s').disabled=false;$('cx_add').textContent='＋ Добавить раздел';$('cx_x').hidden=true;$('cx_e').textContent='';cxPal()}
 function cxRender(){const l=csAll();$('cx_e').textContent='';
   $('cx_l').innerHTML=l.length?l.map(x=>{let h='';try{h=new URL(x.url).hostname}catch(e){}
-    return '<div class="li"><span class="n">'+esc(x.icon||'📊')+' '+esc(x.title)+'<small>'+esc(h)+' · '+(x.shared?'для отдела':'личный')+'</small></span><span class="r"><button class="sm bad" data-x="'+esc(x.id)+'" data-sh="'+(x.shared?1:0)+'"'+(x.shared&&ME.role!=='admin'?' disabled title="Удалить общий раздел может администратор"':'')+' aria-label="Удалить раздел">✕</button></span></div>'}).join(''):'<div class="empty">Своих разделов пока нет</div>'}
+    const dis=x.shared&&ME.role!=='admin'?' disabled title="Общий раздел меняет администратор"':'';
+    return '<div class="li"><span class="n">'+(x.icon?esc(x.icon)+' ':'')+esc(x.title)+'<small>'+esc(h)+' · '+(x.shared?'для отдела':'личный')+'</small></span><span class="r"><button class="sm" data-e="'+esc(x.id)+'"'+dis+' aria-label="Изменить раздел">✎</button><button class="sm bad" data-x="'+esc(x.id)+'" data-sh="'+(x.shared?1:0)+'"'+dis+' aria-label="Удалить раздел">✕</button></span></div>'}).join(''):'<div class="empty">Своих разделов пока нет</div>'}
+$('cx_p').onclick=e=>{const b=e.target.closest('[data-ic]');if(!b)return;$('cx_i').value=($('cx_i').value===b.dataset.ic)?'':b.dataset.ic;cxPal()};
+$('cx_i').oninput=cxPal;
+$('cx_x').onclick=cxReset;
 $('cx_add').onclick=()=>{
-  const t=$('cx_n').value.trim(),u=csUrl($('cx_u').value),ic=$('cx_i').value.trim()||'📊',sh=$('cx_s').checked&&ME.role==='admin',e=$('cx_e');e.textContent='';
+  const t=$('cx_n').value.trim(),u=csUrl($('cx_u').value),ic=$('cx_i').value.trim().slice(0,8),e=$('cx_e');e.textContent='';
   if(!t)return e.textContent='Укажите название';
   if(!u)return e.textContent='Нужна ссылка https:// на Google Таблицу, Looker Studio или веб-приложение Apps Script';
-  const x={id:nid('x'),title:t.slice(0,30),icon:ic.slice(0,4),url:u};
-  if(sh)save('sections',{list:(((items.sections||{}).list)||[]).concat([x])});else save('prefs',{custom:(((items.prefs||{}).custom)||[]).concat([x])});
-  $('cx_n').value='';$('cx_u').value='';$('cx_s').checked=false;cxRender()};
-$('cx_l').onclick=e=>{const b=e.target.closest('[data-x]');if(!b||b.disabled)return;
+  if(CXE&&CXE.shared&&ME.role!=='admin')return e.textContent='Общий раздел меняет администратор';
+  const x={id:CXE?CXE.id:nid('x'),title:t.slice(0,30),icon:ic,url:u},sh=CXE?CXE.shared:($('cx_s').checked&&ME.role==='admin'),ed=l=>CXE?l.map(q=>q.id===x.id?x:q):l.concat([x]);
+  if(sh)save('sections',{list:ed(((items.sections||{}).list)||[])});else save('prefs',{custom:ed(((items.prefs||{}).custom)||[])});
+  if(CS_CUR===x.id&&CXE)csOpen(x.id);
+  cxReset();cxRender()};
+$('cx_l').onclick=e=>{
+  const ed=e.target.closest('[data-e]');
+  if(ed&&!ed.disabled){const x=csAll().find(q=>q.id===ed.dataset.e);if(!x)return;CXE={id:x.id,shared:!!x.shared};
+    $('cx_n').value=x.title;$('cx_u').value=x.url;$('cx_i').value=x.icon||'';$('cx_s').checked=!!x.shared;$('cx_s').disabled=true;
+    $('cx_add').textContent='✓ Сохранить изменения';$('cx_x').hidden=false;$('cx_e').textContent='';cxPal();$('cx_n').focus();return}
+  const b=e.target.closest('[data-x]');if(!b||b.disabled)return;
   if(!confirm('Удалить раздел из МУРР? Сама таблица не пострадает.'))return;
+  if(CXE&&CXE.id===b.dataset.x)cxReset();
   if(b.dataset.sh==='1')save('sections',{list:(((items.sections||{}).list)||[]).filter(q=>q.id!==b.dataset.x)});
   else save('prefs',{custom:(((items.prefs||{}).custom)||[]).filter(q=>q.id!==b.dataset.x)});cxRender()};
+cxPal();
 /* ---------- Старт ---------- */
 (function(){
   const now=new Date(),cur=today().slice(0,7);let o='';
@@ -1919,8 +1969,8 @@ const SECS=[[1,'✓','Личные задачи'],[4,'👥','Задачи отд
 const secSel=()=>{const v=(items.prefs||{}).sections;return Array.isArray(v)&&v.length?v.map(Number):[1,4,2,3,5]};
 function csNav(){
   document.querySelectorAll('#navbar [data-cs]').forEach(b=>b.remove());const on=$('p6').classList.contains('on');
-  $('navbar').insertAdjacentHTML('beforeend',csAll().map(x=>'<button data-cs="'+esc(x.id)+'" class="'+(on&&x.id===CS_CUR?'on':'')+'">'+esc(x.icon||'📊')+' '+esc(x.title)+'</button>').join(''));
-  return csAll().map(x=>'<button class="tile" data-cs="'+esc(x.id)+'"><span>'+esc(x.icon||'📊')+'</span>'+esc(x.title)+'</button>').join('')}
+  $('navbar').insertAdjacentHTML('beforeend',csAll().map(x=>'<button data-cs="'+esc(x.id)+'" class="'+(on&&x.id===CS_CUR?'on':'')+'">'+(x.icon?esc(x.icon)+' ':'')+esc(x.title)+'</button>').join(''));
+  return csAll().map(x=>'<button class="tile" data-cs="'+esc(x.id)+'">'+(x.icon?'<span>'+esc(x.icon)+'</span>':'')+esc(x.title)+'</button>').join('')}
 function applySections(){const sel=secSel();[1,2,3,4,5].forEach(i=>{$('n'+i).hidden=!sel.includes(i)});
   $('tiles').innerHTML=SECS.filter(x=>sel.includes(x[0])).map(x=>'<button class="tile" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>').join('')+csNav()}
 function secBoxes(el,sel){$(el).innerHTML=SECS.map(x=>'<label class="chk" style="padding-bottom:6px"><input type="checkbox" value="'+x[0]+'"'+(sel.includes(x[0])?' checked':'')+'> '+x[1]+' '+x[2]+'</label>').join('')}
