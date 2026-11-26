@@ -1,6 +1,6 @@
 // Сервис-воркер: приложение открывается без интернета. Файлы приложения берутся из сети в первую очередь
 // (новый релиз виден сразу, без чистки кэша), а без интернета — из кэша. Номер версии V меняйте при релизе.
-const V = 'crm-v17';
+const V = 'crm-v18';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
