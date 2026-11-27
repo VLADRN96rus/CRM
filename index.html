@@ -484,7 +484,7 @@ details.glass>.in{margin-top:16px}
 </div></div>
 <div class="modal" id="dmod" hidden><div class="glass wide">
   <h2 id="dm_h2">Задача отдела</h2>
-  <div style="margin-bottom:10px"><button class="sm" id="dm_edit" hidden>✎ Изменить основные данные</button></div>
+  <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="sm" id="dm_edit" hidden>✎ Изменить основные данные</button><button class="sm" id="dm_priv" aria-pressed="false" title="Задачу увидите только вы: другие сотрудники её не увидят">🔒 Видно только мне</button><span class="hint" id="dm_ph"></span></div>
   <div id="dm_main">
     <div class="fld"><label class="f">Название</label><input id="dm_t"></div>
     <div class="fld"><label class="f">Комментарий</label><textarea id="dm_c" rows="3"></textarea></div>
@@ -919,14 +919,14 @@ $('chips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b
 /* ---------- Задачи отдела ---------- */
 const DST=['Не начато','В процессе','На проверке','Выполнено'],DCL=['s0','','sc','dn'];
 const DF=[['act','Активные'],['Не начато','Не начато'],['В процессе','В процессе'],['На проверке','На проверке'],['Выполнено','Выполнено'],['mine','Мои']];
-let dId=null,dFilter='act';
+let dId=null,dFilter='act',PRIV=false;
 const uname=id=>((USERS.find(u=>u.id===id)||{}).name||'—'),fst=n=>String(n).split(' ')[0];
 function dcard(d){
   const i=DST.indexOf(d.status),dn=d.status==='Выполнено',as=d.all?'Все сотрудники':(d.assignees||[]).map(x=>fst(uname(x))).join(', ');
   const tags=[d.focus,d.tactic].filter(Boolean).join(' · ');
   const txt=dn&&d.result?'Итог: '+d.result:(d.situation?(d.lastDate?fmt(d.lastDate)+': ':'')+d.situation:(d.comment||''));
   return '<div class="task '+DCL[i<0?0:i]+'" data-did="'+d.id+'"><div class="tt" title="'+esc(d.title)+'">'+esc(d.title)+'</div>'
-    +'<div class="tgs"><span class="tg">'+esc(d.status||DST[0])+'</span>'+(d.deadline?dueChip({deadline:d.deadline,archived:dn}):'')+'</div>'
+    +'<div class="tgs"><span class="tg">'+esc(d.status||DST[0])+'</span>'+(d.priv?'<span class="tg" title="Видно только вам">🔒 Только я</span>':'')+(d.deadline?dueChip({deadline:d.deadline,archived:dn}):'')+'</div>'
     +'<div class="cm">'+(tags?'<b>'+esc(tags)+'</b>\n':'')+esc(txt)+'</div>'
     +'<div class="hint" style="margin-top:auto">👤 '+esc(as||'не назначен')+'</div></div>';
 }
@@ -956,6 +956,7 @@ function openDept(id){
   $('dm_d').value=x.deadline||'';$('dm_sit').value=x.situation||'';$('dm_ld').value=x.lastDate||today();$('dm_ld')._man=0;$('dm_r').value=x.result||'';
   const as=x.assignees||[];$('dm_a').innerHTML=USERS.map(u=>'<label class="chk" style="padding-bottom:4px"><input type="checkbox" value="'+esc(u.id)+'"'+(as.includes(u.id)?' checked':'')+'> '+esc(u.name)+'</label>').join('')||'<span class="hint">Список сотрудников загрузится после синхронизации</span>';
   $('dm_all').checked=!!x.all;dmAll();
+  PRIV=!!x.priv;$('dm_priv').hidden=!!d&&(d.owner||d.creator)!==ME.id;dmPrivUI();   // менять видимость может только автор
   const h=(x.history||[]).slice().reverse();$('dm_hd').hidden=!h.length;$('dm_hd').open=false;$('dm_hs').textContent='Архив действий ('+h.length+')';
   $('dm_hl').innerHTML=h.map(q=>'<div class="li"><span class="n">'+esc(q.text)+'<small>'+fmt(q.date)+(q.by?' · '+esc(uname(q.by)):'')+'</small></span></div>').join('');
   $('dm_del').hidden=!d;$('dm_err').textContent='';dmRes();$('dmod').hidden=false;
@@ -963,6 +964,12 @@ function openDept(id){
 $('dm_s').onchange=dmRes;
 function dmAll(){const on=$('dm_all').checked;document.querySelectorAll('#dm_a input').forEach(i=>{if(on)i.checked=true;i.disabled=on})}
 $('dm_all').onchange=dmAll;
+function dmPrivUI(){   // «видно только мне»: ответственным остаётся только автор
+  $('dm_priv').className='sm'+(PRIV?' okb':'');$('dm_priv').setAttribute('aria-pressed',PRIV?'true':'false');
+  $('dm_ph').textContent=PRIV?'Задачу видите только вы':'Задачу видят все сотрудники';
+  if(PRIV){$('dm_all').checked=false;$('dm_all').disabled=true;document.querySelectorAll('#dm_a input').forEach(i=>{i.disabled=i.value!==ME.id;if(i.disabled)i.checked=false})}
+  else{$('dm_all').disabled=false;dmAll()}}
+$('dm_priv').onclick=()=>{PRIV=!PRIV;dmPrivUI()};
 $('dm_edit').onclick=()=>{const open=$('dm_main').hidden;$('dm_main').hidden=!open;$('dm_asg').hidden=!open;$('dm_edit').textContent=open?'▲ Скрыть основные данные':'✎ Изменить основные данные'};
 $('dm_sit').oninput=()=>{if(!$('dm_ld')._man)$('dm_ld').value=today()};$('dm_ld').onchange=()=>{$('dm_ld')._man=1};
 $('dm_cancel').onclick=()=>{$('dmod').hidden=true};
@@ -974,6 +981,7 @@ $('dm_save').onclick=()=>{
   const d={title:t,comment:$('dm_c').value.trim(),focus:f,tactic:k,status:st,deadline:$('dm_d').value,
     all:$('dm_all').checked,assignees:[...document.querySelectorAll('#dm_a input:checked')].map(i=>i.value),situation:$('dm_sit').value.trim(),lastDate:$('dm_ld').value||today(),result:res};
   if(!dId){d.created=today();d.creator=ME.id}
+  if(!$('dm_priv').hidden){d.priv=PRIV;if(PRIV){d.all=false;d.assignees=d.assignees.filter(x=>x===ME.id)}}
   save(dId||nid('d_'),d);
   const dc=items.dict||{},fo=(dc.focus||[]).slice(),ta=(dc.tactic||[]).slice();let ch=0;
   if(f&&!fo.includes(f)){fo.push(f);ch=1}if(k&&!ta.includes(k)){ta.push(k);ch=1}
@@ -1191,8 +1199,12 @@ const b64f=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok({na
 const ERR={auth:'Неверный код доступа',busy:'Сервер таблицы занят — повторите через минуту'};
 async function mapi(act,d){
   if(!cfg.url||!cfg.key)throw new Error('Нет подключения к таблице (⚙)');
-  const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({k:cfg.key,act},d||{})),redirect:'follow'});
-  const j=await r.json();if(!j.ok)throw new Error(ERR[j.error]||j.error||'Ошибка сервера');return j;
+  for(let i=0;;i++){
+    const r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({k:cfg.key,act},d||{})),redirect:'follow'});
+    const j=await r.json();if(j.ok)return j;
+    if(j.error==='busy'&&i<4){await new Promise(ok=>setTimeout(ok,1500+i*1500+Math.random()*1000));continue}   // таблицу на миг занял кто-то другой (ничего не записано) — тихо повторяем
+    throw new Error(ERR[j.error]||j.error||'Ошибка сервера');
+  }
 }
 function renderQ(j){
   const q=j.q,live=j.hb&&Date.now()-j.hb<9e4;M.q=q;M.live=!!live;M.hb=j.hb||0;sndStatus();
